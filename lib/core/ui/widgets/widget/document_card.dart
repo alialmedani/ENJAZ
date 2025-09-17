@@ -2,7 +2,6 @@ import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
 import '../../../boilerplate/create_model/widgets/create_model.dart';
 import '../../../constant/app_colors/app_colors.dart';
 import '../../../constant/app_icons/app_icons.dart';
@@ -10,7 +9,6 @@ import '../../../constant/text_styles/app_text_style.dart';
 import '../../../constant/text_styles/font_size.dart';
 import '../../dialogs/dialogs.dart';
 import '../custom_button.dart';
-import '../../../../generated/l10n.dart';
 import '../../../services/documents/cubit/document_cubit.dart';
 import 'document_image_with_fallback.dart';
 import 'full_screen_image.dart';
@@ -115,7 +113,7 @@ class _DocumentCardState extends State<DocumentCard> {
                   _onDocumentDeleted();
                   if (context.mounted) {
                     Dialogs.showSnackBar(
-                      message: S.of(context).request_sent_successfully,
+                      message:"request_sent_successfully",
                       typeSnackBar: AnimatedSnackBarType.success,
                     );
                   }

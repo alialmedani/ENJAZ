@@ -1,12 +1,10 @@
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
+import 'package:enjaz/features/cart/screen/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:enjaz/features/home/screen/home_screen.dart';
-import 'package:enjaz/features/order/screen/orders_screen.dart';
 import 'package:enjaz/features/profile/screen/profile_screen.dart';
-
 import '../cubit/root_cubit.dart';
 
 class RootScreen extends StatelessWidget {
@@ -23,7 +21,7 @@ class RootScreen extends StatelessWidget {
             index: currentIndex,
             children: const [
               CoffeeAppHomeScreen(), // 0
-              OrdersScreen(), // 1
+              CartScreen(), // 1
               ProfileScreen(), // 2
               // 3
             ],
@@ -36,7 +34,7 @@ class RootScreen extends StatelessWidget {
                 _BarItem(icon: Icons.home_filled, label: 'Home'),
                 _BarItem(icon: Icons.local_offer, label: 'Orders'),
                 _BarItem(icon: Icons.person_2, label: 'Profile'),
-               ],
+              ],
               barColor: AppColors.xprimaryColor, // بنفسجيك
               accentColor: AppColors.xbackgroundColor, // الدائرة
               curveDepth: 50, // نفس عمق قوس الـCTA
@@ -81,7 +79,6 @@ class _ArcBarPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final d = depth.clamp(12.0, barHeight - 1.0);
-    final r = cornerRadius;
     final w = size.width;
     final h = barHeight;
 
@@ -93,17 +90,6 @@ class _ArcBarPainter extends CustomPainter {
       ..close();
 
     // حواف جانبية ناعمة فوق (اختياري: بتضيف تفصيل صغير على الأطراف)
-    final leftCap = Path()
-      ..moveTo(0, d)
-      ..quadraticBezierTo(0, d - r, r, d - r)
-      ..lineTo(r, d)
-      ..close();
-
-    final rightCap = Path()
-      ..moveTo(w, d)
-      ..quadraticBezierTo(w, d - r, w - r, d - r)
-      ..lineTo(w - r, d)
-      ..close();
 
     canvas.drawPath(p, paintBar);
     // إذا بدك الكابات: فكّ التعليقات
@@ -284,7 +270,9 @@ class _AnimatedNotchedNavBarState extends State<_AnimatedNotchedNavBar>
               Positioned.fill(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: Container(height: barHeight, color: const Color(0xFFF6EDE7),
+                  child: Container(
+                    height: barHeight,
+                    color: const Color(0xFFF6EDE7),
                   ),
                 ),
               ),

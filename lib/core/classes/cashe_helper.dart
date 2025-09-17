@@ -1,11 +1,9 @@
 import 'package:enjaz/core/constant/end_points/cashe_helper_constant.dart';
 import 'package:enjaz/features/auth/data/model/login_model.dart';
- import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
- 
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
+
 import 'package:hive_flutter/hive_flutter.dart';
-  
+
 class CacheHelper {
   static late Box<dynamic> box;
   static late Box<dynamic> wishlistBox;
@@ -16,20 +14,6 @@ class CacheHelper {
   static init() async {
     await Hive.initFlutter();
     // Hive.registerAdapter(MatrixModelAdapter());
-    // Hive.registerAdapter(ProductModelAdapter());
-    // Hive.registerAdapter(DocumentModelAdapter());
-    // Hive.registerAdapter(DiscountIIemModelAdapter());
-    // Hive.registerAdapter(DiscountModelAdapter());
-    // Hive.registerAdapter(CurrentUserModelAdapter());
-    // Hive.registerAdapter(ProductPricesModelAdapter());
-    // Hive.registerAdapter(SUoMModelAdapter());
-    // Hive.registerAdapter(CategoryModelAdapter());
-    // Hive.registerAdapter(BrandModelAdapter());
-    // Hive.registerAdapter(ChildrenAdapter());
-    // Hive.registerAdapter(SettingModelAdapter());
-    // Hive.registerAdapter(AboutAdapter());
-    // Hive.registerAdapter(PriceListModelAdapter());
-    // Hive.registerAdapter(ConfigPriceListsModelAdapter());
     box = await Hive.openBox("default_box");
     wishlistBox = await Hive.openBox("model_box");
     cartBox = await Hive.openBox("cart_box");
@@ -37,81 +21,7 @@ class CacheHelper {
     settingBox = await Hive.openBox("setting_box");
   }
 
-  // static Future<void> setCurrentUserInfo(CurrentUserModel? value) async {
-  //   if (value != null) {
-  //     await currentUserBox.put('user_info', value);
-  //   } else {
-  //     if (kDebugMode) {
-  //       print("Attempted to save null user info to cache");
-  //     }
-  //   }
-  // }
-
-  // static Future<void> setSetting(SettingModel? value) async {
-  //   if (value != null) {
-  //     await settingBox.put('setting', value);
-  //   } else {
-  //     if (kDebugMode) {
-  //       print("Attempted to save null setting to cache");
-  //     }
-  //   }
-  // }
-
   static Future<void> setLang(String value) => box.put(languageValue, value);
-
-  // static Future<void> toggleWishList(ProductModel value) async {
-  //   if (!Hive.isBoxOpen('model_box')) {
-  //     wishlistBox = await Hive.openBox('model_box');
-  //   }
-
-  //   final List<ProductModel> currentWishList =
-  //       wishlistBox.values.toList().cast<ProductModel>();
-  //   final existingIndex =
-  //       currentWishList.indexWhere((item) => item.id == value.id);
-
-  //   if (existingIndex >= 0) {
-  //     currentWishList.removeAt(existingIndex);
-  //   } else {
-  //     currentWishList.add(value);
-  //   }
-
-  //   await wishlistBox.clear();
-  //   await wishlistBox.addAll(currentWishList);
-  // }
-
-  // static Future<void> addToCart(
-  //     ProductModel value, bool operation, BuildContext context) async {
-  //   if (!Hive.isBoxOpen('cart_box')) {
-  //     cartBox = await Hive.openBox('cart_box');
-  //   }
-
-  //   final List<ProductModel> currentCart =
-  //       cartBox.values.toList().cast<ProductModel>();
-  //   final existingIndex = currentCart.indexWhere((item) => item.id == value.id);
-
-  //   if (existingIndex >= 0) {
-  //     if (operation) {
-  //       currentCart[existingIndex].quantity += 1;
-  //     } else {
-  //       currentCart[existingIndex].quantity -= 1;
-
-  //       if (currentCart[existingIndex].quantity == 0) {
-  //         currentCart.removeAt(existingIndex);
-  //       }
-  //     }
-  //   } else {
-  //     currentCart.add(value);
-  //   }
-
-  //   await cartBox.clear();
-  //   if (currentCart.isNotEmpty) {
-  //     await cartBox.addAll(currentCart);
-  //   }
-
-  //   if (context.mounted) {
-  //     context.read<CartCubit>().getCartItem();
-  //   }
-  // }
 
   static Future<void> setToken(String? value) =>
       box.put(accessToken, value ?? '');
@@ -128,22 +38,13 @@ class CacheHelper {
   }
 
   static Future<void> setDateWithExpiry(int expiresInSeconds) {
-    DateTime expiryDateTime =
-        DateTime.now().add(Duration(seconds: expiresInSeconds));
+    DateTime expiryDateTime = DateTime.now().add(
+      Duration(seconds: expiresInSeconds),
+    );
     return box.put(date, expiryDateTime);
   }
 
   ////////////////////////////////Get///////////////////////////////
-
-  // static CurrentUserModel? get currentUserInfo {
-  //   if (!currentUserBox.containsKey('user_info')) return null;
-  //   return currentUserBox.get('user_info');
-  // }
-
-  // static SettingModel? get setting {
-  //   if (!settingBox.containsKey('setting')) return null;
-  //   return settingBox.get('setting');
-  // }
 
   static String get lang => box.get(languageValue) ?? 'en';
   static String? get token {
@@ -160,18 +61,6 @@ class CacheHelper {
     if (!box.containsKey(refreshToken)) return null;
     return "${box.get(refreshToken)}";
   }
-
-  // static List<ProductModel>? get wishlist {
-  //   List<ProductModel> productModel =
-  //       wishlistBox.values.toList().cast<ProductModel>();
-  //   return productModel;
-  // }
-
-  // static List<ProductModel>? get cartItem {
-  //   List<ProductModel> productModel =
-  //       cartBox.values.toList().cast<ProductModel>();
-  //   return productModel;
-  // }
 
   static String? get userID {
     if (!box.containsKey(userId)) return null;
@@ -190,8 +79,116 @@ class CacheHelper {
     return box.get(userModel);
   }
 
-  // static void deleteCertificates() {
-  //   setToken(null);
-  //   setUserId(null);
-  // }
+  // Cart operations
+  static Future<void> addToCart(CartItemModel cartItem) async {
+    List<CartItemModel> currentCart = getCartItems();
+
+    // Check if item already exists in cart
+    int existingIndex = currentCart.indexWhere(
+      (item) =>
+          item.drink.id == cartItem.drink.id &&
+          item.size == cartItem.size &&
+          item.sugarPercentage == cartItem.sugarPercentage,
+    );
+
+    if (existingIndex != -1) {
+      // Update quantity if item exists
+      currentCart[existingIndex] = currentCart[existingIndex].copyWith(
+        quantity: currentCart[existingIndex].quantity + cartItem.quantity,
+      );
+    } else {
+      // Add new item
+      currentCart.add(cartItem);
+    }
+
+    await _saveCartItems(currentCart);
+  }
+
+  static Future<void> removeFromCart(
+    String drinkId,
+    String size,
+    double sugarPercentage,
+  ) async {
+    List<CartItemModel> currentCart = getCartItems();
+    currentCart.removeWhere(
+      (item) =>
+          item.drink.id == drinkId &&
+          item.size == size &&
+          item.sugarPercentage == sugarPercentage,
+    );
+    await _saveCartItems(currentCart);
+  }
+
+  static Future<void> updateCartItemQuantity(
+    String drinkId,
+    String size,
+    double sugarPercentage,
+    int newQuantity,
+  ) async {
+    List<CartItemModel> currentCart = getCartItems();
+    int index = currentCart.indexWhere(
+      (item) =>
+          item.drink.id == drinkId &&
+          item.size == size &&
+          item.sugarPercentage == sugarPercentage,
+    );
+
+    if (index != -1) {
+      if (newQuantity <= 0) {
+        currentCart.removeAt(index);
+      } else {
+        currentCart[index] = currentCart[index].copyWith(quantity: newQuantity);
+      }
+      await _saveCartItems(currentCart);
+    }
+  }
+
+  static List<CartItemModel> getCartItems() {
+    try {
+      if (!cartBox.containsKey(cartItems)) return [];
+
+      List<dynamic> cartData = cartBox.get(cartItems) ?? [];
+      return cartData
+          .map(
+            (item) => CartItemModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+    } catch (e) {
+      // If there's any error loading cart items, clear the cache and return empty list
+      print('Error loading cart items: $e');
+      cartBox.delete(cartItems);
+      return [];
+    }
+  }
+
+  static Future<void> clearCart() async {
+    await cartBox.delete(cartItems);
+  }
+
+  // Debug method to test cart operations
+  static Future<void> debugClearCartAndTest() async {
+    try {
+      print('Debug: Clearing cart...');
+      await clearCart();
+      print('Debug: Cart cleared successfully');
+
+      print('Debug: Testing getCartItems...');
+      final items = getCartItems();
+      print('Debug: Retrieved ${items.length} cart items');
+    } catch (e) {
+      print('Debug: Error during cart operations: $e');
+    }
+  }
+
+  static int get cartItemCount {
+    List<CartItemModel> cart = getCartItems();
+    return cart.fold(0, (sum, item) => sum + item.quantity);
+  }
+
+  static Future<void> _saveCartItems(List<CartItemModel> cartItemsList) async {
+    List<Map<String, dynamic>> cartData = cartItemsList
+        .map((item) => item.toJson())
+        .toList();
+    await cartBox.put(cartItems, cartData);
+  }
 }

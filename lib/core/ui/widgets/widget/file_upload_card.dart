@@ -7,7 +7,6 @@ import '../../../constant/app_colors/app_colors.dart';
 import '../../../constant/app_icons/app_icons.dart';
 import '../../../constant/text_styles/app_text_style.dart';
 import '../../../constant/text_styles/font_size.dart';
-import '../../../../generated/l10n.dart';
 
 void showUploadOptionsForDocumentBottomSheet(
   BuildContext context, {
@@ -46,7 +45,7 @@ void showUploadOptionsForDocumentBottomSheet(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  S.of(context).Choose_method_upload_image,
+                  "Choose method to upload image",
                   style: AppTextStyle.getBoldStyle(
                     color: AppColors.grey9A,
                     fontSize: AppFontSize.size_16,
@@ -62,7 +61,7 @@ void showUploadOptionsForDocumentBottomSheet(
 
             _UploadOptionButton(
               icon: imageIcon,
-              text: S.of(context).Select_photo_gallery,
+              text: "Select photo from gallery",
               onTap: () async {
                 final ImagePicker picker = ImagePicker();
                 final XFile? image = await picker.pickImage(
@@ -80,7 +79,7 @@ void showUploadOptionsForDocumentBottomSheet(
             const SizedBox(height: 16),
             _UploadOptionButton(
               icon: cameraIcon,
-              text: S.of(context).Take_live_photo,
+              text: "Take live photo",
               onTap: () async {
                 final ImagePicker picker = ImagePicker();
                 final XFile? image = await picker.pickImage(

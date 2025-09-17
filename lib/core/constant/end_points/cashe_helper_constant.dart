@@ -18,4 +18,5 @@ const languageValue = 'Lang';
 const rememberMe = 'remember_me';
 const fromNotification = 'fromNotification';
 const wishList = 'wishlist';
+const cartItems = 'cart_items';
 const currency = '\$';

@@ -21,7 +21,6 @@ import 'package:enjaz/features/profile/data/model/order_history_entry.dart';
 import 'package:enjaz/features/profile/data/usecase/get_profile_usecase.dart';
 import 'package:enjaz/features/profile/data/usecase/get_order_history_usecase.dart';
 
-import 'package:enjaz/features/order/cubit/corder_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -54,8 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     final Map<String, int> byDrink = {};
     for (final e in list) {
       total += e.totalPrice;
-      final k = e.order.itemName;
-     }
+    }
     String topDrink = '-';
     if (byDrink.isNotEmpty) {
       final sorted = byDrink.entries.toList()
@@ -72,7 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ProfileCubit()),
-        BlocProvider(create: (_) => OrderCubit()),
       ],
       child: Scaffold(
         backgroundColor: AppColors.xbackgroundColor2,
@@ -930,7 +927,6 @@ class _FavoritesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orderCubit = context.read<OrderCubit>();
     final profileCubit = context.read<ProfileCubit>();
     final buyer = profile.name;
 
@@ -1049,49 +1045,51 @@ class _LogoutCard extends StatelessWidget {
               ),
             ),
           ),
-             TextButton(
-  onPressed: () async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('sign_out_confirm_title'.tr()),
-        content: Text('sign_out_confirm_body'.tr()),
-        actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () async {
+              final ok = await showDialog<bool>(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: Text('sign_out_confirm_title'.tr()),
+                  content: Text('sign_out_confirm_body'.tr()),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text('cancel'.tr()),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text('sign_out'.tr()),
+                    ),
+                  ],
+                ),
+              );
+
+              if (ok == true && context.mounted) {
+                // امسح الرموز/الداتا (اختياري – محمي try/catch لو Hive مش مفعّل)
+                try {
+                  await CacheHelper.box.delete(accessToken);
+                  await CacheHelper.box.delete(refreshToken);
+                  await CacheHelper.box.delete('current_user_phone');
+                  await CacheHelper.box.delete('current_user_role');
+                } catch (_) {
+                  /* ignore if not initialized */
+                }
+
+                // Snack (اختياري)
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('signed_out'.tr())));
+
+                // توجيه للـ Login وإغلاق كل النّافيجاشن السابقة
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
             child: Text('sign_out'.tr()),
           ),
-        ],
-      ),
-    );
-
-    if (ok == true && context.mounted) {
-      // امسح الرموز/الداتا (اختياري – محمي try/catch لو Hive مش مفعّل)
-      try {
-        await CacheHelper.box.delete(accessToken);
-        await CacheHelper.box.delete(refreshToken);
-        await CacheHelper.box.delete('current_user_phone');
-        await CacheHelper.box.delete('current_user_role');
-      } catch (_) {/* ignore if not initialized */}
-
-      // Snack (اختياري)
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('signed_out'.tr())));
-
-      // توجيه للـ Login وإغلاق كل النّافيجاشن السابقة
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
-  },
-  child: Text('sign_out'.tr()),
-),
-
         ],
       ),
     );
@@ -1357,7 +1355,6 @@ class _HistoryList extends StatelessWidget {
       );
     }
 
-    final orderCubit = context.read<OrderCubit>();
     final profile = context.read<ProfileCubit>().state;
 
     return ListView.separated(
@@ -1407,7 +1404,7 @@ class _HistoryList extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              '${e.order.itemName} • ${e.order.size}',
+                              '',
                               style: AppTextStyle.getBoldStyle(
                                 fontSize: AppFontSize.size_14,
                                 color: AppColors.black23,

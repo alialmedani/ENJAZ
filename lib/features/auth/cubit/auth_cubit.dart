@@ -22,26 +22,7 @@ class AuthCubit extends Cubit<AuthState> {
     clientId: 'CoffeeApp_App',
     scope: 'offline_access openid profile email',
   );
-// في AuthCubit
-  void updateCredentials(String username, String password) {
-    final u = username.trim();
-    final p = password.trim();
 
-    // قواعد تمكين بسيطة:
-    final userOk = u.isNotEmpty; // أو اخضعه لقواعدك: طول معيّن/regex
-    final passOk = p.length >= 6; // عدّلها حسب سياستك
-
-    final shouldEnable = userOk && passOk;
-
-    if (isLoginButtonEnabled != shouldEnable) {
-      isLoginButtonEnabled = shouldEnable;
-      emit(AuthLoginButtonStateChanged(shouldEnable));
-    }
-
-    // خزّن القيم لتستخدمها عند الضغط
-    loginParams.username = u;
-    loginParams.password = p;
-  }
 
   Future<Result> login() async {
     return await LoginUsecase(AuthRepository()).call(params: loginParams);

@@ -5,7 +5,6 @@ import '../../../constant/app_colors/app_colors.dart';
 import '../../../constant/app_icons/app_icons.dart';
 import '../../../constant/text_styles/app_text_style.dart';
 import '../../../constant/text_styles/font_size.dart';
-import '../../../../generated/l10n.dart';
 
 class UploadButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -51,7 +50,7 @@ class UploadButton extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              S.of(context).Upload_file,
+              "Upload file",
               style: AppTextStyle.getBoldStyle(
                 color: Colors.white,
                 fontSize: AppFontSize.size_14,

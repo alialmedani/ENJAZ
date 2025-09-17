@@ -2,8 +2,6 @@ import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
-import 'package:enjaz/core/constant/end_points/cashe_helper_constant.dart'
-    as model;
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
@@ -34,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   InputDecoration _deco(String hint, {IconData? prefix, Widget? suffix}) {
-    final enabled = AppColors.secondPrimery.withOpacity(.30);
+    final enabled = AppColors.secondPrimery.withValues(alpha: .30);
     return InputDecoration(
       hintText: hint,
       prefixIcon: prefix == null
@@ -80,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(AppPaddingSize.padding_16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.black.withOpacity(.05),
+                    color: AppColors.black.withValues(alpha: .05),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -115,7 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppPaddingSize.padding_24),
 
-                    // USERNAME/PHONE (يمكّن الزر مثل مشروعك المرجعي)
                     TextFormField(
                       controller: _phoneCtl,
                       keyboardType: TextInputType.text,
@@ -130,14 +127,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Phone / Username',
                         prefix: Icons.person_outline,
                       ),
-             onChanged: (_) => context
-                          .read<AuthCubit>()
-                          .updateCredentials(_phoneCtl.text, _passCtl.text),
+                      onChanged: (_) =>
+                          context.read<AuthCubit>().loginParams.username =
+                              _phoneCtl.text.trim(),
                       validator: (v) {
                         final value = v?.trim() ?? '';
                         if (value.isEmpty) return 'أدخل اسم المستخدم/الهاتف';
-                        if (!RegExp(r'^[A-Za-z0-9]+$').hasMatch(value))
+                        if (!RegExp(r'^[A-Za-z0-9]+$').hasMatch(value)) {
                           return 'يسمح بالأحرف والأرقام فقط';
+                        }
                         return null;
                       },
                     ),
@@ -159,83 +157,57 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
-                      onChanged: (_) => context
-                          .read<AuthCubit>()
-                          .updateCredentials(_phoneCtl.text, _passCtl.text),
+                      onChanged: (_) =>
+                          context.read<AuthCubit>().loginParams.password =
+                              _passCtl.text.trim(),
                       validator: (v) {
                         final value = v?.trim() ?? '';
                         if (value.isEmpty) return 'أدخل كلمة المرور';
-                        if (value.length < 6)
+                        if (value.length < 6) {
                           return 'كلمة المرور يجب ألا تقل عن 6 أحرف/أرقام';
+                        }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: AppPaddingSize.padding_16),
 
-                    // زر الدخول على ستايل (CreateModel) + تمكين/تعطيل عبر AuthCubit مثل المرجع
                     SizedBox(
                       width: double.infinity,
                       height: AppPaddingSize.padding_52,
                       child: CreateModel<LoginModel>(
-                    useCaseCallBack: (_) {
-                          final cubit = context.read<AuthCubit>();
-                          cubit.loginParams.username = _phoneCtl.text.trim();
-                          cubit.loginParams.password = _passCtl.text;
-                       
-                          return cubit.login();
+                        useCaseCallBack: (model) {
+                          return context.read<AuthCubit>().login();
                         },
-
-                        withValidation: true,
-                        onTap: () {
-                          final isEnabled = context
-                              .read<AuthCubit>()
-                              .isLoginButtonEnabled;
-                          if (!isEnabled) return false;
-                          return _formKey.currentState?.validate() ?? false;
-                        },
+                        withValidation: false,
+                        onTap: () {},
                         onSuccess: (LoginModel res) {
-                          // ✅ خُد القيم من النتيجة، مش من ثوابت cashe_helper_constant
                           CacheHelper.setToken(res.accessToken);
                           CacheHelper.setRefreshToken(res.refreshToken);
+                          CacheHelper.setExpiresIn(res.expiresIn);
+                          CacheHelper.setDateWithExpiry(res.expiresIn ?? 3600);
                           Navigation.pushAndRemoveUntil(const RootScreen());
                         },
-                        child: BlocBuilder<AuthCubit, AuthState>(
-                          buildWhen: (prev, curr) =>
-                              curr is AuthLoginButtonStateChanged,
-                          builder: (context, state) {
-                            final isEnabled = context
-                                .watch<AuthCubit>()
-                                .isLoginButtonEnabled;
-                            return ElevatedButton(
-                              onPressed: null, // CreateModel مسؤول عن onTap
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isEnabled
-                                    ? AppColors.xprimaryColor
-                                    : AppColors.grey9A,
-                                disabledBackgroundColor: isEnabled
-                                    ? AppColors.xprimaryColor
-                                    : AppColors.whiteF0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppPaddingSize.padding_12,
-                                  ),
-                                ),
+                        child: ElevatedButton(
+                          onPressed: null, // CreateModel مسؤول عن onTap
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.xprimaryColor,
+                            disabledBackgroundColor: AppColors.xprimaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppPaddingSize.padding_12,
                               ),
-                              child: Text(
-                                'Sign In',
-                                style: AppTextStyle.getBoldStyle(
-                                  fontSize: AppFontSize.size_16,
-                                  color: isEnabled
-                                      ? AppColors.white
-                                      : AppColors.ali,
-                                ),
-                              ),
-                            );
-                          },
+                            ),
+                          ),
+                          child: Text(
+                            'Sign In',
+                            style: AppTextStyle.getBoldStyle(
+                              fontSize: AppFontSize.size_16,
+                              color: AppColors.white,
+                            ),
+                          ),
                         ),
                       ),
-
                     ),
 
                     const SizedBox(height: AppPaddingSize.padding_12),

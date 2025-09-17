@@ -1,7 +1,6 @@
 import 'package:enjaz/core/constant/app_icons/app_icons.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
-import 'package:enjaz/generated/l10n.dart';
 import 'package:flutter/material.dart';
  
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,7 +46,7 @@ class _AppBarWidgetState extends State<AppBarWidget> {
               },
               child: AbsorbPointer(
                 child: CustomTextFormField(
-                  hintText: S.of(context).Search,
+                  hintText: "Search",
                   fillColor: AppColors.greyE5,
                   height: 30.h,
                   prefixIcon: const Icon(Icons.search),

@@ -1,4 +1,3 @@
-import 'package:enjaz/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -33,7 +32,7 @@ class GeneralErrorWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppTextStyle.getRegularStyle(
                 color: AppColors.grey9A, fontSize: AppFontSize.size_16)),
-        buttonText: S.of(context).try_again,
+        buttonText: "Try again",
         image: logoPngImage,
         onTap: onTap,
         description: '',

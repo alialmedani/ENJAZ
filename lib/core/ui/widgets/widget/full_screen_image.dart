@@ -1,18 +1,15 @@
 import 'dart:io';
-
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../../../constant/app_colors/app_colors.dart';
 import '../../../constant/app_icons/app_icons.dart';
 import '../../../constant/text_styles/app_text_style.dart';
 import '../../../constant/text_styles/font_size.dart';
 import '../../dialogs/dialogs.dart';
 import '../cached_image.dart';
-import '../../../../generated/l10n.dart';
 
 class FullScreenImage extends StatelessWidget {
   final String imageUrl;
@@ -67,7 +64,7 @@ class FullScreenImage extends StatelessWidget {
                       onPressed: () => _downloadImage(context),
                       icon: SvgPicture.asset("downloadIcon"),
                       label: Text(
-                        S.of(context).Download_file,
+                        "Download file",
                         style: AppTextStyle.getMediumStyle(
                           color: AppColors.ali,
                           fontSize: AppFontSize.size_16,
@@ -97,7 +94,7 @@ class FullScreenImage extends StatelessWidget {
     if (!status.isGranted) {
       if (context.mounted) {
         Dialogs.showSnackBar(
-          message: S.of(context).permission_denied,
+          message: "permission_denied",
           typeSnackBar: AnimatedSnackBarType.error,
         );
       }
@@ -126,7 +123,7 @@ class FullScreenImage extends StatelessWidget {
       if (response.statusCode == 200) {
         if (context.mounted) {
           Dialogs.showSnackBar(
-            message: S.of(context).file_downloaded_successfully,
+            message: "file_downloaded_successfully",
             typeSnackBar: AnimatedSnackBarType.success,
           );
         }
@@ -137,7 +134,7 @@ class FullScreenImage extends StatelessWidget {
       debugPrint(e.toString());
       if (context.mounted) {
         Dialogs.showSnackBar(
-          message: S.of(context).download_failed,
+          message: "download_failed",
           typeSnackBar: AnimatedSnackBarType.error,
         );
       }

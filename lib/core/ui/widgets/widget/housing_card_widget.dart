@@ -2,7 +2,6 @@ import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart' show AppTextStyle;
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/services/documents/cubit/document_cubit.dart';
-import 'package:enjaz/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
  
@@ -52,7 +51,7 @@ class HousingCardWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    S.of(context).My_documents,
+                    "My documents",
                     style: AppTextStyle.getBoldStyle(
                       fontSize: AppFontSize.size_24,
                       color: AppColors.white,

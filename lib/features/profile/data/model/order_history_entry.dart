@@ -1,15 +1,11 @@
-// lib/features/profile/data/model/order_history_entry.dart
-import 'package:enjaz/features/order/data/model/order_model.dart';
 
 class OrderHistoryEntry {
-  final OrderModel order;
   final DateTime createdAt;
   final int quantity;
-  final double unitPrice; // سعر الكوب حسب الحجم
-  final double extrasPrice; // سعر الإضافات (إن وُجد)
+  final double unitPrice; 
+  final double extrasPrice;
 
   const OrderHistoryEntry({
-    required this.order,
     required this.createdAt,
     this.quantity = 1,
     this.unitPrice = 0,

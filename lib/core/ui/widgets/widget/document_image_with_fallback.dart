@@ -1,17 +1,14 @@
 import 'dart:io';
-
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
-
 import '../../../classes/cashe_helper.dart';
 import '../../../constant/app_colors/app_colors.dart';
 import '../../../constant/text_styles/app_text_style.dart';
 import '../../../constant/text_styles/font_size.dart';
 import '../../dialogs/dialogs.dart';
-import '../../../../generated/l10n.dart';
 import '../../../services/documents/cubit/document_cubit.dart';
 import '../../../services/documents/data/service/dio_client_service.dart';
 import 'file_upload_card.dart';
@@ -238,7 +235,7 @@ class _DocumentImageWithFallbackState extends State<DocumentImageWithFallback> {
         ),
         const SizedBox(height: 16),
         Text(
-          S.of(context).Upload_file,
+          "Upload file",
           style: AppTextStyle.getBoldStyle(
             color: AppColors.primary,
             fontSize: AppFontSize.size_16,
@@ -378,7 +375,7 @@ class _DocumentImageWithFallbackState extends State<DocumentImageWithFallback> {
         widget.onImageSelected(false);
 
         Dialogs.showSnackBar(
-          message: S.of(context).request_sent_successfully,
+          message: "request_sent_successfully",
           typeSnackBar: AnimatedSnackBarType.success,
         );
       }
