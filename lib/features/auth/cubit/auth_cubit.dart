@@ -20,7 +20,7 @@ class AuthCubit extends Cubit<AuthState> {
     password: '1',
     grantType: 'password',
     clientId: 'CoffeeApp_App',
-    scope: 'offline_access openid profile email',
+    scope: 'CoffeeApp',
   );
 
 
