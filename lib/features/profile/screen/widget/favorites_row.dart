@@ -1,14 +1,11 @@
+// lib/features/profile/widgets/favorites_row.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
-
-import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
-import 'package:enjaz/features/profile/data/model/user_profile.dart';
+import '../../data/model/user_profile.dart';
 
 class FavoritesRow extends StatelessWidget {
   final UserProfile profile;
@@ -16,11 +13,7 @@ class FavoritesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileCubit = context.read<ProfileCubit>();
-    final buyer = profile.name;
-
     if (profile.favorites.isEmpty) return const SizedBox.shrink();
-
     return Container(
       padding: const EdgeInsets.all(AppPaddingSize.padding_16),
       decoration: BoxDecoration(
@@ -68,8 +61,10 @@ class FavoritesRow extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    onPressed: () async {
-                      // علّقتها كما في الأصل
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('quick_order_todo'.tr())),
+                      );
                     },
                   ),
                 );

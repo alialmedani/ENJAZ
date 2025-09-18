@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
+// lib/features/profile/widgets/logout_card.dart
 import 'package:easy_localization/easy_localization.dart';
-
+import 'package:flutter/material.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
 import 'package:enjaz/core/constant/end_points/cashe_helper_constant.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
-
 import 'package:enjaz/features/auth/screen/login_screen.dart';
 
 class LogoutCard extends StatelessWidget {
@@ -60,7 +59,6 @@ class LogoutCard extends StatelessWidget {
                   ],
                 ),
               );
-
               if (ok == true && context.mounted) {
                 try {
                   await CacheHelper.box.delete(accessToken);
@@ -68,14 +66,12 @@ class LogoutCard extends StatelessWidget {
                   await CacheHelper.box.delete('current_user_phone');
                   await CacheHelper.box.delete('current_user_role');
                 } catch (_) {}
-
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text('signed_out'.tr())));
-
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
+                  (r) => false,
                 );
               }
             },

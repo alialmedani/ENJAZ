@@ -1,6 +1,6 @@
+// lib/features/profile/widgets/summary_card.dart
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
@@ -11,7 +11,6 @@ class SummaryCard extends StatelessWidget {
   final int count;
   final double total;
   final String topDrink;
-
   const SummaryCard({
     super.key,
     required this.monthLabel,
@@ -58,11 +57,9 @@ class SummaryCard extends StatelessWidget {
               ),
               const Spacer(),
               TextButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('share_soon'.tr())));
-                },
+                onPressed: () => ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('share_soon'.tr()))),
                 icon: const Icon(Icons.share),
                 label: Text('share'.tr()),
               ),
@@ -91,7 +88,6 @@ class _StatTile extends StatelessWidget {
   final String title;
   final String value;
   const _StatTile({required this.title, required this.value});
-
   @override
   Widget build(BuildContext context) {
     return Expanded(

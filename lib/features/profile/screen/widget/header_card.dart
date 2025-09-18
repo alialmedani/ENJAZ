@@ -1,12 +1,11 @@
+// lib/features/profile/widgets/header_card.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
-
-import 'package:enjaz/features/profile/data/model/user_profile.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../data/model/user_profile.dart';
 
 class HeaderCard extends StatelessWidget {
   final UserProfile profile;

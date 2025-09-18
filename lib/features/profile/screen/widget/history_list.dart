@@ -1,17 +1,15 @@
+// lib/features/profile/widgets/history_list.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
-
+import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
-
-import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
-import 'package:enjaz/features/profile/data/model/order_history_entry.dart';
-
+import '../../cubit/profile_cubit.dart';
+import '../../data/model/order_history_entry.dart';
 import 'fade_slide_in.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HistoryList extends StatelessWidget {
   final List<OrderHistoryEntry> entries;
@@ -37,7 +35,8 @@ class HistoryList extends StatelessWidget {
       );
     }
 
-    final profile = context.read<ProfileCubit>().state;
+    // لو احتجت الديفولت floor/office
+    context.read<ProfileCubit>().state;
 
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
@@ -86,7 +85,7 @@ class HistoryList extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              '', // أبقيتها فارغة كما في الأصل
+                           "   e.order.itemName", // اسم العنصر
                               style: AppTextStyle.getBoldStyle(
                                 fontSize: AppFontSize.size_14,
                                 color: AppColors.black23,
@@ -126,19 +125,20 @@ class HistoryList extends StatelessWidget {
                       Row(
                         children: [
                           OutlinedButton.icon(
-                            onPressed: () async {
-                              // معلّقة كما في الأصل
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('reorder_todo'.tr())),
+                              );
                             },
                             icon: const Icon(Icons.refresh),
                             label: Text('reorder'.tr()),
                           ),
                           const SizedBox(width: 8),
                           TextButton.icon(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('more_soon'.tr())),
-                              );
-                            },
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('more_soon'.tr())),
+                                ),
                             icon: const Icon(Icons.more_horiz),
                             label: Text('more'.tr()),
                           ),
