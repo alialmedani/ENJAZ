@@ -21,10 +21,11 @@ extension AppColors on ColorScheme {
   static Color xbackgroundColor = const Color(0xfff9f9f9);
   static Color xprimaryColor = const Color(0xffC67C4E);
   static Color xsecondaryColor = const Color(0xffA2A2A2);
+  static Color xbackgroundColor3 = const Color(0xFFF6EDE7);
   static Color xorangeColor = const Color(0xFFEC8600);
   static Color xpurpleColor = const Color(0xFF7C4DFF);
   static Color xbackgroundColor2 = const Color(0xffA2A2A2);
-  
+
   // static Color xsecondaryColor = const Color(0xffA2A2A2);
 
   // when switch color

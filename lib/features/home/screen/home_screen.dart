@@ -1,4 +1,6 @@
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
+import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
+import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
@@ -163,28 +165,85 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                         // === زر Add (Quick Add) ===
                         Align(
                           alignment: Alignment.centerRight,
-                          child: InkWell(
-                            onTap: () {},
-                            borderRadius: BorderRadius.circular(
-                              AppFontSize.size_8,
-                            ),
-                            child: Container(
-                              width: AppFontSize.size_32,
-                              height: AppFontSize.size_32,
-                              decoration: BoxDecoration(
-                                color: AppColors.xprimaryColor,
+                          child: StatefulBuilder(
+                            builder: (context, setLocalState) {
+                              bool adding = false; // حارس للنقرات المتتالية
+
+                              return InkWell(
+                                onTap:  
+                                
+                                () async {
+                                        setLocalState(() => adding = true);
+                                        try {
+                                          await context.read<CartCubit>().addToCart(
+                                            CartItemModel(
+                                              drink:
+                                                  api, // ← نفس المتغير داخل itemBuilder
+                                              quantity: 1,
+                                              size: 'M', // افتراضي
+                                              sugarPercentage:
+                                                  0.50, // 0 / .25 / .50 / .75
+                                            ),
+                                          );
+
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  '${api.name ?? "Item"} added to cart!',
+                                                ),
+                                                duration: const Duration(
+                                                  seconds: 2,
+                                                ),
+                                                backgroundColor:
+                                                    AppColors.xprimaryColor,
+                                              ),
+                                            );
+                                          }
+                                        } catch (_) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Failed to add item to cart',
+                                                ),
+                                                duration: Duration(seconds: 2),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } finally {
+                                          if (context.mounted)
+                                            setLocalState(() => adding = false);
+                                        }
+                                      },
                                 borderRadius: BorderRadius.circular(
                                   AppFontSize.size_8,
                                 ),
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                color: AppColors.white,
-                                size: AppFontSize.size_18,
-                              ),
-                            ),
+                                child: Container(
+                                  width: AppFontSize.size_32,
+                                  height: AppFontSize.size_32,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.xprimaryColor,
+                                    borderRadius: BorderRadius.circular(
+                                      AppFontSize.size_8,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: AppColors.white,
+                                    size: AppFontSize.size_18,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
+                        )
+
                       ],
                     ),
                   );

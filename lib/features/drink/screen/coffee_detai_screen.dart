@@ -13,6 +13,8 @@ import 'package:enjaz/core/constant/text_styles/font_size.dart';
 class CoffeeDetailScreen extends StatefulWidget {
   final String heroTag;
   final DrinkModel drinkModel;
+ 
+
   const CoffeeDetailScreen({
     super.key,
     required this.heroTag,
@@ -28,7 +30,19 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
   int _qty = 1;
   double _sugarPct = 0.50;
   bool _submitting = false;
-
+  double _snapSugar(double v) {
+    const steps = [0.0, 0.25, 0.50, 0.75];
+    double best = steps.first;
+    double bestDiff = (v - best).abs();
+    for (final s in steps) {
+      final d = (v - s).abs();
+      if (d < bestDiff) {
+        best = s;
+        bestDiff = d;
+      }
+    }
+    return best;
+  }
   String get _imageUrl =>
       "https://task.jasim-erp.com/api/dms/file/get/${widget.drinkModel.id}/?entitytype=1";
 
@@ -75,11 +89,13 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
 
                     const SizedBox(height: 14),
 
-                    _sugarAmountSection(
+                   _sugarAmountSection(
                       color: AppColors.orange,
                       percent: _sugarPct,
-                      onChanged: (v) => setState(() => _sugarPct = v),
+                      onChanged: (v) =>
+                          setState(() => _sugarPct = _snapSugar(v)),
                     ),
+
 
                     const SizedBox(height: 16),
 
@@ -498,9 +514,10 @@ class _sugarArcPainter extends CustomPainter {
       );
     }
 
+   final percentInt = (percent * 100).round(); // سيعطي 0/25/50/75
     final tp = TextPainter(
       text: TextSpan(
-        text: '${(percent * 100).round()} % Sugar',
+        text: '$percentInt % Sugar',
         style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.black87,
@@ -509,6 +526,7 @@ class _sugarArcPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(canvas, Offset((size.width - tp.width) / 2, size.height * 0.08));
+
   }
 
   @override

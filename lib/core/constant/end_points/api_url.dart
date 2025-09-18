@@ -1,6 +1,6 @@
 
 // const baseUrl = 'https://api.ecommerce.jedar.demo.erpmawared.com/'; //
-const baseUrl = 'https://93cef47f3a9a.ngrok-free.app/'; //base_url_live
+const baseUrl = 'https://task.jasim-erp.com/'; //base_url_live
 // const baseUrl = 'https://api.ecommerce.demo.jedar-center.com/'; //base_url_demo
 // var baseImageUrl = "${CacheHelper.setting?.baseImageUrl}/"; //base_Image_url
 

@@ -21,7 +21,6 @@ import 'package:enjaz/features/profile/data/model/order_history_entry.dart';
 import 'package:enjaz/features/profile/data/usecase/get_profile_usecase.dart';
 import 'package:enjaz/features/profile/data/usecase/get_order_history_usecase.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -68,11 +67,9 @@ class _ProfileScreenState extends State<ProfileScreen>
     final monthFormat = DateFormat('yyyy-MM');
 
     return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => ProfileCubit()),
-      ],
+      providers: [BlocProvider(create: (_) => ProfileCubit())],
       child: Scaffold(
-        backgroundColor: AppColors.xbackgroundColor2,
+        backgroundColor: AppColors.xbackgroundColor3,
         body: Column(
           children: [
             _ProfileArcHeader(controller: _tab, title: 'profile_title'.tr()),
@@ -732,7 +729,7 @@ class _SettingsCardState extends State<_SettingsCard> {
   late int _floor;
   late int _office;
 
-  bool _saved = false;
+  final bool _saved = false;
 
   @override
   void initState() {
@@ -745,8 +742,7 @@ class _SettingsCardState extends State<_SettingsCard> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<ProfileCubit>();
-    final p = cubit.state ?? widget.profile;
+    context.read<ProfileCubit>();
 
     return Container(
       padding: const EdgeInsets.all(AppPaddingSize.padding_16),
@@ -834,7 +830,7 @@ class _SettingsCardState extends State<_SettingsCard> {
                     labelText: 'default_floor'.tr(),
                     border: const OutlineInputBorder(),
                   ),
-                  value: _floor,
+                  initialValue: _floor,
                   items: List.generate(5, (i) => i + 1)
                       .map((f) => DropdownMenuItem(value: f, child: Text('$f')))
                       .toList(),
@@ -848,7 +844,7 @@ class _SettingsCardState extends State<_SettingsCard> {
                     labelText: 'default_office'.tr(),
                     border: const OutlineInputBorder(),
                   ),
-                  value: _office,
+                  initialValue: _office,
                   items: List.generate(6, (i) => i + 1)
                       .map((o) => DropdownMenuItem(value: o, child: Text('$o')))
                       .toList(),
@@ -859,61 +855,7 @@ class _SettingsCardState extends State<_SettingsCard> {
           ),
           const SizedBox(height: AppPaddingSize.padding_12),
 
-          // Row(
-          //   children: [
-          //     Expanded(
-          //       child: ElevatedButton.icon(
-          //         style: ElevatedButton.styleFrom(
-          //           backgroundColor: AppColors.xprimaryColor,
-          //         ),
-          //         onPressed: () async {
-          //           final next = p.copyWith(
-          //             language: _lang,
-          //             notificationsEnabled: _notif,
-          //             defaultFloor: _floor,
-          //             defaultOffice: _office,
-          //           );
-          //           final res = await cubit.updateSettings(next);
-          //           final ok = res.hasDataOnly;
-          //           if (!mounted) return;
-          //           ScaffoldMessenger.of(context).showSnackBar(
-          //             SnackBar(
-          //               content: Text(
-          //                 ok
-          //                     ? 'save_success'.tr()
-          //                     : (res.error ?? 'save_failed'.tr()),
-          //               ),
-          //               backgroundColor: ok
-          //                   ? AppColors.xprimaryColor
-          //                   : AppColors.secondPrimery,
-          //             ),
-          //           );
-          //           setState(() => _saved = ok);
-          //           Future.delayed(const Duration(seconds: 2), () {
-          //             if (mounted) setState(() => _saved = false);
-          //           });
-          //         },
-          //         icon: const Icon(Icons.save),
-          //         label: Text('save'.tr()),
-          //       ),
-          //     ),
-          //     const SizedBox(width: AppPaddingSize.padding_12),
-          //     Expanded(
-          //       child: OutlinedButton.icon(
-          //         onPressed: () {
-          //           ScaffoldMessenger.of(context).showSnackBar(
-          //             SnackBar(
-          //               content: Text('export_pdf_soon'.tr()),
-          //               backgroundColor: AppColors.secondPrimery,
-          //             ),
-          //           );
-          //         },
-          //         icon: const Icon(Icons.picture_as_pdf),
-          //         label: Text('export_pdf'.tr()),
-          //       ),
-          //     ),
-          //   ],
-          // ),
+  
         ],
       ),
     );
@@ -927,8 +869,7 @@ class _FavoritesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileCubit = context.read<ProfileCubit>();
-    final buyer = profile.name;
+    context.read<ProfileCubit>();
 
     if (profile.favorites.isEmpty) return const SizedBox.shrink();
 

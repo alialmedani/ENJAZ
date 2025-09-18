@@ -57,7 +57,8 @@ class MyApp extends StatelessWidget {
             navigatorKey: Keys.navigatorKey,
             title: 'Task App',
             theme: appThemeData[AppTheme.light],
-            home: CacheHelper.token != null ? RootScreen() : LoginScreen(),
+            // home: CacheHelper.token != null ? RootScreen() : LoginScreen(),
+            home: RootScreen(),
           );
         },
       ),
