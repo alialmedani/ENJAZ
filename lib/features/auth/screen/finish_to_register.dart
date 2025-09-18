@@ -4,11 +4,9 @@ import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
-import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
-  import 'package:enjaz/features/auth/data/model/register_model.dart';
+import 'package:enjaz/features/auth/data/model/register_model.dart';
 import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FinishToRegister extends StatelessWidget {
   const FinishToRegister({super.key});

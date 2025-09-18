@@ -89,10 +89,10 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
 
                     const SizedBox(height: 14),
 
-                    _sugarAmountSection(
+                    SugarAmountSection(
                       color: AppColors.orange,
                       sugarLevel: _sugarLevel,
-                      onChanged: (level) => setState(() => _sugarLevel = level),
+                      onChanged: (level) => setState(() => _sugarLevel = level), pad: 24.0,
                     ),
 
                     const SizedBox(height: 16),
@@ -401,17 +401,16 @@ class _TopArcClipper extends CustomClipper<Path> {
 }
 
 /// ======================= sugar PERCENT (Arc + Slider) =======================
-class _sugarAmountSection extends StatelessWidget {
+class SugarAmountSection extends StatelessWidget {
   final Color color;
   final SugarLevel sugarLevel;
   final ValueChanged<SugarLevel> onChanged;
   final double pad;
 
-  const _sugarAmountSection({
+  const SugarAmountSection({super.key, 
     required this.color,
     required this.sugarLevel,
-    required this.onChanged,
-    this.pad = 24.0,
+    required this.onChanged, required this.pad,
   });
 
   void _updateFromLocal(Offset local, double width) {
@@ -450,7 +449,7 @@ class _sugarAmountSection extends StatelessWidget {
             onPanUpdate: (d) => _updateFromLocal(d.localPosition, w),
             child: CustomPaint(
               size: Size(w, 110),
-              painter: _sugarArcPainter(
+              painter: SugarArcPainter(
                 color: color,
                 sugarLevel: sugarLevel,
                 pad: pad,
@@ -463,12 +462,12 @@ class _sugarAmountSection extends StatelessWidget {
   }
 }
 
-class _sugarArcPainter extends CustomPainter {
+class SugarArcPainter extends CustomPainter {
   final Color color;
   final SugarLevel sugarLevel;
   final double pad;
 
-  _sugarArcPainter({
+  SugarArcPainter({
     required this.color,
     required this.sugarLevel,
     this.pad = 24.0,
@@ -589,7 +588,7 @@ class _sugarArcPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _sugarArcPainter old) =>
+  bool shouldRepaint(covariant SugarArcPainter old) =>
       old.color != color || old.sugarLevel != sugarLevel || old.pad != pad;
 }
 

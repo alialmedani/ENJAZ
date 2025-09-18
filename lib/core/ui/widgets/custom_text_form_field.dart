@@ -33,35 +33,37 @@ class CustomTextFormField extends StatelessWidget {
   final int? minLines;
   final FocusNode? focusNode;
 
-  const CustomTextFormField(
-      {super.key,
-        this.borderRadius,
-        this.labelWidget,
-        this.validator,
-        this.labelText,
-        this.minLines,
-        this.textAlign,
-        this.labelStyle,
-        this.textInputAction,
-        this.errorText,
-        this.paddingTop,
-        this.borderColor,
-        this.isObscure = false,
-        this.controller,
-        this.prefixIcon,
-        this.suffixIcon,
-        this.fillColor,
-        this.hintText,
-        this.hintStyle,
-        this.textStyle,
-        this.initValue,
-        this.keyboardType,
-        this.height,
-        this.readOnly,
-        this.onComplete,
-        this.onChanged,
-        this.width,
-        this.maxLines= 1, this.focusNode});
+  const CustomTextFormField({
+    super.key,
+    this.borderRadius,
+    this.labelWidget,
+    this.validator,
+    this.labelText,
+    this.minLines,
+    this.textAlign,
+    this.labelStyle,
+    this.textInputAction,
+    this.errorText,
+    this.paddingTop,
+    this.borderColor,
+    this.isObscure = false,
+    this.controller,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.fillColor,
+    this.hintText,
+    this.hintStyle,
+    this.textStyle,
+    this.initValue,
+    this.keyboardType,
+    this.height,
+    this.readOnly,
+    this.onComplete,
+    this.onChanged,
+    this.width,
+    this.maxLines = 1,
+    this.focusNode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,65 +73,78 @@ class CustomTextFormField extends StatelessWidget {
       child: TextFormField(
         focusNode: focusNode,
         initialValue: initValue,
-        validator:(validator!=null)?(value)=>validator!(value):null,
+        validator: (validator != null) ? (value) => validator!(value) : null,
         minLines: minLines,
         maxLines: maxLines,
-        textInputAction: textInputAction??TextInputAction.next,
-        textAlign: textAlign??TextAlign.start,
-        onChanged:(value) {
-          if(onChanged != null)onChanged!(value);},
-        onEditingComplete:onComplete,
-        readOnly: readOnly??false,
+        textInputAction: textInputAction ?? TextInputAction.next,
+        textAlign: textAlign ?? TextAlign.start,
+        onChanged: (value) {
+          if (onChanged != null) onChanged!(value);
+        },
+        onEditingComplete: onComplete,
+        readOnly: readOnly ?? false,
         keyboardType: keyboardType,
-        style: textStyle ??  AppTextStyle.getMediumStyle(
-            color: AppColors.black1c,
-            fontSize: AppFontSize.size_14),
+        style:
+            textStyle ??
+            AppTextStyle.getMediumStyle(
+              color: AppColors.black1c,
+              fontSize: AppFontSize.size_14,
+            ),
         obscureText: isObscure,
         controller: controller,
         cursorColor: Colors.deepOrange,
         decoration: InputDecoration(
           alignLabelWithHint: true,
-          contentPadding:  EdgeInsets.only(left: 15,top: paddingTop??0),
-          hintStyle: hintStyle?? AppTextStyle.getMediumStyle(
-            color: AppColors.black1c.withOpacity(0.8), fontSize: AppFontSize.size_12),
+          contentPadding: EdgeInsets.only(left: 15, top: paddingTop ?? 0),
+          hintStyle:
+              hintStyle ??
+              AppTextStyle.getMediumStyle(
+                color: AppColors.black1c.withValues(alpha: 0.8),
+                fontSize: AppFontSize.size_12,
+              ),
           hintText: hintText,
           prefixIcon: prefixIcon,
           filled: true,
           enabled: true,
           fillColor: fillColor ?? Colors.transparent,
           border: InputBorder.none,
-          focusedErrorBorder:  OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius??8)),
-              borderSide:  BorderSide(
-                color: borderColor??AppColors.greyDD,
-              )),
-          disabledBorder:  OutlineInputBorder(
-              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-              borderSide: BorderSide(
-                color: borderColor??AppColors.greyDD,
-              )),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 8)),
+            borderSide: BorderSide(color: borderColor ?? AppColors.greyDD),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+            borderSide: BorderSide(color: borderColor ?? AppColors.greyDD),
+          ),
           enabledBorder: OutlineInputBorder(
-              borderRadius:  BorderRadius.all(Radius.circular(borderRadius??8)),
-              borderSide:  BorderSide(
-                color: borderColor??AppColors.greyDD,
-              )),
-          focusedBorder:  OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius??8)),
-              borderSide:  BorderSide(
-                color: borderColor??AppColors.greyDD,
-              )),
-          errorBorder:  OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius??8)),
-              borderSide: const BorderSide(color: Colors.red)),
-          labelText:labelWidget==null?labelText:null,
-          label:labelWidget!=null?Center(child: Text(labelText??'')):null,
-          labelStyle: labelStyle ?? AppTextStyle.getBoldStyle(color: Theme.of(context).colorScheme.primaryColor, fontSize: AppFontSize.size_14),
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 8)),
+            borderSide: BorderSide(color: borderColor ?? AppColors.greyDD),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 8)),
+            borderSide: BorderSide(color: borderColor ?? AppColors.greyDD),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 8)),
+            borderSide: const BorderSide(color: Colors.red),
+          ),
+          labelText: labelWidget == null ? labelText : null,
+          label: labelWidget != null
+              ? Center(child: Text(labelText ?? ''))
+              : null,
+          labelStyle:
+              labelStyle ??
+              AppTextStyle.getBoldStyle(
+                color: Theme.of(context).colorScheme.primaryColor,
+                fontSize: AppFontSize.size_14,
+              ),
           errorText: errorText,
           suffixIcon: suffixIcon,
           errorStyle: AppTextStyle.getRegularStyle(
-              fontSize: AppFontSize.size_14,
-              color: Colors.red),
-          errorMaxLines: 2
+            fontSize: AppFontSize.size_14,
+            color: Colors.red,
+          ),
+          errorMaxLines: 2,
         ),
       ),
     );

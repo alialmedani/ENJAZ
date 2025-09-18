@@ -1,12 +1,8 @@
-// lib/features/staff/staff_module.dart
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
-import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 
@@ -438,7 +434,7 @@ class StaffHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(.06),
+                      color: Colors.black.withValues(alpha: .06),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -551,10 +547,12 @@ class _QueueTabState extends State<_QueueTab> {
             )
             .toList();
 
-        if (_floorFilter != null)
+        if (_floorFilter != null) {
           list = list.where((o) => o.floor == _floorFilter).toList();
-        if (_officeFilter != null)
+        }
+        if (_officeFilter != null) {
           list = list.where((o) => o.office == _officeFilter).toList();
+        }
 
         return Column(
           children: [
@@ -623,7 +621,7 @@ class _QueueCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -790,9 +788,9 @@ class _ScheduledTabState extends State<_ScheduledTab> {
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (_, i) {
                         final o = list[i];
-                        final minutesLeft = o.scheduledAt == null
-                            ? null
-                            : o.scheduledAt!.difference(now).inMinutes;
+                        final minutesLeft = o.scheduledAt
+                            ?.difference(now)
+                            .inMinutes;
                         final showWarn =
                             minutesLeft != null &&
                             minutesLeft <= 10 &&
@@ -806,7 +804,7 @@ class _ScheduledTabState extends State<_ScheduledTab> {
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(.06),
+                                  color: Colors.black.withValues(alpha: .06),
                                   blurRadius: 12,
                                   offset: const Offset(0, 6),
                                 ),
@@ -875,7 +873,7 @@ class _ScheduledTabState extends State<_ScheduledTab> {
                                       Text(
                                         'scheduled_in_min'.tr(
                                           namedArgs: {
-                                            'min': '${minutesLeft!.abs()}',
+                                            'min': '${minutesLeft.abs()}',
                                           },
                                         ),
                                         style: AppTextStyle.getBoldStyle(
@@ -1059,7 +1057,7 @@ class _MyOrderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -1302,7 +1300,7 @@ class _StaffOrderDetailsScreenState extends State<StaffOrderDetailsScreen> {
                           ),
                         )
                       else
-                        ...o.notes.reversed.map((n) => _NoteTile(n)).toList(),
+                        ...o.notes.reversed.map((n) => _NoteTile(n)),
                       const SizedBox(height: 8),
                       _NoteComposer(
                         controller: _ctrl,
@@ -1368,7 +1366,7 @@ class _Section extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.04),
+            color: Colors.black.withValues(alpha: .04),
             blurRadius: 10,
             offset: const Offset(0, 6),
           ),
@@ -1396,9 +1394,9 @@ Widget _chip({required String text, IconData? icon}) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(.18),
+      color: Colors.white.withValues(alpha: .18),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.white.withOpacity(.35)),
+      border: Border.all(color: Colors.white.withValues(alpha: .35)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -1508,7 +1506,7 @@ class _NoteTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.02),
+            color: Colors.black.withValues(alpha: .02),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1598,7 +1596,7 @@ class _StaffProfileTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.06),
+                  color: Colors.black.withValues(alpha: .06),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -1646,7 +1644,7 @@ class _StaffProfileTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.06),
+                  color: Colors.black.withValues(alpha: .06),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -1678,7 +1676,7 @@ class _StaffProfileTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.06),
+                  color: Colors.black.withValues(alpha: .06),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -1956,19 +1954,19 @@ class _StatusPill extends StatelessWidget {
     Color bg, fg;
     switch (status) {
       case StaffOrderStatus.pending:
-        bg = AppColors.lightOrange.withOpacity(.15);
+        bg = AppColors.lightOrange.withValues(alpha: .15);
         fg = AppColors.lightOrange;
         break;
       case StaffOrderStatus.inProgress:
-        bg = AppColors.xprimaryColor.withOpacity(.15);
+        bg = AppColors.xprimaryColor.withValues(alpha: .15);
         fg = AppColors.xprimaryColor;
         break;
       case StaffOrderStatus.ready:
-        bg = AppColors.lightGreen.withOpacity(.15);
+        bg = AppColors.lightGreen.withValues(alpha: .15);
         fg = AppColors.green32;
         break;
       case StaffOrderStatus.delivered:
-        bg = AppColors.greyE5.withOpacity(.45);
+        bg = AppColors.greyE5.withValues(alpha: .45);
         fg = AppColors.secondPrimery;
         break;
     }

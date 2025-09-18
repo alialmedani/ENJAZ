@@ -72,15 +72,15 @@ class _ShimmerBoxState extends State<_ShimmerBox>
               begin: Alignment(-1.0 + _ctrl.value * 2, 0),
               end: Alignment(1.0 + _ctrl.value * 2, 0),
               colors: [
-                Colors.white.withOpacity(.6),
-                Colors.white.withOpacity(.85),
-                Colors.white.withOpacity(.6),
+                Colors.white.withValues(alpha: .6),
+                Colors.white.withValues(alpha: .85),
+                Colors.white.withValues(alpha: .6),
               ],
               stops: const [0.2, 0.5, 0.8],
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.05),
+                color: Colors.black.withValues(alpha: .05),
                 blurRadius: 10,
                 offset: const Offset(0, 6),
               ),

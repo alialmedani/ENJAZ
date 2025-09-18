@@ -1,7 +1,8 @@
 import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
 import 'package:enjaz/core/ui/dialogs/dialogs.dart';
 import 'package:enjaz/core/ui/widgets/custom_button.dart';
-import 'package:enjaz/features/cart/data/model/order_model.dart';
+import 'package:enjaz/features/order/cubit/order_cubit.dart';
+import 'package:enjaz/features/order/data/model/order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
@@ -215,7 +216,7 @@ class _CartScreenState extends State<CartScreen> {
               },
               withValidation: false,
               useCaseCallBack: (data) {
-                return context.read<CartCubit>().requestOrder();
+                return context.read<OrderCubit>().requestOrder();
               },
               child: CustomButton(
                 color: AppColors.orange,

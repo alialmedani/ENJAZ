@@ -4,9 +4,7 @@ import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/services/documents/cubit/document_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
- 
-import '../../../constant/enum/enum.dart';
-import 'document_card.dart';
+ import 'document_card.dart';
 
 class HousingCardWidget extends StatelessWidget {
   const HousingCardWidget({super.key});

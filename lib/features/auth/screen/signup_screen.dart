@@ -3,7 +3,7 @@ import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart' show AuthCubit;
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'finish_to_register.dart';
 
@@ -35,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   InputDecoration _deco(String hint, {IconData? prefix, Widget? suffix}) {
-    final enabled = AppColors.secondPrimery.withOpacity(.30);
+    final enabled = AppColors.secondPrimery.withValues(alpha: .30);
     return InputDecoration(
       hintText: hint,
       prefixIcon: prefix == null
@@ -58,10 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
-        borderSide: BorderSide(
-          color: AppColors.xprimaryColor,
-          width: 1.4,
-        ),
+        borderSide: BorderSide(color: AppColors.xprimaryColor, width: 1.4),
       ),
     );
   }
@@ -92,7 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 borderRadius: BorderRadius.circular(AppPaddingSize.padding_16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.black.withOpacity(.05),
+                    color: AppColors.black.withValues(alpha: .05),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -143,8 +140,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       validator: (v) {
                         final x = v?.trim() ?? '';
                         if (x.isEmpty) return 'أدخل رقم الهاتف';
-                        if (!RegExp(r'^[0-9]{8,14}$').hasMatch(x))
+                        if (!RegExp(r'^[0-9]{8,14}$').hasMatch(x)) {
                           return 'رقم غير صالح';
+                        }
                         return null;
                       },
                     ),
@@ -197,7 +195,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<int>(
-                            value: _floor,
+                            initialValue: _floor,
                             items: List.generate(5, (i) => i + 1)
                                 .map(
                                   (f) => DropdownMenuItem(
@@ -219,7 +217,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         const SizedBox(width: AppPaddingSize.padding_12),
                         Expanded(
                           child: DropdownButtonFormField<int>(
-                            value: _office,
+                            initialValue: _office,
                             items: List.generate(6, (i) => i + 1)
                                 .map(
                                   (o) => DropdownMenuItem(
@@ -248,9 +246,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       height: AppPaddingSize.padding_52,
                       child: ElevatedButton(
                         onPressed: () {
-                          if (!(_formKey.currentState?.validate() ?? false))
+                          if (!(_formKey.currentState?.validate() ?? false)) {
                             return;
-                          final c = context.read<AuthCubit>();
+                          }
+                          context.read<AuthCubit>();
                           // _fillCubit(c);
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -261,7 +260,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.xprimaryColor,
                           disabledBackgroundColor: AppColors.secondPrimery
-                              .withOpacity(.6),
+                              .withValues(alpha: .6),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
                               AppPaddingSize.padding_12,

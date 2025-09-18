@@ -1,8 +1,6 @@
 import 'package:enjaz/core/repository/core_repository.dart';
 import 'package:enjaz/core/results/result.dart';
 import 'package:enjaz/core/services/documents/data/model/document_model.dart';
-
-import '../../../../constant/end_points/api_url.dart';
 import '../../../../data_source/remote_data_source.dart';
 import '../../../../http/http_method.dart';
 import '../usecase/delete_document_usecase.dart';

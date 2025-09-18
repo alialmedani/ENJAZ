@@ -1,14 +1,14 @@
 // lib/features/profile/widgets/header_card.dart
+import 'package:enjaz/features/profile/data/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../data/model/user_profile.dart';
 
 class HeaderCard extends StatelessWidget {
-  final UserProfile profile;
+  final UserModel profile;
   const HeaderCard({super.key, required this.profile});
 
   @override
@@ -20,7 +20,7 @@ class HeaderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -44,16 +44,12 @@ class HeaderCard extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: AppColors.xbackgroundColor,
-                backgroundImage: profile.avatarUrl != null
-                    ? NetworkImage(profile.avatarUrl!)
-                    : null,
-                child: profile.avatarUrl == null
-                    ? Icon(
-                        Icons.person,
-                        color: AppColors.secondPrimery,
-                        size: 28,
-                      )
-                    : null,
+                backgroundImage: null,
+                child: Icon(
+                  Icons.person,
+                  color: AppColors.secondPrimery,
+                  size: 28,
+                ),
               ),
             ],
           ),
@@ -63,7 +59,7 @@ class HeaderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  profile.name,
+                  profile.name ?? "",
                   style: AppTextStyle.getBoldStyle(
                     fontSize: AppFontSize.size_16,
                     color: AppColors.black23,
@@ -71,12 +67,21 @@ class HeaderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'floor_office'.tr(
-                    namedArgs: {
-                      'floor': '${profile.defaultFloor}',
-                      'office': '${profile.defaultOffice}',
-                    },
+                  'floor_office'.tr(),
+                  style: AppTextStyle.getRegularStyle(
+                    fontSize: AppFontSize.size_12,
+                    color: AppColors.secondPrimery,
                   ),
+                ),
+                Text(
+                  "floor: ${profile.floor}",
+                  style: AppTextStyle.getRegularStyle(
+                    fontSize: AppFontSize.size_12,
+                    color: AppColors.secondPrimery,
+                  ),
+                ),
+                Text(
+                  "office: ${profile.office}",
                   style: AppTextStyle.getRegularStyle(
                     fontSize: AppFontSize.size_12,
                     color: AppColors.secondPrimery,

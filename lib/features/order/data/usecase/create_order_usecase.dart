@@ -1,7 +1,7 @@
 import '../../../../core/params/base_params.dart';
 import '../../../../core/results/result.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../model/create_item_model.dart';
+import '../../../cart/data/model/create_item_model.dart';
 import '../model/order_model.dart';
 import '../repository/order_repo.dart';
 

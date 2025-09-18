@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../constant/app_colors/app_colors.dart';
-import '../../../constant/app_icons/app_icons.dart';
 import '../../../constant/text_styles/app_text_style.dart';
 import '../../../constant/text_styles/font_size.dart';
 import '../../dialogs/dialogs.dart';

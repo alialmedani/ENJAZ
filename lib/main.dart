@@ -4,6 +4,7 @@ import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
 import 'package:enjaz/features/auth/screen/login_screen.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 import 'package:enjaz/features/drink/cubit/drink_cubit.dart';
+import 'package:enjaz/features/order/cubit/order_cubit.dart';
 import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:enjaz/features/staff/cubit/ccubit1.dart';
 import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => AuthCubit()),
         BlocProvider(create: (context) => DrinkCubit()),
         BlocProvider(create: (context) => CartCubit()),
+        BlocProvider(create: (context) => OrderCubit()),
       ],
       child: ScreenUtilInit(
         minTextAdapt: true,

@@ -21,7 +21,7 @@ class LogoutCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

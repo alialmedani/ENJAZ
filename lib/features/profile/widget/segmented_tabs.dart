@@ -44,7 +44,7 @@ class SegmentedTabs extends StatelessWidget {
             border: Border.all(color: borderColor),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.06),
+                color: Colors.black.withValues(alpha: .06),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -80,7 +80,9 @@ class SegmentedTabs extends StatelessWidget {
                         borderRadius: BorderRadius.circular(pillRadius),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.darkAccentColor.withOpacity(.22),
+                            color: AppColors.darkAccentColor.withValues(
+                              alpha: .22,
+                            ),
                             blurRadius: 10,
                             offset: const Offset(0, 6),
                           ),

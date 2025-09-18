@@ -7,7 +7,6 @@ import 'package:enjaz/core/http/http_method.dart';
 import 'package:flutter/foundation.dart';
  
 
-import '../utils/functions/token_validator.dart';
 
 abstract class RemoteDataSource {
   static Future<Either<String, Data>> request<Data>({
@@ -39,7 +38,7 @@ abstract class RemoteDataSource {
     // headers.putIfAbsent("JasimTenant", () => CacheHelper.tenant);
 
     if (withAuthentication) {
-      await checkToken();
+      // await checkToken();
       final String token = CacheHelper.token ?? "";
       debugPrint(token);
       if (token != "") {

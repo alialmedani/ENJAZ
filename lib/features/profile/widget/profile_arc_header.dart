@@ -8,12 +8,16 @@ import 'package:enjaz/core/constant/text_styles/font_size.dart';
 
 import 'animated_dark_header_bg.dart';
 import 'fade_slide_in.dart';
- import 'segmented_tabs.dart';
+import 'segmented_tabs.dart';
 
 class ProfileArcHeader extends StatelessWidget {
   final TabController controller;
   final String title;
-  const ProfileArcHeader({super.key, required this.controller, required this.title});
+  const ProfileArcHeader({
+    super.key,
+    required this.controller,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +71,7 @@ class ProfileArcHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(.10),
+                      color: Colors.black.withValues(alpha: .10),
                       blurRadius: 14,
                       offset: const Offset(0, 8),
                     ),
@@ -83,7 +87,10 @@ class ProfileArcHeader extends StatelessWidget {
                   backgroundColor: AppColors.xbackgroundColor3,
                   borderColor: const Color(0xFFEFE4DE),
                   unselectedTextColor: AppColors.secondPrimery,
-                  pillGradient: [AppColors.darkAccentColor, AppColors.xorangeColor],
+                  pillGradient: [
+                    AppColors.darkAccentColor,
+                    AppColors.xorangeColor,
+                  ],
                 ),
               ),
             ),
