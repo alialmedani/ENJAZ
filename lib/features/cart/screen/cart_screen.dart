@@ -1,4 +1,5 @@
 import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
+import 'package:enjaz/core/ui/dialogs/dialogs.dart';
 import 'package:enjaz/core/ui/widgets/custom_button.dart';
 import 'package:enjaz/features/cart/data/model/order_model.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/ui/widgets/cached_image.dart';
+import 'package:enjaz/core/constant/enum/enum.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -207,6 +209,10 @@ class _CartScreenState extends State<CartScreen> {
           SizedBox(
             width: double.infinity,
             child: CreateModel<OrderModel>(
+              onSuccess: (model) {
+                Dialogs.showSnackBar(message: "Successfully placed order");
+                context.read<CartCubit>().clearCart();
+              },
               withValidation: false,
               useCaseCallBack: (data) {
                 return context.read<CartCubit>().requestOrder();
@@ -286,6 +292,28 @@ class CartItemWidget extends StatelessWidget {
     required this.onRemove,
   });
 
+  // Helper method to convert percentage back to SugarLevel enum
+  SugarLevel _percentageToSugarLevel(double percentage) {
+    if (percentage <= 0.0) return SugarLevel.none;
+    if (percentage <= 0.25) return SugarLevel.light;
+    if (percentage <= 0.50) return SugarLevel.medium;
+    return SugarLevel.high;
+  }
+
+  // Helper method to get display name from SugarLevel
+  String _getSugarLevelDisplayName(SugarLevel level) {
+    switch (level) {
+      case SugarLevel.none:
+        return 'No';
+      case SugarLevel.light:
+        return 'Light';
+      case SugarLevel.medium:
+        return 'Medium';
+      case SugarLevel.high:
+        return 'High';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -332,7 +360,7 @@ class CartItemWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Size: ${cartItem.size} • Sugar: ${(cartItem.sugarPercentage * 100).toInt()}%',
+                  'Size: ${cartItem.size} • Sugar: ${_getSugarLevelDisplayName(_percentageToSugarLevel(cartItem.sugarPercentage))}',
                   style: AppTextStyle.getRegularStyle(
                     fontSize: AppFontSize.size_12,
                     color: AppColors.secondPrimery,

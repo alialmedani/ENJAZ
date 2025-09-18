@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
 import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
 import 'package:meta/meta.dart';
+import 'package:enjaz/core/constant/enum/enum.dart';
 
 import '../../../core/results/result.dart';
 import '../data/model/create_item_model.dart';
@@ -13,6 +14,14 @@ part 'cart_state.dart';
 class CartCubit extends Cubit<CartState> {
   CartCubit() : super(CartInitial());
 
+  // Helper method to convert percentage to SugarLevel enum
+  SugarLevel _percentageToSugarLevel(double percentage) {
+    if (percentage <= 0.0) return SugarLevel.none;
+    if (percentage <= 0.25) return SugarLevel.light;
+    if (percentage <= 0.50) return SugarLevel.medium;
+    return SugarLevel.high;
+  }
+
   CreateOrderParams get createOrderParams => CreateOrderParams(
     floor: 1,
     office: 'Office 1',
@@ -21,7 +30,7 @@ class CartCubit extends Cubit<CartState> {
         drinkId: cartItem.drink.id ?? "",
         quantity: cartItem.quantity,
         notes: "",
-        sugarLevel: cartItem.sugarPercentage.toInt(),
+        sugarLevel: _percentageToSugarLevel(cartItem.sugarPercentage).toInt(),
       );
     }).toList(),
   );

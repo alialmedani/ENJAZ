@@ -4,16 +4,15 @@ import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:enjaz/core/ui/widgets/cached_image.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
+import 'package:enjaz/core/constant/enum/enum.dart';
 
 class CoffeeDetailScreen extends StatefulWidget {
   final String heroTag;
   final DrinkModel drinkModel;
- 
 
   const CoffeeDetailScreen({
     super.key,
@@ -28,21 +27,22 @@ class CoffeeDetailScreen extends StatefulWidget {
 class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
   String _size = 'M';
   int _qty = 1;
-  double _sugarPct = 0.50;
+  SugarLevel _sugarLevel = SugarLevel.medium;
   bool _submitting = false;
-  double _snapSugar(double v) {
-    const steps = [0.0, 0.25, 0.50, 0.75];
-    double best = steps.first;
-    double bestDiff = (v - best).abs();
-    for (final s in steps) {
-      final d = (v - s).abs();
-      if (d < bestDiff) {
-        best = s;
-        bestDiff = d;
-      }
+
+  double _sugarLevelToPercent(SugarLevel level) {
+    switch (level) {
+      case SugarLevel.none:
+        return 0.0;
+      case SugarLevel.light:
+        return 0.25;
+      case SugarLevel.medium:
+        return 0.50;
+      case SugarLevel.high:
+        return 0.75;
     }
-    return best;
   }
+
   String get _imageUrl =>
       "https://task.jasim-erp.com/api/dms/file/get/${widget.drinkModel.id}/?entitytype=1";
 
@@ -89,13 +89,11 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
 
                     const SizedBox(height: 14),
 
-                   _sugarAmountSection(
+                    _sugarAmountSection(
                       color: AppColors.orange,
-                      percent: _sugarPct,
-                      onChanged: (v) =>
-                          setState(() => _sugarPct = _snapSugar(v)),
+                      sugarLevel: _sugarLevel,
+                      onChanged: (level) => setState(() => _sugarLevel = level),
                     ),
-
 
                     const SizedBox(height: 16),
 
@@ -263,7 +261,7 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
         drink: widget.drinkModel,
         quantity: _qty,
         size: _size,
-        sugarPercentage: _sugarPct,
+        sugarPercentage: _sugarLevelToPercent(_sugarLevel),
       );
 
       await context.read<CartCubit>().addToCart(cartItem);
@@ -405,13 +403,13 @@ class _TopArcClipper extends CustomClipper<Path> {
 /// ======================= sugar PERCENT (Arc + Slider) =======================
 class _sugarAmountSection extends StatelessWidget {
   final Color color;
-  final double percent; // 0..1
-  final ValueChanged<double> onChanged;
+  final SugarLevel sugarLevel;
+  final ValueChanged<SugarLevel> onChanged;
   final double pad;
 
   const _sugarAmountSection({
     required this.color,
-    required this.percent,
+    required this.sugarLevel,
     required this.onChanged,
     this.pad = 24.0,
   });
@@ -421,7 +419,21 @@ class _sugarAmountSection extends StatelessWidget {
     final right = width - pad;
     final dx = local.dx.clamp(left, right);
     final t = ((dx - left) / (right - left)).toDouble();
-    onChanged(t.clamp(0.0, 1.0));
+
+    // Convert percentage to discrete SugarLevel positions
+    // Divide the slider into 4 equal sections for 4 enum values
+    SugarLevel newLevel;
+    if (t <= 0.25) {
+      newLevel = SugarLevel.none;
+    } else if (t <= 0.50) {
+      newLevel = SugarLevel.light;
+    } else if (t <= 0.75) {
+      newLevel = SugarLevel.medium;
+    } else {
+      newLevel = SugarLevel.high;
+    }
+
+    onChanged(newLevel);
   }
 
   @override
@@ -440,7 +452,7 @@ class _sugarAmountSection extends StatelessWidget {
               size: Size(w, 110),
               painter: _sugarArcPainter(
                 color: color,
-                percent: percent,
+                sugarLevel: sugarLevel,
                 pad: pad,
               ),
             ),
@@ -453,14 +465,28 @@ class _sugarAmountSection extends StatelessWidget {
 
 class _sugarArcPainter extends CustomPainter {
   final Color color;
-  final double percent; // 0..1
+  final SugarLevel sugarLevel;
   final double pad;
 
   _sugarArcPainter({
     required this.color,
-    required this.percent,
+    required this.sugarLevel,
     this.pad = 24.0,
   });
+
+  double get percent {
+    // Map enum values to discrete positions on the slider
+    switch (sugarLevel) {
+      case SugarLevel.none:
+        return 0.0; // 0% position
+      case SugarLevel.light:
+        return 0.33; // 33% position
+      case SugarLevel.medium:
+        return 0.67; // 67% position
+      case SugarLevel.high:
+        return 1.0; // 100% position
+    }
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -483,6 +509,26 @@ class _sugarArcPainter extends CustomPainter {
 
     final metrics = path.computeMetrics().toList();
     if (metrics.isEmpty) return;
+
+    // Draw discrete position markers for each enum value
+    final markerPositions = [
+      0.0,
+      0.33,
+      0.67,
+      1.0,
+    ]; // Positions for None, Light, Medium, High
+    final markerPaint = Paint()
+      ..color = color.withValues(alpha: .4)
+      ..style = PaintingStyle.fill;
+
+    for (final pos in markerPositions) {
+      final tan = metrics.first.getTangentForOffset(metrics.first.length * pos);
+      if (tan != null) {
+        final p = tan.position;
+        canvas.drawCircle(p, 3, markerPaint);
+      }
+    }
+
     final m = metrics.first;
     final total = m.length;
     final to = (total * percent.clamp(0.0, 1.0)).clamp(0.0, total);
@@ -514,10 +560,11 @@ class _sugarArcPainter extends CustomPainter {
       );
     }
 
-   final percentInt = (percent * 100).round(); // سيعطي 0/25/50/75
+    // Get the display name for the sugar level
+    String sugarLevelName = _getSugarLevelDisplayName(sugarLevel);
     final tp = TextPainter(
       text: TextSpan(
-        text: '$percentInt % Sugar',
+        text: '$sugarLevelName Sugar',
         style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.black87,
@@ -526,12 +573,24 @@ class _sugarArcPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(canvas, Offset((size.width - tp.width) / 2, size.height * 0.08));
+  }
 
+  String _getSugarLevelDisplayName(SugarLevel level) {
+    switch (level) {
+      case SugarLevel.none:
+        return 'No';
+      case SugarLevel.light:
+        return 'Light';
+      case SugarLevel.medium:
+        return 'Medium';
+      case SugarLevel.high:
+        return 'High';
+    }
   }
 
   @override
   bool shouldRepaint(covariant _sugarArcPainter old) =>
-      old.color != color || old.percent != percent || old.pad != pad;
+      old.color != color || old.sugarLevel != sugarLevel || old.pad != pad;
 }
 
 /// =============================== SIZE TILE ===============================
@@ -715,135 +774,6 @@ class _AnimatedBorderPainter extends CustomPainter {
       old.stroke != stroke ||
       old.radius != radius ||
       old.colors != colors;
-}
-
-/// ============================ BOTTOM TEXT BAR ============================
-class _BottomArcBarText extends StatelessWidget {
-  final String priceText;
-  final String actionText;
-  final VoidCallback onTap;
-
-  final double height;
-  final double curveH;
-  final double liftUp;
-
-  final double contentTopPadding;
-  final double contentBottomPadding;
-
-  const _BottomArcBarText({
-    required this.priceText,
-    required this.actionText,
-    required this.onTap,
-    this.height = 118,
-    this.curveH = 56,
-    this.liftUp = 0,
-    this.contentTopPadding = 14,
-    this.contentBottomPadding = 12,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    final totalH = height + bottom;
-
-    final bar = Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        splashColor: Colors.white10,
-        child: SizedBox(
-          height: totalH,
-          width: double.infinity,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              CustomPaint(
-                painter: _BottomCurvePainter(
-                  color: AppColors.xprimaryColor, // كان xpurpleColor
-                  curveH: curveH,
-                ),
-              ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: contentTopPadding,
-                    bottom: contentBottomPadding,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        priceText,
-                        style: AppTextStyle.getBoldStyle(
-                          fontSize: AppFontSize.size_16,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            actionText,
-                            style: AppTextStyle.getBoldStyle(
-                              fontSize: AppFontSize.size_18,
-                              color: AppColors.white,
-                            ),
-                          ),
-                          SizedBox(width: AppFontSize.size_10),
-                          const Icon(
-                            Iconsax.add_square,
-                            color: AppColors.white,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Transform.translate(offset: Offset(0, -liftUp), child: bar),
-        SizedBox(height: liftUp),
-      ],
-    );
-  }
-}
-
-class _BottomCurvePainter extends CustomPainter {
-  final Color color;
-  final double curveH;
-  const _BottomCurvePainter({required this.color, required this.curveH});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paintBar = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    final w = size.width;
-    final double ch = curveH.clamp(10.0, size.height - 1).toDouble();
-
-    final p = Path()
-      ..moveTo(0.0, ch)
-      ..quadraticBezierTo(w * .5, 0.0, w, ch)
-      ..lineTo(w, size.height)
-      ..lineTo(0.0, size.height)
-      ..close();
-
-    canvas.drawPath(p, paintBar);
-  }
-
-  @override
-  bool shouldRepaint(covariant _BottomCurvePainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.curveH != curveH;
 }
 
 // ================================ HELPERS ================================

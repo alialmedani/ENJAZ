@@ -1,120 +1,112 @@
-// // ignore_for_file: constant_identifier_names
+enum EntityType {
+  drink,
+  user,
+  other;
 
-// import 'package:flutter/material.dart';
+  static EntityType? fromInt(int? value) {
+    switch (value) {
+      case 1:
+        return EntityType.drink;
+      case 2:
+        return EntityType.user;
+      case 3:
+        return EntityType.other;
 
- 
-// enum VisitRequestStatus {
-//   pending,
-//   approved,
-//   rejected,
-//   expired,
-//   deactivated;
+      default:
+        return null;
+    }
+  }
 
-//   static VisitRequestStatus? fromInt(int? value) {
-//     switch (value) {
-//       case 1:
-//         return VisitRequestStatus.pending;
-//       case 2:
-//         return VisitRequestStatus.approved;
-//       case 3:
-//         return VisitRequestStatus.rejected;
-//       case 4:
-//         return VisitRequestStatus.expired;
-//       case 5:
-//         return VisitRequestStatus.deactivated;
-//       default:
-//         return null;
-//     }
-//   }
+  int toInt() {
+    switch (this) {
+      case EntityType.drink:
+        return 1;
+      case EntityType.user:
+        return 2;
+      case EntityType.other:
+        return 3;
+    }
+  }
+}
 
-//   String localizedLabel(BuildContext context) {
-//     final s = S.of(context);
-//     switch (this) {
-//       case VisitRequestStatus.pending:
-//         return s.Pending;
-//       case VisitRequestStatus.approved:
-//         return s.approved;
-//       case VisitRequestStatus.rejected:
-//         return s.rejected;
-//       case VisitRequestStatus.expired:
-//         return s.expired;
-//       case VisitRequestStatus.deactivated:
-//         return s.deactivated;
-//     }
-//   }
-// }
+enum OrderStatus {
+  draft,
+  submitted,
+  inPreparation,
+  ready,
+  delivered,
+  canceled;
 
-// enum EntityType {
-//   compund,
-//   square,
-//   floor,
-//   building,
-//   customer,
-//   apartment,
-//   advertisement,
-//   service,
-//   categoryService,
-//   serviceRequest,
-//   visitRequest,
-//   complaint;
+  static OrderStatus? fromInt(int? value) {
+    switch (value) {
+      case 0:
+        return OrderStatus.draft;
+      case 1:
+        return OrderStatus.submitted;
+      case 2:
+        return OrderStatus.inPreparation;
+      case 3:
+        return OrderStatus.ready;
+      case 4:
+        return OrderStatus.delivered;
+      case 5:
+        return OrderStatus.canceled;
 
-//   static EntityType? fromInt(int? value) {
-//     switch (value) {
-//       case 1:
-//         return EntityType.compund;
-//       case 2:
-//         return EntityType.square;
-//       case 3:
-//         return EntityType.floor;
-//       case 4:
-//         return EntityType.building;
-//       case 5:
-//         return EntityType.customer;
-//       case 6:
-//         return EntityType.apartment;
-//       case 7:
-//         return EntityType.advertisement;
-//       case 8:
-//         return EntityType.service;
-//       case 9:
-//         return EntityType.categoryService;
-//       case 10:
-//         return EntityType.serviceRequest;
-//       case 11:
-//         return EntityType.visitRequest;
-//       case 12:
-//         return EntityType.complaint;
-//       default:
-//         return null;
-//     }
-//   }
+      default:
+        return null;
+    }
+  }
 
-//   int toInt() {
-//     switch (this) {
-//       case EntityType.compund:
-//         return 1;
-//       case EntityType.square:
-//         return 2;
-//       case EntityType.floor:
-//         return 3;
-//       case EntityType.building:
-//         return 4;
-//       case EntityType.customer:
-//         return 5;
-//       case EntityType.apartment:
-//         return 6;
-//       case EntityType.advertisement:
-//         return 7;
-//       case EntityType.service:
-//         return 8;
-//       case EntityType.categoryService:
-//         return 9;
-//       case EntityType.serviceRequest:
-//         return 10;
-//       case EntityType.visitRequest:
-//         return 11;
-//       case EntityType.complaint:
-//         return 12;
-//     }
-//   }
-// }
+  int toInt() {
+    switch (this) {
+      case OrderStatus.draft:
+        return 0;
+      case OrderStatus.submitted:
+        return 1;
+      case OrderStatus.inPreparation:
+        return 2;
+      case OrderStatus.ready:
+        return 3;
+      case OrderStatus.delivered:
+        return 4;
+      case OrderStatus.canceled:
+        return 5;
+    }
+  }
+}
+
+enum SugarLevel {
+  none,
+  light,
+  medium,
+  high;
+
+  static SugarLevel? fromInt(int? value) {
+    switch (value) {
+      case 0:
+        return SugarLevel.none;
+      case 1:
+        return SugarLevel.light;
+      case 2:
+        return SugarLevel.medium;
+      case 3:
+        return SugarLevel.high;
+
+      default:
+        return null;
+    }
+  }
+
+  int toInt() {
+    switch (this) {
+      case SugarLevel.none:
+        return 0;
+      case SugarLevel.light:
+        return 1;
+      case SugarLevel.medium:
+        return 2;
+      case SugarLevel.high:
+        return 3;
+    }
+  }
+}
