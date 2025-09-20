@@ -83,9 +83,9 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.10),
-                    Colors.black.withOpacity(0.55),
-                    Colors.black.withOpacity(0.75),
+                    Colors.black.withValues(alpha: 0.10),
+                    Colors.black.withValues(alpha: 0.55),
+                    Colors.black.withValues(alpha: 0.75),
                   ],
                 ),
               ),
@@ -188,7 +188,8 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                                   fontSize: AppFontSize.size_13,
                                   color: AppColors.black23,
                                 ).copyWith(
-                                  color: AppColors.black23.withOpacity(0.65),
+                                  color: AppColors.black23.withValues(
+                                    alpha: 0.65),
                                   height: 1.5,
                                 ),
                           ),
@@ -354,7 +355,7 @@ class _GlassIconButton extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Material(
-          color: Colors.white.withOpacity(0.16),
+          color: Colors.white.withValues(alpha: 0.16),
           child: InkWell(
             onTap: onTap,
             child: SizedBox(
@@ -383,12 +384,12 @@ class _FrostedSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.94),
+            color: Colors.white.withValues(alpha: 0.94),
             borderRadius: radius,
-            border: Border.all(color: Colors.white.withOpacity(0.35)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.30),
+                color: Colors.black.withValues(alpha: 0.30),
                 blurRadius: 32,
                 offset: const Offset(0, -12),
               ),
@@ -465,7 +466,7 @@ class _MetaInfoRow extends StatelessWidget {
         gradient: const LinearGradient(
           colors: [Color(0xFFFFF7EE), Color(0xFFFFE9D6)],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -476,7 +477,7 @@ class _MetaInfoRow extends StatelessWidget {
                 width: 1,
                 height: 40,
                 margin: const EdgeInsets.symmetric(horizontal: 12),
-                color: AppColors.orange.withOpacity(0.25),
+                color: AppColors.orange.withValues(alpha: 0.25),
               ),
           ],
         ],
@@ -607,14 +608,14 @@ class _SizeOption extends StatelessWidget {
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: selected
-                  ? AppColors.orange.withOpacity(0.7)
+                  ? AppColors.orange.withValues(alpha: 0.7)
                   : AppColors.greyE5,
               width: 1.6,
             ),
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: AppColors.orange.withOpacity(0.35),
+                      color: AppColors.orange.withValues(alpha: 0.35),
                       blurRadius: 18,
                       offset: const Offset(0, 8),
                     ),
@@ -643,7 +644,7 @@ class _SizeOption extends StatelessWidget {
                 style: AppTextStyle.getRegularStyle(
                   fontSize: AppFontSize.size_11,
                   color: selected
-                      ? Colors.white.withOpacity(0.86)
+                      ? Colors.white.withValues(alpha: 0.86)
                       : AppColors.secondPrimery,
                 ),
               ),
@@ -679,12 +680,12 @@ class _SelectionSummary extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [accent.withOpacity(0.14), Colors.white],
+          colors: [accent.withValues(alpha: 0.14), Colors.white],
         ),
-        border: Border.all(color: accent.withOpacity(0.25)),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
         boxShadow: [
           BoxShadow(
-            color: accent.withOpacity(0.12),
+            color: accent.withValues(alpha: 0.12),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -744,9 +745,9 @@ class _SummaryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: accent.withOpacity(0.3)),
+        border: Border.all(color: accent.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -808,7 +809,7 @@ class _BottomBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   elevation: 6,
-                  shadowColor: accent.withOpacity(0.4),
+                  shadowColor: accent.withValues(alpha: 0.4),
                 ),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
@@ -856,9 +857,9 @@ class _QuantityController extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: accent.withOpacity(0.12),
+        color: accent.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: accent.withOpacity(0.35)),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -911,7 +912,7 @@ class _QtyButton extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: accent.withOpacity(0.2),
+                color: accent.withValues(alpha: 0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 6),
               ),
@@ -1023,7 +1024,7 @@ class SugarArcPainter extends CustomPainter {
       ..quadraticBezierTo(control.dx, control.dy, right.dx, right.dy);
 
     final trackPaint = Paint()
-      ..color = color.withOpacity(.18)
+      ..color = color.withValues(alpha: 0.18)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
@@ -1034,7 +1035,7 @@ class SugarArcPainter extends CustomPainter {
 
     final markerPositions = [0.0, 0.33, 0.67, 1.0];
     final markerPaint = Paint()
-      ..color = color.withOpacity(.45)
+      ..color = color.withValues(alpha: 0.45)
       ..style = PaintingStyle.fill;
 
     for (final pos in markerPositions) {

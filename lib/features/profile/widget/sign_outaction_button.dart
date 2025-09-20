@@ -139,7 +139,7 @@ class _SignOutActionButtonState extends State<SignOutActionButton>
             gradient: LinearGradient(colors: [g1, g2]),
             boxShadow: [
               BoxShadow(
-                color: g1.withOpacity(.22),
+                color: g1.withValues(alpha: 0.22),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -152,7 +152,7 @@ class _SignOutActionButtonState extends State<SignOutActionButton>
                 borderRadius: BorderRadius.circular(radius),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-                  child: Container(color: Colors.white.withOpacity(.06)),
+                  child: Container(color: Colors.white.withValues(alpha: 0.06)),
                 ),
               ),
               // النص
@@ -202,11 +202,11 @@ class _NeoToast extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.20),
-            border: Border.all(color: Colors.white.withOpacity(.55)),
+            color: Colors.white.withValues(alpha: 0.20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -254,11 +254,11 @@ class _ConfirmSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.92),
+            color: Colors.white.withValues(alpha: 0.92),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 24,
                 offset: const Offset(0, -8),
               ),
@@ -272,7 +272,7 @@ class _ConfirmSheet extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -305,7 +305,7 @@ class _ConfirmSheet extends StatelessWidget {
                           'sign_out_confirm_body'.tr(),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.black.withOpacity(.6),
+                            color: Colors.black.withValues(alpha: 0.6),
                           ),
                         ),
                       ],

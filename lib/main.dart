@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
+import 'package:enjaz/features/FO/cubit/place_cubit.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
 import 'package:enjaz/features/auth/screen/login_screen.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => DrinkCubit()),
         BlocProvider(create: (context) => CartCubit()),
         BlocProvider(create: (context) => OrderCubit()),
+        BlocProvider(create: (context) => PlaceCubit()),
       ],
       child: ScreenUtilInit(
         minTextAdapt: true,

@@ -1,7 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:enjaz/features/auth/data/repo/auth_repository.dart';
 import 'package:enjaz/features/auth/data/uscase/login_usecase.dart';
- import 'dart:async';
+import 'package:enjaz/features/auth/data/uscase/register_params.dart';
+import 'dart:async';
 import '../../../core/results/result.dart';
 
 part 'auth_state.dart';
@@ -16,16 +17,28 @@ class AuthCubit extends Cubit<AuthState> {
   Timer? _timer;
 
   LoginParams loginParams = LoginParams(
-     username: '1',
+    username: '1',
     password: '1',
     grantType: 'password',
     clientId: 'CoffeeApp_App',
     scope: 'CoffeeApp',
   );
-
+  RegisterParams registerParams = RegisterParams(
+    userName: "",
+    name: "",
+    phoneNumber: "",
+    roles: [],
+    officeId: "",
+    floorId: "",
+    password: "",
+  );
 
   Future<Result> login() async {
     return await LoginUsecase(AuthRepository()).call(params: loginParams);
+  }
+
+  Future<Result> register() async {
+    return await RegisterUseCase(AuthRepository()).call(params: registerParams);
   }
 
   void toggleLoginButton(String value) {

@@ -15,11 +15,12 @@ const String getCurrentUserOrdersUrl = '${baseUrl}api/app/Order/current_user';
 /////auth_url////////////
 ///
 const loginUrl = '${baseUrl}connect/token';
-const registerUrl = '${baseUrl}api/app/mobile-ecommerce-user-info';
+const registerUrl = '${baseUrl}users/mobile-register';
 
 
 ///user url////////////
 
 const currentUserUrl = '${baseUrl}api/app/current-customer';
+const getPlaceUrl = '${baseUrl}api/app/floor/offices/autocomplete';
 
 

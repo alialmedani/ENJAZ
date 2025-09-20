@@ -110,3 +110,52 @@ enum SugarLevel {
     }
   }
 }
+
+enum RoleType {
+  user,
+  officeBoy;
+
+  /// يحوّل من نص (من الـ API أو من الواجهة) إلى RoleType
+  /// يقبل "OfficeBoy" أو "Office Boy" ويطبع المسافات/الحروف
+  static RoleType? fromString(String? value) {
+    if (value == null) return null;
+    final v = value.trim().toLowerCase().replaceAll(' ', '');
+    switch (v) {
+      case 'User':
+        return RoleType.user;
+      case 'OfficeBoy':
+        return RoleType.officeBoy;
+
+      default:
+        return null;
+    }
+  }
+
+  /// النص المرسل للـ API
+  String toApiString() {
+    switch (this) {
+      case RoleType.user:
+        return 'User';
+      case RoleType.officeBoy:
+        return 'OfficeBoy';
+    }
+  }
+
+  String displayString() {
+    switch (this) {
+      case RoleType.user:
+        return 'User';
+      case RoleType.officeBoy:
+        return 'Office Boy';
+    }
+  }
+
+  static List<RoleType> listFromApi(List<String>? apiRoles) {
+    if (apiRoles == null) return [];
+    return apiRoles.map(fromString).whereType<RoleType>().toList();
+  }
+
+  static List<String> listToApi(List<RoleType> roles) {
+    return roles.map((e) => e.toApiString()).toList();
+  }
+}

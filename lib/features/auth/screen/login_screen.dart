@@ -7,6 +7,7 @@ import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
 import 'package:enjaz/features/auth/data/model/login_model.dart';
+import 'package:enjaz/features/auth/screen/signup_screen.dart';
 import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -214,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: () {
                         // إلى شاشة التسجيل
-                        // Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignupScreen()));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignupScreen()));
                       },
                       child: Text(
                         'ليس لديك حساب؟ إنشاء حساب',

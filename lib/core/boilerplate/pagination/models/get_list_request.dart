@@ -1,5 +1,5 @@
 
-class GetListRequest {
+class  GetListRequest {
   int? skip;
   int? take;
 
@@ -10,8 +10,8 @@ class GetListRequest {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    if (skip != null) data['skip'] = skip;
-    if (take != null) data['take'] = take;
+    if (skip != null) data['SkipCount'] = skip;
+    if (take != null) data['MaxResultCount'] = take;
     return data;
   }
 }
