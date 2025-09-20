@@ -1,4 +1,5 @@
-import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:enjaz/features/drink/data/model/drink_model.dart';
 import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
@@ -30,226 +31,187 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
   SugarLevel _sugarLevel = SugarLevel.medium;
   bool _submitting = false;
 
-  double _sugarLevelToPercent(SugarLevel level) {
-    switch (level) {
-      case SugarLevel.none:
-        return 0.0;
-      case SugarLevel.light:
-        return 0.25;
-      case SugarLevel.medium:
-        return 0.50;
-      case SugarLevel.high:
-        return 0.75;
-    }
-  }
-
   String get _imageUrl =>
-      "https://task.jasim-erp.com/api/dms/file/get/${widget.drinkModel.id}/?entitytype=1";
+      'https://task.jasim-erp.com/api/dms/file/get/${widget.drinkModel.id}/?entitytype=1';
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final heroHeight = media.size.height * 0.52;
+    final accent = AppColors.orange;
+    final description = widget.drinkModel.description?.trim();
+    final tagline = _tagline(description);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6EDE7),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _HeroHeader(
-              imageUrl: _imageUrl,
-              heroTag: widget.heroTag,
-              onBack: () => Navigator.of(context).maybePop(),
-              rightIcon: Icons.favorite_border_rounded,
-            ),
-            const SizedBox(height: 12),
-
-            _ArcSection(
-              arcDepth: 36,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.drinkModel.name ?? 'Unknown',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyle.getBoldStyle(
-                        fontSize: AppFontSize.size_18,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    Text(
-                      widget.drinkModel.description ?? "",
-                      textAlign: TextAlign.center,
-                      style: AppTextStyle.getRegularStyle(
-                        fontSize: AppFontSize.size_14,
-                        color: AppColors.secondPrimery,
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    SugarAmountSection(
-                      color: AppColors.orange,
-                      sugarLevel: _sugarLevel,
-                      onChanged: (level) => setState(() => _sugarLevel = level), pad: 24.0,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Text(
-                      'Coffee Size',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyle.getBoldStyle(
-                        fontSize: AppFontSize.size_16,
-                        color: AppColors.black23,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _SizeTile(
-                          label: 'Small',
-                          selected: _size == 'S',
-                          onTap: () => setState(() => _size = 'S'),
-                          fillColor: _size == 'S'
-                              ? AppColors.orange
-                              : Colors.white,
-                          borderColor: _size == 'S'
-                              ? AppColors.orange
-                              : AppColors.orange.withValues(alpha: .35),
-                          icon: Icons.local_cafe_outlined,
-                          iconColor: _size == 'S'
-                              ? Colors.white
-                              : AppColors.orange,
-                        ),
-                        _SizeTile(
-                          label: 'Medium',
-                          selected: _size == 'M',
-                          onTap: () => setState(() => _size = 'M'),
-                          fillColor: _size == 'M'
-                              ? AppColors.orange
-                              : Colors.white,
-                          borderColor: _size == 'M'
-                              ? AppColors.orange
-                              : AppColors.orange.withValues(alpha: .35),
-                          icon: Icons.local_cafe_outlined,
-                          iconColor: _size == 'M'
-                              ? Colors.white
-                              : AppColors.orange,
-                        ),
-                        _SizeTile(
-                          label: 'Large',
-                          selected: _size == 'L',
-                          onTap: () => setState(() => _size = 'L'),
-                          fillColor: _size == 'L'
-                              ? AppColors.orange
-                              : Colors.white,
-                          borderColor: _size == 'L'
-                              ? AppColors.orange
-                              : AppColors.orange.withValues(alpha: .35),
-                          icon: Icons.local_cafe_outlined,
-                          iconColor: _size == 'L'
-                              ? Colors.white
-                              : AppColors.orange,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF6EDE7),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFF6EDE7)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: .04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _MiniCircleBtn(
-                            icon: Icons.remove,
-                            color: AppColors.orange,
-                            onTap: () =>
-                                setState(() => _qty = _qty > 1 ? _qty - 1 : 1),
-                          ),
-                          const SizedBox(width: 12),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 160),
-                            child: Text(
-                              '$_qty',
-                              key: ValueKey(_qty),
-                              style: AppTextStyle.getBoldStyle(
-                                fontSize: AppFontSize.size_16,
-                                color: AppColors.black23,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          _MiniCircleBtn(
-                            icon: Icons.add,
-                            color: AppColors.orange,
-                            onTap: () => setState(() => _qty++),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(
-                      height: 100,
-                    ), // Extra space for the floating button
+      extendBody: true,
+      backgroundColor: const Color(0xFF120B07),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF2B1205),
+                    Color(0xFF120B07),
+                    Color(0xFF070302),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        child: FloatingActionButton.extended(
-          onPressed: _submitting ? null : _addToCart,
-          backgroundColor: AppColors.orange,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
           ),
-          label: _submitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : Text(
-                  'Add to Cart',
-                  style: AppTextStyle.getBoldStyle(
-                    fontSize: AppFontSize.size_16,
-                    color: Colors.white,
-                  ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: heroHeight,
+            child: Hero(
+              tag: widget.heroTag,
+              child: CachedImage(imageUrl: _imageUrl, fit: BoxFit.cover),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: heroHeight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.10),
+                    Colors.black.withOpacity(0.55),
+                    Colors.black.withOpacity(0.75),
+                  ],
                 ),
-          icon: _submitting
-              ? null
-              : const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-        ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  _GlassIconButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    onTap: () => Navigator.of(context).maybePop(),
+                  ),
+                  const Spacer(),
+                  _GlassIconButton(
+                    icon: Icons.favorite_border_rounded,
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.58,
+            minChildSize: 0.54,
+            maxChildSize: 0.92,
+            builder: (context, controller) {
+              return _FrostedSheet(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    const _DragHandle(),
+                    Expanded(
+                      child: ListView(
+                        controller: controller,
+                        padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          Text(
+                            widget.drinkModel.name ?? 'Signature Coffee',
+                            style: AppTextStyle.getBoldStyle(
+                              fontSize: AppFontSize.size_22,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            tagline,
+                            style: AppTextStyle.getRegularStyle(
+                              fontSize: AppFontSize.size_13,
+                              color: AppColors.secondPrimery,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _MetaInfoRow(items: _buildMetaInfo(description)),
+                          const SizedBox(height: 28),
+                          const _SectionTitle(
+                            title: 'Choose your size',
+                            subtitle: 'Dial in the cup that fits your moment',
+                          ),
+                          const SizedBox(height: 16),
+                          _SizeSelector(
+                            selected: _size,
+                            onChanged: (code) => setState(() => _size = code),
+                          ),
+                          const SizedBox(height: 32),
+                          const _SectionTitle(
+                            title: 'Sugar level',
+                            subtitle:
+                                'Slide to fine tune the sweetness profile',
+                          ),
+                          const SizedBox(height: 14),
+                          SugarAmountSection(
+                            color: accent,
+                            sugarLevel: _sugarLevel,
+                            onChanged: (level) =>
+                                setState(() => _sugarLevel = level),
+                            pad: 28.0,
+                          ),
+                          const SizedBox(height: 28),
+                          _SelectionSummary(
+                            sizeLabel: _sizeLabel(_size),
+                            sugarLabel: _sugarLabel(_sugarLevel),
+                            quantity: _qty,
+                            accent: accent,
+                          ),
+                          const SizedBox(height: 32),
+                          const _SectionTitle(
+                            title: 'Story',
+                            subtitle: 'Savor the craft behind every cup',
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            description?.isNotEmpty == true
+                                ? description!
+                                : 'Our roasters built this blend to deliver a smooth, layered profile that works beautifully with or without milk. Expect a velvety mouthfeel, gentle sweetness, and a lingering cocoa finish.',
+                            style:
+                                AppTextStyle.getRegularStyle(
+                                  fontSize: AppFontSize.size_13,
+                                  color: AppColors.black23,
+                                ).copyWith(
+                                  color: AppColors.black23.withOpacity(0.65),
+                                  height: 1.5,
+                                ),
+                          ),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    ),
+                    _BottomBar(
+                      quantity: _qty,
+                      onIncrement: () => setState(() => _qty++),
+                      onDecrement: () =>
+                          setState(() => _qty = _qty > 1 ? _qty - 1 : 1),
+                      onAdd: _submitting ? null : () => _addToCart(),
+                      submitting: _submitting,
+                      accent: accent,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -291,87 +253,147 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
       }
     }
   }
+
+  double _sugarLevelToPercent(SugarLevel level) {
+    switch (level) {
+      case SugarLevel.none:
+        return 0.0;
+      case SugarLevel.light:
+        return 0.25;
+      case SugarLevel.medium:
+        return 0.5;
+      case SugarLevel.high:
+        return 0.75;
+    }
+  }
+
+  String _tagline(String? description) {
+    if (description == null || description.isEmpty) {
+      return 'Slow-roasted beans with a velvety finish and caramel glow.';
+    }
+    final sentences = description.split(RegExp(r'[.!?]'));
+    for (final sentence in sentences) {
+      final trimmed = sentence.trim();
+      if (trimmed.isNotEmpty) {
+        return trimmed;
+      }
+    }
+    return description;
+  }
+
+  List<_MetaInfo> _buildMetaInfo(String? description) {
+    return [
+      _MetaInfo(
+        icon: Icons.local_fire_department_outlined,
+        label: 'Intensity',
+        value: _guessIntensity(description),
+      ),
+      const _MetaInfo(
+        icon: Icons.timer_outlined,
+        label: 'Brew',
+        value: '3-5 min',
+      ),
+      const _MetaInfo(
+        icon: Icons.opacity_outlined,
+        label: 'Serve',
+        value: 'Hot or iced',
+      ),
+    ];
+  }
+
+  String _guessIntensity(String? description) {
+    final text = description?.toLowerCase() ?? '';
+    if (text.contains('strong') || text.contains('bold')) {
+      return 'Bold';
+    }
+    if (text.contains('light') || text.contains('smooth')) {
+      return 'Smooth';
+    }
+    if (text.contains('dark')) {
+      return 'Dark';
+    }
+    return 'Balanced';
+  }
+
+  String _sizeLabel(String code) {
+    switch (code) {
+      case 'S':
+        return 'Small 180 ml';
+      case 'L':
+        return 'Large 360 ml';
+      case 'M':
+      default:
+        return 'Medium 240 ml';
+    }
+  }
+
+  String _sugarLabel(SugarLevel level) {
+    switch (level) {
+      case SugarLevel.none:
+        return 'No added sugar';
+      case SugarLevel.light:
+        return 'Light sweetness';
+      case SugarLevel.medium:
+        return 'Balanced sweetness';
+      case SugarLevel.high:
+        return 'Extra sweet';
+    }
+  }
 }
 
-/// =============================== HEADER ===============================
-class _HeroHeader extends StatelessWidget {
-  final String imageUrl;
-  final String heroTag;
-  final IconData rightIcon;
-  final VoidCallback onBack;
+class _GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
 
-  const _HeroHeader({
-    required this.imageUrl,
-    required this.heroTag,
-    required this.onBack,
-    required this.rightIcon,
-  });
+  const _GlassIconButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(28),
-              bottomRight: Radius.circular(28),
-            ),
-            child: Hero(
-              tag: heroTag,
-              child: CachedImage(imageUrl: imageUrl, fit: BoxFit.cover),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Material(
+          color: Colors.white.withOpacity(0.16),
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              height: 44,
+              width: 44,
+              child: Icon(icon, color: Colors.white, size: 20),
             ),
           ),
-          Builder(
-            builder: (context) {
-              final top = MediaQuery.of(context).padding.top;
-              return Stack(
-                children: [
-                  Positioned(
-                    top: top,
-                    left: 10,
-                    child: _CircleIcon(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: onBack,
-                    ),
-                  ),
-                  Positioned(
-                    top: top,
-                    right: 10,
-                    child: _CircleIcon(icon: rightIcon, onTap: () {}),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// ========================= ARC SECTION =========================
-class _ArcSection extends StatelessWidget {
-  final double arcDepth;
+class _FrostedSheet extends StatelessWidget {
   final Widget child;
 
-  const _ArcSection({required this.child, this.arcDepth = 36});
+  const _FrostedSheet({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-    final bottomBarHeight = 133 + bottomInset;
-
-    return ClipPath(
-      clipper: _TopArcClipper(arcDepth: arcDepth),
-      child: Container(
-        width: double.infinity,
-        color: const Color(0xFFF6EDE7),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: bottomBarHeight + 16),
+    final radius = const BorderRadius.vertical(top: Radius.circular(36));
+    return ClipRRect(
+      borderRadius: radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.94),
+            borderRadius: radius,
+            border: Border.all(color: Colors.white.withOpacity(0.35)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.30),
+                blurRadius: 32,
+                offset: const Offset(0, -12),
+              ),
+            ],
+          ),
           child: child,
         ),
       ),
@@ -379,25 +401,527 @@ class _ArcSection extends StatelessWidget {
   }
 }
 
-class _TopArcClipper extends CustomClipper<Path> {
-  final double arcDepth;
-  const _TopArcClipper({this.arcDepth = 36});
+class _DragHandle extends StatelessWidget {
+  const _DragHandle();
 
   @override
-  Path getClip(Size size) {
-    final double d = arcDepth.clamp(12.0, 64.0).toDouble();
-
-    return Path()
-      ..lineTo(0.0, d)
-      ..quadraticBezierTo(size.width / 2, 0.0, size.width, d)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0.0, size.height)
-      ..close();
+  Widget build(BuildContext context) {
+    return Container(
+      width: 58,
+      height: 6,
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: AppColors.greyE5,
+        borderRadius: BorderRadius.circular(999),
+      ),
+    );
   }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+
+  const _SectionTitle({required this.title, this.subtitle});
 
   @override
-  bool shouldReclip(covariant _TopArcClipper oldClipper) =>
-      oldClipper.arcDepth != arcDepth;
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTextStyle.getBoldStyle(
+            fontSize: AppFontSize.size_16,
+            color: AppColors.black23,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            subtitle!,
+            style: AppTextStyle.getRegularStyle(
+              fontSize: AppFontSize.size_12,
+              color: AppColors.secondPrimery,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MetaInfoRow extends StatelessWidget {
+  final List<_MetaInfo> items;
+
+  const _MetaInfoRow({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF7EE), Color(0xFFFFE9D6)],
+        ),
+        border: Border.all(color: Colors.white.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < items.length; i++) ...[
+            Expanded(child: _MetaInfoTile(info: items[i])),
+            if (i != items.length - 1)
+              Container(
+                width: 1,
+                height: 40,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                color: AppColors.orange.withOpacity(0.25),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MetaInfoTile extends StatelessWidget {
+  final _MetaInfo info;
+
+  const _MetaInfoTile({required this.info});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(info.icon, color: AppColors.orange, size: 22),
+        const SizedBox(height: 6),
+        Text(
+          info.label,
+          style: AppTextStyle.getRegularStyle(
+            fontSize: AppFontSize.size_11,
+            color: AppColors.secondPrimery,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          info.value,
+          style: AppTextStyle.getBoldStyle(
+            fontSize: AppFontSize.size_13,
+            color: AppColors.black23,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MetaInfo {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _MetaInfo({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+}
+
+class _SizeSelector extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  static const _options = [
+    _SizeOptionData(code: 'S', label: 'Small', description: '180 ml'),
+    _SizeOptionData(code: 'M', label: 'Medium', description: '240 ml'),
+    _SizeOptionData(code: 'L', label: 'Large', description: '360 ml'),
+  ];
+
+  const _SizeSelector({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: _options
+          .map(
+            (option) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: _SizeOption(
+                  option: option,
+                  selected: option.code == selected,
+                  onTap: () => onChanged(option.code),
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+class _SizeOptionData {
+  final String code;
+  final String label;
+  final String description;
+
+  const _SizeOptionData({
+    required this.code,
+    required this.label,
+    required this.description,
+  });
+}
+
+class _SizeOption extends StatelessWidget {
+  final _SizeOptionData option;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SizeOption({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final gradient = LinearGradient(
+      colors: selected
+          ? [AppColors.orange, const Color(0xFFF0B27A)]
+          : [Colors.white, Colors.white],
+    );
+
+    return AnimatedScale(
+      scale: selected ? 1.02 : 1.0,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: selected
+                  ? AppColors.orange.withOpacity(0.7)
+                  : AppColors.greyE5,
+              width: 1.6,
+            ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: AppColors.orange.withOpacity(0.35),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : const [],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.local_cafe_outlined,
+                color: selected ? Colors.white : AppColors.orange,
+                size: 26,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                option.label,
+                style: AppTextStyle.getBoldStyle(
+                  fontSize: AppFontSize.size_13,
+                  color: selected ? Colors.white : AppColors.black23,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                option.description,
+                style: AppTextStyle.getRegularStyle(
+                  fontSize: AppFontSize.size_11,
+                  color: selected
+                      ? Colors.white.withOpacity(0.86)
+                      : AppColors.secondPrimery,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionSummary extends StatelessWidget {
+  final String sizeLabel;
+  final String sugarLabel;
+  final int quantity;
+  final Color accent;
+
+  const _SelectionSummary({
+    required this.sizeLabel,
+    required this.sugarLabel,
+    required this.quantity,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [accent.withOpacity(0.14), Colors.white],
+        ),
+        border: Border.all(color: accent.withOpacity(0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withOpacity(0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Your recipe',
+            style: AppTextStyle.getBoldStyle(
+              fontSize: AppFontSize.size_14,
+              color: AppColors.black23,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              _SummaryPill(
+                icon: Icons.local_cafe,
+                label: sizeLabel,
+                accent: accent,
+              ),
+              _SummaryPill(
+                icon: Icons.cake_outlined,
+                label: sugarLabel,
+                accent: accent,
+              ),
+              _SummaryPill(
+                icon: Icons.format_list_numbered,
+                label: '${quantity} cup${quantity > 1 ? 's' : ''}',
+                accent: accent,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color accent;
+
+  const _SummaryPill({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: accent.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: accent, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: AppTextStyle.getRegularStyle(
+              fontSize: AppFontSize.size_12,
+              color: AppColors.black23,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomBar extends StatelessWidget {
+  final int quantity;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final VoidCallback? onAdd;
+  final bool submitting;
+  final Color accent;
+
+  const _BottomBar({
+    required this.quantity,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onAdd,
+    required this.submitting,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 26),
+        child: Row(
+          children: [
+            _QuantityController(
+              quantity: quantity,
+              onIncrement: onIncrement,
+              onDecrement: onDecrement,
+              accent: accent,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: onAdd,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 6,
+                  shadowColor: accent.withOpacity(0.4),
+                ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: submitting
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Add to cart',
+                          style: AppTextStyle.getBoldStyle(
+                            fontSize: AppFontSize.size_15,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityController extends StatelessWidget {
+  final int quantity;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final Color accent;
+
+  const _QuantityController({
+    required this.quantity,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: accent.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accent.withOpacity(0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _QtyButton(icon: Icons.remove, onTap: onDecrement, accent: accent),
+          const SizedBox(width: 14),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Text(
+              '$quantity',
+              key: ValueKey<int>(quantity),
+              style: AppTextStyle.getBoldStyle(
+                fontSize: AppFontSize.size_16,
+                color: AppColors.black23,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          _QtyButton(icon: Icons.add, onTap: onIncrement, accent: accent),
+        ],
+      ),
+    );
+  }
+}
+
+class _QtyButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color accent;
+
+  const _QtyButton({
+    required this.icon,
+    required this.onTap,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 22,
+        highlightShape: BoxShape.circle,
+        child: Container(
+          height: 32,
+          width: 32,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: accent.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: accent, size: 18),
+        ),
+      ),
+    );
+  }
 }
 
 /// ======================= sugar PERCENT (Arc + Slider) =======================
@@ -407,10 +931,12 @@ class SugarAmountSection extends StatelessWidget {
   final ValueChanged<SugarLevel> onChanged;
   final double pad;
 
-  const SugarAmountSection({super.key, 
+  const SugarAmountSection({
+    super.key,
     required this.color,
     required this.sugarLevel,
-    required this.onChanged, required this.pad,
+    required this.onChanged,
+    required this.pad,
   });
 
   void _updateFromLocal(Offset local, double width) {
@@ -419,8 +945,6 @@ class SugarAmountSection extends StatelessWidget {
     final dx = local.dx.clamp(left, right);
     final t = ((dx - left) / (right - left)).toDouble();
 
-    // Convert percentage to discrete SugarLevel positions
-    // Divide the slider into 4 equal sections for 4 enum values
     SugarLevel newLevel;
     if (t <= 0.25) {
       newLevel = SugarLevel.none;
@@ -438,7 +962,7 @@ class SugarAmountSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110,
+      height: 120,
       child: LayoutBuilder(
         builder: (context, c) {
           final w = c.maxWidth;
@@ -448,7 +972,7 @@ class SugarAmountSection extends StatelessWidget {
             onPanDown: (d) => _updateFromLocal(d.localPosition, w),
             onPanUpdate: (d) => _updateFromLocal(d.localPosition, w),
             child: CustomPaint(
-              size: Size(w, 110),
+              size: Size(w, 120),
               painter: SugarArcPainter(
                 color: color,
                 sugarLevel: sugarLevel,
@@ -474,23 +998,22 @@ class SugarArcPainter extends CustomPainter {
   });
 
   double get percent {
-    // Map enum values to discrete positions on the slider
     switch (sugarLevel) {
       case SugarLevel.none:
-        return 0.0; // 0% position
+        return 0.0;
       case SugarLevel.light:
-        return 0.33; // 33% position
+        return 0.33;
       case SugarLevel.medium:
-        return 0.67; // 67% position
+        return 0.67;
       case SugarLevel.high:
-        return 1.0; // 100% position
+        return 1.0;
     }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final baseY = size.height * .70;
-    final controlY = size.height * .28;
+    final baseY = size.height * .68;
+    final controlY = size.height * .24;
     final left = Offset(pad, baseY);
     final right = Offset(size.width - pad, baseY);
     final control = Offset(size.width / 2, controlY);
@@ -500,7 +1023,7 @@ class SugarArcPainter extends CustomPainter {
       ..quadraticBezierTo(control.dx, control.dy, right.dx, right.dy);
 
     final trackPaint = Paint()
-      ..color = color.withValues(alpha: .25)
+      ..color = color.withOpacity(.18)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
@@ -509,15 +1032,9 @@ class SugarArcPainter extends CustomPainter {
     final metrics = path.computeMetrics().toList();
     if (metrics.isEmpty) return;
 
-    // Draw discrete position markers for each enum value
-    final markerPositions = [
-      0.0,
-      0.33,
-      0.67,
-      1.0,
-    ]; // Positions for None, Light, Medium, High
+    final markerPositions = [0.0, 0.33, 0.67, 1.0];
     final markerPaint = Paint()
-      ..color = color.withValues(alpha: .4)
+      ..color = color.withOpacity(.45)
       ..style = PaintingStyle.fill;
 
     for (final pos in markerPositions) {
@@ -543,35 +1060,39 @@ class SugarArcPainter extends CustomPainter {
     final tan = m.getTangentForOffset(to);
     if (tan != null) {
       final p = tan.position;
-      canvas.drawCircle(
-        Offset(p.dx, p.dy + 1.5),
-        7,
-        Paint()..color = Colors.black12,
+      canvas.drawShadow(
+        Path()..addOval(Rect.fromCircle(center: p, radius: 9)),
+        Colors.black26,
+        4,
+        false,
       );
-      canvas.drawCircle(p, 7, Paint()..color = Colors.white);
+      canvas.drawCircle(p, 9, Paint()..color = Colors.white);
       canvas.drawCircle(
         p,
-        7,
+        9,
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
+          ..strokeWidth = 3
           ..color = color,
       );
     }
 
-    // Get the display name for the sugar level
-    String sugarLevelName = _getSugarLevelDisplayName(sugarLevel);
-    final tp = TextPainter(
+    final label = _getSugarLevelDisplayName(sugarLevel);
+    final painter = TextPainter(
       text: TextSpan(
-        text: '$sugarLevelName Sugar',
+        text: '$label sugar',
         style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.black87,
+          fontSize: 14,
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    tp.paint(canvas, Offset((size.width - tp.width) / 2, size.height * 0.08));
+    painter.paint(
+      canvas,
+      Offset((size.width - painter.width) / 2, size.height * 0.1),
+    );
   }
 
   String _getSugarLevelDisplayName(SugarLevel level) {
@@ -590,247 +1111,4 @@ class SugarArcPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant SugarArcPainter old) =>
       old.color != color || old.sugarLevel != sugarLevel || old.pad != pad;
-}
-
-/// =============================== SIZE TILE ===============================
-class _SizeTile extends StatefulWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  final Color fillColor;
-  final Color borderColor;
-  final IconData icon;
-  final Color iconColor;
-
-  const _SizeTile({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    required this.fillColor,
-    required this.borderColor,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  State<_SizeTile> createState() => _SizeTileState();
-}
-
-class _SizeTileState extends State<_SizeTile>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
-    if (widget.selected) _ctrl.repeat();
-  }
-
-  @override
-  void didUpdateWidget(covariant _SizeTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selected && !_ctrl.isAnimating) {
-      _ctrl.repeat();
-    } else if (!widget.selected && _ctrl.isAnimating) {
-      _ctrl.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const radius = 16.0;
-    final active = widget.selected;
-    final bgColor = widget.fillColor;
-    final brdColor = widget.borderColor;
-
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeOutCubic,
-            width: 82,
-            height: 78,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(color: brdColor, width: 2),
-              boxShadow: active
-                  ? [
-                      BoxShadow(
-                        blurRadius: 14,
-                        offset: const Offset(0, 8),
-                        color: Colors.black12,
-                      ),
-                    ]
-                  : const [],
-            ),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Center(
-                  child: TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutBack,
-                    tween: Tween(begin: 1.0, end: active ? 1.08 : 1.0),
-                    builder: (_, scale, __) => Transform.scale(
-                      scale: scale,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 180),
-                        child: Icon(
-                          widget.icon,
-                          key: ValueKey<Color>(widget.iconColor),
-                          color: widget.iconColor,
-                          size: 28,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                if (active)
-                  AnimatedBuilder(
-                    animation: _ctrl,
-                    builder: (_, __) => CustomPaint(
-                      painter: _AnimatedBorderPainter(
-                        progress: _ctrl.value,
-                        stroke: 2.8,
-                        radius: radius,
-                        colors: const [
-                          Color(0xFFFFE4C4),
-                          Color(0xFFD95B2B),
-                          Color(0xFFFFE4C4),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          style: AppTextStyle.getRegularStyle(
-            fontSize: AppFontSize.size_12,
-            color: active ? const Color(0xFFD95B2B) : AppColors.secondPrimery,
-          ),
-          child: Text(widget.label),
-        ),
-      ],
-    );
-  }
-}
-
-class _AnimatedBorderPainter extends CustomPainter {
-  final double progress; // 0..1
-  final double stroke;
-  final double radius;
-  final List<Color> colors;
-
-  _AnimatedBorderPainter({
-    required this.progress,
-    required this.stroke,
-    required this.radius,
-    required this.colors,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-    final shader = SweepGradient(
-      startAngle: 0.0,
-      endAngle: math.pi * 2,
-      colors: colors,
-      stops: const [0.0, 0.55, 1.0],
-      transform: GradientRotation(progress * math.pi * 2),
-    ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..shader = shader;
-    final path = Path()..addRRect(rrect);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _AnimatedBorderPainter old) =>
-      old.progress != progress ||
-      old.stroke != stroke ||
-      old.radius != radius ||
-      old.colors != colors;
-}
-
-// ================================ HELPERS ================================
-
-class _MiniCircleBtn extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-  const _MiniCircleBtn({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkResponse(
-      onTap: onTap,
-      radius: 22,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 10,
-              offset: Offset(0, 6),
-              color: Colors.black26,
-            ),
-          ],
-        ),
-        child: Icon(icon, color: Colors.white, size: 18),
-      ),
-    );
-  }
-}
-
-class _CircleIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _CircleIcon({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkResponse(
-      onTap: onTap,
-      radius: 30,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: const BoxDecoration(
-          color: Colors.white70,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.black87, size: 20),
-      ),
-    );
-  }
 }

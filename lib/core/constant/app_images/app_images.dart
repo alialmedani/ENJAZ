@@ -1,7 +1,7 @@
 const imageBaseUrl = 'assets/images';
 
 //onboarding
-const logoPngImage = 'assets/images/banner.png';
+const logoPngImage = 'assets/images/bean.png';
 const logoWithoutNamePngImage = '$imageBaseUrl/logowiname.png';
 const backgroundPngRootImage = '$imageBaseUrl/background_root.png';
 const noDataImage = '$imageBaseUrl/empty_favorite.png';
