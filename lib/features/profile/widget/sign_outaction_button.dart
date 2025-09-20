@@ -39,10 +39,6 @@ class _SignOutActionButtonState extends State<SignOutActionButton>
     _toastActive = true;
 
     final overlay = Overlay.of(context);
-    if (overlay == null) {
-      _toastActive = false;
-      return;
-    }
 
     final g1 = error ? Colors.red.shade600 : AppColors.darkAccentColor;
     final g2 = error ? Colors.orange : AppColors.xorangeColor;

@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,7 +7,6 @@ import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
 import 'package:enjaz/core/ui/dialogs/dialogs.dart';
 import 'package:enjaz/core/ui/widgets/custom_button.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
-import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/ui/widgets/cached_image.dart';
