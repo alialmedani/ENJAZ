@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:enjaz/features/profile/widget/2.dart';
+import 'package:enjaz/features/profile/widget/sign_outaction_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,7 +15,6 @@ import 'package:enjaz/features/order/cubit/order_cubit.dart';
 import 'package:enjaz/features/order/data/model/order_model.dart';
 import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/profile/data/model/user_model.dart';
-import 'package:enjaz/features/profile/widget/gradient_signout_button.dart';
 import 'package:enjaz/features/profile/widget/history_list.dart';
 import 'package:enjaz/features/profile/widget/skeletons.dart';
 
@@ -566,6 +565,3 @@ String _displayName(UserModel profile) {
   if (surname != null && surname.isNotEmpty) return surname;
   return profile.userName?.trim() ?? 'Guest';
 }
-
-
-
