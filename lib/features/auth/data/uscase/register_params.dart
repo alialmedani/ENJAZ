@@ -12,7 +12,7 @@ class RegisterParams extends BaseParams {
   String officeId;
   String floorId;
   String password;
-  List<RegisterModel> roles;
+  List<String> roles;
 
   RegisterParams({
     required this.userName,
@@ -28,7 +28,8 @@ class RegisterParams extends BaseParams {
     return {
       "userName": userName,
       "name": name,
-      "roles": roles.map((item) => item.toJson()).toList(),
+      "roles": roles,
+
       "phoneNumber": phoneNumber,
       "officeId": officeId,
       "floorId": floorId,

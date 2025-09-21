@@ -280,11 +280,9 @@ class _SignupScreenState extends State<SignupScreen> {
     final cubit = context.read<AuthCubit>();
     final params = cubit.registerParams;
 
-    RoleType? currentRole;
-    if (params.roles.isNotEmpty &&
-        params.roles.first.roles?.isNotEmpty == true) {
-      currentRole = RoleType.fromString(params.roles.first.roles!.first);
-    }
+    final RoleType? currentRole = RoleType.fromString(
+      params.roles.isNotEmpty ? params.roles.first : null,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.xbackgroundColor,
@@ -444,8 +442,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     ),
                                     onChanged: (place) {
                                       params.floorId = place?.id ?? '';
-                                      params.officeId =
-                                          ''; // reset office when floor changes
+
                                       _safeSetState(() {});
                                     },
                                   ),
@@ -476,26 +473,16 @@ class _SignupScreenState extends State<SignupScreen> {
                                         )
                                         .toList(),
                                     onChanged: (rt) {
-                                      final api = rt?.toApiString();
-                                      params.roles =
-                                          (api == null || api.isEmpty)
+                                      params.roles = (rt == null)
                                           ? []
-                                          : [
-                                              RegisterModel(roles: [api]),
-                                            ];
+                                          : [rt.toApiString()];
                                       _safeSetState(() {});
                                     },
                                     decoration: _deco(
                                       'Role',
                                       prefix: Icons.badge_outlined,
                                     ),
-                                    validator: (_) {
-                                      final roles = params.roles;
-                                      final ok =
-                                          roles.isNotEmpty &&
-                                          roles.first.roles?.isNotEmpty == true;
-                                      return ok ? null : 'اختر الدور';
-                                    },
+
                                     iconEnabledColor: AppColors.xprimaryColor,
                                   ),
                                 ),

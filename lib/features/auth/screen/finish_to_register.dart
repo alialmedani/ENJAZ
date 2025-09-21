@@ -7,6 +7,9 @@ import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/auth/data/model/register_model.dart';
 import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../cubit/auth_cubit.dart';
 
 class FinishToRegister extends StatelessWidget {
   const FinishToRegister({super.key});
@@ -29,9 +32,7 @@ class FinishToRegister extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(AppPaddingSize.padding_20),
         child: GetModel<RegisterModel>(
-          // useCaseCallBack: () => context.read<AuthCubit>().sigup(),
-
-          // لازم modelBuilder لأن GetModel يلفّه بـ RefreshIndicator
+          useCaseCallBack: () => context.read<AuthCubit>().register(),
           modelBuilder: (_) => const SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             child: SizedBox.shrink(),

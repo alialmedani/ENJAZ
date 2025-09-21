@@ -115,23 +115,19 @@ enum RoleType {
   user,
   officeBoy;
 
-  /// يحوّل من نص (من الـ API أو من الواجهة) إلى RoleType
-  /// يقبل "OfficeBoy" أو "Office Boy" ويطبع المسافات/الحروف
   static RoleType? fromString(String? value) {
     if (value == null) return null;
     final v = value.trim().toLowerCase().replaceAll(' ', '');
     switch (v) {
-      case 'User':
+      case 'user':
         return RoleType.user;
-      case 'OfficeBoy':
+      case 'officeboy':
         return RoleType.officeBoy;
-
       default:
         return null;
     }
   }
 
-  /// النص المرسل للـ API
   String toApiString() {
     switch (this) {
       case RoleType.user:
