@@ -3,13 +3,218 @@ import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/enum/enum.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
-import 'package:enjaz/features/FO/widget/place_dropdown.dart';
+import 'package:enjaz/core/boilerplate/pagination/models/get_list_request.dart';
+import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
+import 'package:enjaz/features/FO/cubit/place_cubit.dart';
+import 'package:enjaz/features/FO/data/model/place_model.dart';
+import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
+import 'package:enjaz/features/FO/widget/place_dropdown.dart'; // (Floor - type=1)
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart' show AuthCubit;
 import 'package:enjaz/features/auth/data/model/register_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'finish_to_register.dart';
 
+/// -----------------------------
+/// Helpers
+/// -----------------------------
+InputDecoration _deco(String hint, {IconData? prefix, Widget? suffix}) {
+  final enabled = AppColors.secondPrimery.withValues(alpha: .30);
+  return InputDecoration(
+    hintText: hint,
+    prefixIcon: prefix == null
+        ? null
+        : Icon(prefix, color: AppColors.secondPrimery),
+    hintStyle: AppTextStyle.getRegularStyle(
+      fontSize: AppFontSize.size_14,
+      color: AppColors.secondPrimery,
+    ),
+    filled: true,
+    fillColor: AppColors.white,
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: AppPaddingSize.padding_16,
+      vertical: AppPaddingSize.padding_16,
+    ),
+    suffixIcon: suffix,
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
+      borderSide: BorderSide(color: enabled),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
+      borderSide: BorderSide(color: AppColors.xprimaryColor, width: 1.4),
+    ),
+  );
+}
+
+DropdownMenuItem<T> _menuItem<T>({
+  required T value,
+  required String title,
+  IconData? icon,
+}) {
+  return DropdownMenuItem<T>(
+    value: value,
+    child: Row(
+      children: [
+        if (icon != null) ...[
+          Icon(icon, size: 18, color: AppColors.secondPrimery),
+          const SizedBox(width: 8),
+        ],
+        Expanded(
+          child: Text(
+            title,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyle.getRegularStyle(
+              fontSize: AppFontSize.size_14,
+              color: AppColors.black23,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// -----------------------------
+/// OfficeDropdown (API فقط، بدون copyWith)
+/// -----------------------------
+/// - مخفي/معطَّل حتى يتم اختيار الطابق.
+/// - عند الجلب: نمرر type=2 وfloorId عبر GetPlaceParam (لا نلمس GetListRequest).
+/// - نُسند GetPlaceParam الجديد إلى placeCubit.getPlaceParam قبل الاستدعاء.
+/// - نُؤجل بلاغ الأب بالـ onChanged(null) بعد الإطار الحالي لتجنب setState أثناء البناء.
+class OfficeDropdown extends StatefulWidget {
+  const OfficeDropdown({
+    super.key,
+    required this.floorId,
+    required this.selectedOfficeId,
+    required this.onChanged,
+    this.hideWhenNoFloor = true,
+    this.decoration,
+  });
+
+  final String floorId;
+  final String? selectedOfficeId;
+  final ValueChanged<PlaceModel?> onChanged;
+  final bool hideWhenNoFloor;
+  final InputDecoration? decoration;
+
+  @override
+  State<OfficeDropdown> createState() => _OfficeDropdownState();
+}
+
+class _OfficeDropdownState extends State<OfficeDropdown> {
+  String? _selectedId;
+
+  void _safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(fn);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedId = widget.selectedOfficeId;
+  }
+
+  @override
+  void didUpdateWidget(covariant OfficeDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.floorId != widget.floorId) {
+      _selectedId = null;
+      // ✅ لا تستدعِ onChanged مباشرة أثناء البناء
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.onChanged(null);
+        _safeSetState(() {}); // لإعادة بناء الدروب داون بعد التغيير
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final noFloor = widget.floorId.isEmpty;
+
+    if (noFloor && widget.hideWhenNoFloor) {
+      // إخفاء كامل حتى يُختار الطابق
+      return const SizedBox.shrink();
+    }
+
+    return IgnorePointer(
+      ignoring: noFloor,
+      child: Opacity(
+        opacity: noFloor ? .55 : 1,
+        child: SizedBox(
+          height: 100,
+          child: PaginationList(
+            // إعادة التحميل عند تغيير الطابق
+            key: ValueKey<String>('office-${widget.floorId}'),
+            repositoryCallBack: (data) {
+              final placeCubit = context.read<PlaceCubit>();
+              final req = (data is GetListRequest) ? data : GetListRequest();
+
+              // تعيين بارامترات الجلب (type=2 + floorId)
+              placeCubit.getPlaceParam = GetPlaceParam(
+                request: req,
+                type: 2, // مكاتب
+                floorId: widget.floorId, // فلترة حسب الطابق
+                term: null,
+              );
+
+              return placeCubit.fetchPLaceServies(req);
+            },
+            listBuilder: (list) {
+              final offices = list.cast<PlaceModel>();
+              final hasSelected = offices.any(
+                (o) => (o.id?.toString() ?? '') == _selectedId,
+              );
+              final value = hasSelected ? _selectedId : null;
+
+              return DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: value,
+                items: offices
+                    .map(
+                      (o) => _menuItem<String>(
+                        value: (o.id?.toString() ?? ''),
+                        title: (o.name ?? '—'),
+                        icon: Icons.apartment_outlined,
+                      ),
+                    )
+                    .toList(),
+                onChanged: (id) {
+                  setState(() => _selectedId = id);
+                  final model = offices.firstWhere(
+                    (o) => (o.id?.toString() ?? '') == id,
+                    orElse: () => PlaceModel(),
+                  );
+                  widget.onChanged(id == null ? null : model);
+                },
+                decoration:
+                    widget.decoration ??
+                    _deco('Office', prefix: Icons.apartment_outlined),
+                iconEnabledColor: AppColors.xprimaryColor,
+                validator: (_) {
+                  if (widget.floorId.isEmpty)
+                    return null; // لا نُلزم بالمكتب قبل اختيار الطابق
+                  return (value == null || value.isEmpty)
+                      ? 'اختر المكتب'
+                      : null;
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// -----------------------------
+/// شاشة التسجيل (تستخدم OfficeDropdown الجديد)
+/// -----------------------------
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
   @override
@@ -19,312 +224,55 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // نحتاج الكنترولرين فقط للمقارنة بين كلمتي المرور
-  final _passCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
+  late final TextEditingController _userCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _passCtrl;
+  late final TextEditingController _confirmCtrl;
 
-  bool _obscure1 = true;
-  bool _obscure2 = true;
+  bool _obscurePass = true;
+  bool _obscureConfirm = true;
+  bool _acceptedRules = false;
 
-  bool _acceptedRules = false; // تبقى محلية لأنها ليست جزءًا من الـ params
-
-  // أدوار للعرض في الـ UI
-  static const _uiRoles = <String>[
-    'User',
-    'Office Boy',
-    'Employee',
-    'Manager',
-    'Admin',
-  ];
-
-  // مكاتب وهمية للعرض (بدّلها ببيانات الـ API لاحقًا)
-  static const _offices = <Map<String, String>>[
-    {'id': '1', 'name': 'Main Office'},
-    {'id': '2', 'name': 'Branch - West'},
-    {'id': '3', 'name': 'Branch - East'},
-  ];
-
-  // تحويل اسم الدور الظاهر في الواجهة إلى القيمة المطلوبة من الـ API
-  String _uiToApiRole(String? uiRole) {
-    if (uiRole == null) return '';
-    switch (uiRole) {
-      case 'User':
-        return 'User';
-      case 'Office Boy':
-        return 'OfficeBoy';
-      default:
-        return uiRole;
-    }
+  void _safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(fn);
+    });
   }
 
-  // عكس التحويل: من قيمة الـ API إلى ما يُعرض في الواجهة (لإظهار القيمة المختارة حاليًا)
-  String? _apiToUiRole(List<RegisterModel> roles) {
-    if (roles.isEmpty ||
-        roles.first.roles == null ||
-        roles.first.roles!.isEmpty)
-      return null;
-    final api = roles.first.roles!.first;
-    switch (api) {
-      case 'User':
-        return 'User';
-      case 'OfficeBoy':
-        return 'Office Boy';
-      default:
-        return api;
-    }
-  }
-
-  InputDecoration _deco(String hint, {IconData? prefix, Widget? suffix}) {
-    final enabled = AppColors.secondPrimery.withValues(alpha: .30);
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: prefix == null
-          ? null
-          : Icon(prefix, color: AppColors.secondPrimery),
-      hintStyle: AppTextStyle.getRegularStyle(
-        fontSize: AppFontSize.size_14,
-        color: AppColors.secondPrimery,
-      ),
-      filled: true,
-      fillColor: AppColors.white,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppPaddingSize.padding_16,
-        vertical: AppPaddingSize.padding_16,
-      ),
-      suffixIcon: suffix,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
-        borderSide: BorderSide(color: enabled),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
-        borderSide: BorderSide(color: AppColors.xprimaryColor, width: 1.4),
-      ),
-    );
-  }
-
-  Widget _card(Widget child) {
-    return Container(
-      padding: const EdgeInsets.all(AppPaddingSize.padding_16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: .05),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-
-  DropdownMenuItem<T> _menuItem<T>({
-    required T value,
-    required String title,
-    IconData? icon,
-  }) {
-    return DropdownMenuItem<T>(
-      value: value,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 18, color: AppColors.secondPrimery),
-            const SizedBox(width: 8),
-          ],
-          Flexible(
-            fit: FlexFit.loose,
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.getRegularStyle(
-                fontSize: AppFontSize.size_14,
-                color: AppColors.black23,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _bottomActionBar(VoidCallback onSubmit) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppPaddingSize.padding_16,
-          vertical: AppPaddingSize.padding_12,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          border: Border(
-            top: BorderSide(
-              color: AppColors.secondPrimery.withValues(alpha: .15),
-            ),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: .06),
-              blurRadius: 16,
-              offset: const Offset(0, -8),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => setState(() => _acceptedRules = !_acceptedRules),
-                borderRadius: BorderRadius.circular(AppPaddingSize.padding_12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Checkbox(
-                      value: _acceptedRules,
-                      activeColor: AppColors.xprimaryColor,
-                      onChanged: (v) =>
-                          setState(() => _acceptedRules = v ?? false),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: AppTextStyle.getRegularStyle(
-                            fontSize: AppFontSize.size_13,
-                            color: AppColors.black23,
-                          ),
-                          children: [
-                            const TextSpan(text: 'أوافق على '),
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: GestureDetector(
-                                onTap: () {
-                                  // Navigator.pushNamed(context, '/terms');
-                                },
-                                child: Text(
-                                  'الشروط والأحكام',
-                                  style: AppTextStyle.getSemiBoldStyle(
-                                    fontSize: AppFontSize.size_13,
-                                    color: AppColors.xprimaryColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: AppPaddingSize.padding_12),
-            SizedBox(
-              height: AppPaddingSize.padding_48,
-              child: ElevatedButton(
-                onPressed: onSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.xprimaryColor,
-                  disabledBackgroundColor: AppColors.secondPrimery.withValues(
-                    alpha: .6,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppPaddingSize.padding_12,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppPaddingSize.padding_20,
-                  ),
-                ),
-                child: Text(
-                  'Create Account',
-                  style: AppTextStyle.getBoldStyle(
-                    fontSize: AppFontSize.size_15,
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _handleSubmit(AuthCubit cubit) {
-    final valid = _formKey.currentState?.validate() ?? false;
-    if (!valid) return;
-
-    if (!_acceptedRules) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'يجب الموافقة على الشروط أولاً',
-            style: AppTextStyle.getSemiBoldStyle(
-              fontSize: AppFontSize.size_14,
-              color: AppColors.white,
-            ),
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    // تحقق أساسي من الحقول المطلوبة
-    final p = cubit.registerParams;
-    if ((p.officeId).isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text(
-            'الرجاء اختيار المكتب (Office)',
-            style: AppTextStyle.getSemiBoldStyle(
-              fontSize: AppFontSize.size_14,
-              color: AppColors.white,
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-    if ((p.floorId).isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text(
-            'الرجاء اختيار الطابق (Floor)',
-            style: AppTextStyle.getSemiBoldStyle(
-              fontSize: AppFontSize.size_14,
-              color: AppColors.white,
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-
-    // إن كان name فارغ لأي سبب، اجعله userName
-    if ((p.name).trim().isEmpty) {
-      p.name = p.userName;
-    }
-
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const FinishToRegister()));
+  @override
+  void initState() {
+    super.initState();
+    final p = context.read<AuthCubit>().registerParams;
+    _userCtrl = TextEditingController(text: p.userName);
+    _phoneCtrl = TextEditingController(text: p.phoneNumber);
+    _passCtrl = TextEditingController(text: p.password);
+    _confirmCtrl = TextEditingController();
   }
 
   @override
   void dispose() {
+    _userCtrl.dispose();
+    _phoneCtrl.dispose();
     _passCtrl.dispose();
     _confirmCtrl.dispose();
     super.dispose();
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text(
+          msg,
+          style: AppTextStyle.getSemiBoldStyle(
+            fontSize: AppFontSize.size_14,
+            color: AppColors.white,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -332,36 +280,44 @@ class _SignupScreenState extends State<SignupScreen> {
     final cubit = context.read<AuthCubit>();
     final params = cubit.registerParams;
 
-    // استنتاج القيم الحالية من الـ cubit لربطها بالـ widgets
-    final selectedFloorInt = int.tryParse(params.floorId);
-    final selectedRoleUi = _apiToUiRole(params.roles); // قد تكون null
-    final selectedOfficeId = params.officeId.isEmpty ? null : params.officeId;
-
-    // current role in UI from params
     RoleType? currentRole;
     if (params.roles.isNotEmpty &&
-        params.roles.first.roles != null &&
-        params.roles.first.roles!.isNotEmpty) {
+        params.roles.first.roles?.isNotEmpty == true) {
       currentRole = RoleType.fromString(params.roles.first.roles!.first);
     }
+
     return Scaffold(
       backgroundColor: AppColors.xbackgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
-          builder: (context, constraints) {
+          builder: (context, cons) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppPaddingSize.padding_20,
                 vertical: AppPaddingSize.padding_20,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                constraints: BoxConstraints(minHeight: cons.maxHeight),
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 520),
-                    child: _card(
-                      Form(
+                    child: Container(
+                      padding: const EdgeInsets.all(AppPaddingSize.padding_16),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(
+                          AppPaddingSize.padding_12,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.black.withValues(alpha: .05),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Form(
                         key: _formKey,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -372,10 +328,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: AppColors.xprimaryColor,
                             ),
                             const SizedBox(height: AppPaddingSize.padding_16),
-
                             Text(
                               'Create Account',
-                              textAlign: TextAlign.center,
                               style: AppTextStyle.getBoldStyle(
                                 fontSize: AppFontSize.size_20,
                                 color: AppColors.black23,
@@ -385,21 +339,15 @@ class _SignupScreenState extends State<SignupScreen> {
 
                             // Username
                             TextFormField(
-                              initialValue: params.userName,
+                              controller: _userCtrl,
                               textInputAction: TextInputAction.next,
                               decoration: _deco(
                                 'Username',
                                 prefix: Icons.person_outline,
                               ),
-                              onChanged: (value) {
-                                final r = context
-                                    .read<AuthCubit>()
-                                    .registerParams;
-                                r.userName = value;
-                                r.name = value; // كما طلبت: name = userName
-                                setState(
-                                  () {},
-                                ); // لتحديث الـ initialValue المشتقة الأخرى إن لزم
+                              onChanged: (v) {
+                                params.userName = v;
+                                params.name = v;
                               },
                               validator: (v) =>
                                   (v == null || v.trim().length < 3)
@@ -410,19 +358,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
                             // Phone
                             TextFormField(
-                              initialValue: params.phoneNumber,
+                              controller: _phoneCtrl,
                               keyboardType: TextInputType.phone,
                               textInputAction: TextInputAction.next,
                               decoration: _deco(
                                 'Phone Number',
                                 prefix: Icons.phone_iphone,
                               ),
-                              onChanged: (value) =>
-                                  context
-                                          .read<AuthCubit>()
-                                          .registerParams
-                                          .phoneNumber =
-                                      value,
+                              onChanged: (v) => params.phoneNumber = v,
                               validator: (v) {
                                 final x = v?.trim() ?? '';
                                 if (x.isEmpty) return 'أدخل رقم الهاتف';
@@ -437,50 +380,47 @@ class _SignupScreenState extends State<SignupScreen> {
                             // Password
                             TextFormField(
                               controller: _passCtrl,
-                              obscureText: _obscure1,
+                              obscureText: _obscurePass,
                               textInputAction: TextInputAction.next,
                               decoration: _deco(
                                 'Password',
                                 prefix: Icons.lock_outline,
                                 suffix: IconButton(
                                   icon: Icon(
-                                    _obscure1
+                                    _obscurePass
                                         ? Icons.visibility_off
                                         : Icons.visibility,
                                     color: AppColors.secondPrimery,
                                   ),
-                                  onPressed: () =>
-                                      setState(() => _obscure1 = !_obscure1),
+                                  onPressed: () => setState(
+                                    () => _obscurePass = !_obscurePass,
+                                  ),
                                 ),
                               ),
-                              onChanged: (value) =>
-                                  context
-                                          .read<AuthCubit>()
-                                          .registerParams
-                                          .password =
-                                      value,
+                              onChanged: (v) => params.password = v,
                               validator: (v) => (v == null || v.length < 6)
                                   ? 'كلمة المرور لا تقل عن 6'
                                   : null,
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
 
-                            // Confirm Password
+                            // Confirm
                             TextFormField(
                               controller: _confirmCtrl,
-                              obscureText: _obscure2,
+                              obscureText: _obscureConfirm,
                               decoration: _deco(
                                 'Confirm Password',
                                 prefix: Icons.lock_outline,
                                 suffix: IconButton(
                                   icon: Icon(
-                                    _obscure2
+                                    _obscureConfirm
                                         ? Icons.visibility_off
                                         : Icons.visibility,
                                     color: AppColors.secondPrimery,
                                   ),
-                                  onPressed: () =>
-                                      setState(() => _obscure2 = !_obscure2),
+                                  onPressed: () => setState(
+                                    () => _obscureConfirm = !_obscureConfirm,
+                                  ),
                                 ),
                               ),
                               validator: (v) => (v != _passCtrl.text)
@@ -489,11 +429,27 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
 
-                            // Row: Floor + Role
+                            // Floor + Role
                             Row(
                               children: [
-                                // Floor
-                                Expanded(child: PlaceDropdown()),
+                                // Floor (type=1)
+                                Expanded(
+                                  child: PlaceDropdown(
+                                    initialPlaceId: params.floorId.isEmpty
+                                        ? null
+                                        : params.floorId,
+                                    decoration: _deco(
+                                      'Floor',
+                                      prefix: Icons.layers_outlined,
+                                    ),
+                                    onChanged: (place) {
+                                      params.floorId = place?.id ?? '';
+                                      params.officeId =
+                                          ''; // reset office when floor changes
+                                      _safeSetState(() {});
+                                    },
+                                  ),
+                                ),
                                 const SizedBox(
                                   width: AppPaddingSize.padding_12,
                                 ),
@@ -521,29 +477,23 @@ class _SignupScreenState extends State<SignupScreen> {
                                         .toList(),
                                     onChanged: (rt) {
                                       final api = rt?.toApiString();
-                                      final p = context
-                                          .read<AuthCubit>()
-                                          .registerParams;
-                                      p.roles = (api == null || api.isEmpty)
+                                      params.roles =
+                                          (api == null || api.isEmpty)
                                           ? []
                                           : [
                                               RegisterModel(roles: [api]),
                                             ];
-                                      setState(() {});
+                                      _safeSetState(() {});
                                     },
                                     decoration: _deco(
                                       'Role',
                                       prefix: Icons.badge_outlined,
                                     ),
                                     validator: (_) {
-                                      final roles = context
-                                          .read<AuthCubit>()
-                                          .registerParams
-                                          .roles;
+                                      final roles = params.roles;
                                       final ok =
                                           roles.isNotEmpty &&
-                                          roles.first.roles != null &&
-                                          roles.first.roles!.isNotEmpty;
+                                          roles.first.roles?.isNotEmpty == true;
                                       return ok ? null : 'اختر الدور';
                                     },
                                     iconEnabledColor: AppColors.xprimaryColor,
@@ -553,44 +503,26 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
 
-                            // Office
-                            DropdownButtonFormField<String>(
-                              isExpanded: true, // ✅
-
-                              value: selectedOfficeId,
-                              items: _offices
-                                  .map(
-                                    (o) => _menuItem<String>(
-                                      value: o['id']!,
-                                      title: o['name']!,
-                                      icon: Icons.apartment_outlined,
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) {
-                                context
-                                        .read<AuthCubit>()
-                                        .registerParams
-                                        .officeId =
-                                    value ?? '';
-                                setState(() {});
+                            // Office (type=2) — يعتمد على floorId
+                            OfficeDropdown(
+                              floorId: params.floorId,
+                              selectedOfficeId: params.officeId.isEmpty
+                                  ? null
+                                  : params.officeId,
+                              onChanged: (place) {
+                                // ⚠️ لا تستخدم setState مباشرة من كول باك طفل أثناء البناء
+                                params.officeId = (place?.id?.toString() ?? '');
+                                _safeSetState(() {});
                               },
+                              hideWhenNoFloor:
+                                  true, // اجعلها false لعرضه معطَّلاً بدل إخفائه
                               decoration: _deco(
                                 'Office',
                                 prefix: Icons.apartment_outlined,
                               ),
-                              validator: (v) {
-                                final id = context
-                                    .read<AuthCubit>()
-                                    .registerParams
-                                    .officeId;
-                                return (id.isEmpty) ? 'اختر المكتب' : null;
-                              },
-                              iconEnabledColor: AppColors.xprimaryColor,
                             ),
 
                             const SizedBox(height: AppPaddingSize.padding_8),
-
                             Row(
                               children: [
                                 Icon(
@@ -612,7 +544,6 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
 
                             const SizedBox(height: AppPaddingSize.padding_8),
-
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
                               child: Text(
@@ -634,15 +565,79 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
       ),
+      bottomNavigationBar: _bottomBar(
+        onSubmit: () {
+          final valid = _formKey.currentState?.validate() ?? false;
+          if (!valid) return;
+          final p = context.read<AuthCubit>().registerParams;
+          if (p.floorId.isEmpty) {
+            return _showError('الرجاء اختيار الطابق (Floor)');
+          }
+          if (p.officeId.isEmpty) {
+            return _showError('الرجاء اختيار المكتب (Office)');
+          }
+          if ((p.name).trim().isEmpty) p.name = p.userName;
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const FinishToRegister()));
+        },
+      ),
+    );
+  }
 
-      bottomNavigationBar: _bottomActionBar(() => _handleSubmit(cubit)),
+  Widget _bottomBar({required VoidCallback onSubmit}) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppPaddingSize.padding_16,
+          vertical: AppPaddingSize.padding_12,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          border: Border(
+            top: BorderSide(
+              color: AppColors.secondPrimery.withValues(alpha: .15),
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: .06),
+              blurRadius: 16,
+              offset: const Offset(0, -8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Spacer(),
+            SizedBox(
+              height: AppPaddingSize.padding_48,
+              child: ElevatedButton(
+                onPressed: onSubmit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.xprimaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppPaddingSize.padding_12,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppPaddingSize.padding_20,
+                  ),
+                ),
+                child: Text(
+                  'Create Account',
+                  style: AppTextStyle.getBoldStyle(
+                    fontSize: AppFontSize.size_15,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
-
-// --------- ملاحظة حول RegisterModel/Params ---------
-// تم حذف أي state محلي للطابق/الدور/المكتب.
-// كل الحقول تُكتب مباشرة في context.read<AuthCubit>().registerParams عبر onChanged.
-// الدور يُحوَّل بالقيم:
-//   "User" → "User", "Office Boy" → "OfficeBoy"
-// وتُخزَّن داخل List<RegisterModel> كما يقتضيه موديلك.

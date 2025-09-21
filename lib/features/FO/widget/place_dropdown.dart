@@ -57,7 +57,7 @@ class _PlaceDropdownState extends State<PlaceDropdown> {
       
           return DropdownButtonFormField<String>(
             isExpanded: true,
-            value: _selectedId == null
+            initialValue: _selectedId == null
                 ? null
                 : places.any((p) => (p.id?.toString() ?? '') == _selectedId)
                 ? _selectedId
