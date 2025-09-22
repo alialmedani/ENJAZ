@@ -52,25 +52,23 @@ class _CartScreenState extends State<CartScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.xbackgroundColor3, Colors.white],
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: BlocBuilder<CartCubit, CartState>(
-            builder: (context, state) => AnimatedSwitcher(
-              duration: const Duration(milliseconds: 260),
-              child: _buildState(context, state),
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          _CartBackground(progress: _headerProgress),
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: BlocBuilder<CartCubit, CartState>(
+              builder: (context, state) => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 260),
+                child: _buildState(context, state),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -121,8 +119,10 @@ class _CartScreenState extends State<CartScreen>
                   onClear: () => _showClearCartDialog(context),
                 ),
               ),
+              SliverToBoxAdapter(child: SizedBox(height: 12)),
+
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                 sliver: SliverList.separated(
                   itemCount: items.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 18),
@@ -147,14 +147,17 @@ class _CartScreenState extends State<CartScreen>
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 210 + safeBottom)),
+              SliverToBoxAdapter(child: SizedBox(height: 220 + safeBottom)),
             ],
           ),
           Positioned(
             left: 20,
             right: 20,
             bottom: 20 + safeBottom,
-            child: CheckoutBar(totalItems: totalQuantity),
+            child: CheckoutBar(
+              totalItems: totalQuantity,
+              onCheckoutComplete: () => context.read<CartCubit>().clearCart(),
+            ),
           ),
         ],
       );
@@ -167,6 +170,109 @@ class _CartScreenState extends State<CartScreen>
     showDialog<void>(
       context: context,
       builder: (dialogContext) => const _ClearDialog(),
+    );
+  }
+}
+
+class _CartBackground extends StatelessWidget {
+  const _CartBackground({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppColors.orange;
+    final topColor = Color.lerp(
+      accent.withValues(alpha: 0.48),
+      AppColors.xbackgroundColor3,
+      progress,
+    )!;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutQuart,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [topColor, Colors.white],
+        ),
+      ),
+      child: IgnorePointer(
+        ignoring: true,
+        child: Stack(
+          children: [
+            Positioned(
+              top: -120 + (progress * 70),
+              right: -40,
+              child: _BlurredOrb(
+                size: 220,
+                colors: [
+                  accent.withValues(alpha: 0.36),
+                  AppColors.xbackgroundColor.withValues(alpha: 0.0),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 220,
+              left: -60,
+              child: _BlurredOrb(
+                size: 280,
+                colors: [
+                  AppColors.secondPrimery.withValues(alpha: 0.18),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: -140,
+              right: -80,
+              child: _BlurredOrb(
+                size: 320,
+                colors: [accent.withValues(alpha: 0.24), Colors.transparent],
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.28, 1.0],
+                    colors: [
+                      Colors.white.withValues(alpha: 0.0),
+                      Colors.white.withValues(alpha: 0.16),
+                      Colors.white,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BlurredOrb extends StatelessWidget {
+  const _BlurredOrb({required this.size, required this.colors});
+
+  final double size;
+  final List<Color> colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: size * 0.08, sigmaY: size * 0.08),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: colors),
+        ),
+      ),
     );
   }
 }

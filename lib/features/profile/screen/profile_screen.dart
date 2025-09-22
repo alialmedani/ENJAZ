@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/features/profile/widget/sign_outaction_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:enjaz/core/boilerplate/get_model/widgets/get_model.dart';
@@ -18,69 +19,79 @@ import 'package:enjaz/features/profile/data/model/user_model.dart';
 import 'package:enjaz/features/profile/widget/history_list.dart';
 import 'package:enjaz/features/profile/widget/skeletons.dart';
 
-/// امتدادات العرض على UserModel
 extension UserModelDisplay on UserModel {
   String get displayName {
-    final n = (name ?? '').trim();
-    final s = (surname ?? '').trim();
-    if (n.isEmpty && s.isEmpty) return (userName ?? '').trim();
-    return [n, s].where((e) => e.isNotEmpty).join(' ');
+    final first = (name ?? '').trim();
+    final last = (surname ?? '').trim();
+    if (first.isEmpty && last.isEmpty) return (userName ?? '').trim();
+    return [first, last].where((value) => value.isNotEmpty).join(' ');
   }
 
   String get displayFloor {
     final byName = (floorName ?? '').trim();
     if (byName.isNotEmpty) return byName;
     final byId = (floorId ?? '').trim();
-    return byId.isNotEmpty ? byId : '—';
+    return byId.isNotEmpty ? byId : '--';
   }
 
   String get displayOffice {
     final byName = (officeName ?? '').trim();
     if (byName.isNotEmpty) return byName;
     final byId = (officeId ?? '').trim();
-    return byId.isNotEmpty ? byId : '—';
+    return byId.isNotEmpty ? byId : '--';
   }
 
   String get initials {
-    final nameStr = (name ?? '').trim();
-    final surStr = (surname ?? '').trim();
-    final userStr = (userName ?? '').trim();
-    if (nameStr.isNotEmpty || surStr.isNotEmpty) {
-      final n = nameStr.isNotEmpty ? nameStr[0] : '';
-      final s = surStr.isNotEmpty ? surStr[0] : '';
+    final first = (name ?? '').trim();
+    final last = (surname ?? '').trim();
+    final user = (userName ?? '').trim();
+    if (first.isNotEmpty || last.isNotEmpty) {
+      final n = first.isNotEmpty ? first[0] : '';
+      final s = last.isNotEmpty ? last[0] : '';
       final both = (n + s).toUpperCase();
       return both.isNotEmpty ? both : '?';
     }
-    return userStr.isNotEmpty ? userStr[0].toUpperCase() : '?';
+    return user.isNotEmpty ? user[0].toUpperCase() : '?';
   }
 
-String get subtitle {
-    final r = roles ?? const [];
-    if (r.isNotEmpty) return r.join(' · ');
-    final userStr = (userName ?? '').trim();
-    return userStr;
+  String get subtitle {
+    final items = (roles ?? const [])
+        .map((role) => role.trim())
+        .where((role) => role.isNotEmpty)
+        .toList();
+    if (items.isNotEmpty) return items.join(' / ');
+    final user = (userName ?? '').trim();
+    return user.isNotEmpty ? user : '--';
   }
-
 
   String get memberSinceText {
-    final ct = creationTime; // ممكن يكون DateTime/String/int
-    DateTime? dt;
+    final dynamic raw = creationTime;
+    DateTime? parsed;
 
-    if (ct is DateTime) {
-      dt = ct as DateTime?;
-    } else if (ct is String && ct.trim().isNotEmpty) {
-      dt = DateTime.tryParse(ct);
-    } else if (ct is int) {
-      dt = DateTime.fromMillisecondsSinceEpoch(ct as int);
-    } else if (ct is num) {
-      dt = DateTime.fromMillisecondsSinceEpoch(ct as int);
+    if (raw is DateTime) {
+      parsed = raw;
+    } else if (raw is String) {
+      final value = raw.trim();
+      if (value.isNotEmpty) {
+        parsed = DateTime.tryParse(value);
+        if (parsed == null) {
+          final numeric =
+              int.tryParse(value) ?? double.tryParse(value)?.toInt();
+          if (numeric != null) {
+            parsed = DateTime.fromMillisecondsSinceEpoch(numeric);
+          }
+        }
+      }
+    } else if (raw is int) {
+      parsed = DateTime.fromMillisecondsSinceEpoch(raw);
+    } else if (raw is num) {
+      parsed = DateTime.fromMillisecondsSinceEpoch(raw.toInt());
     }
 
-    if (dt == null) return '';
-    return DateFormat('d MMM yyyy').format(dt);
+    if (parsed == null) return '';
+    return DateFormat('d MMM yyyy').format(parsed);
   }
 }
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -109,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      body: Container(
+      body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -147,7 +158,6 @@ class _ProfileHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.of(context).padding.top;
-    final accent = AppColors.orange;
 
     final displayName = profile.displayName;
     final initials = profile.initials;
@@ -157,17 +167,18 @@ class _ProfileHero extends StatelessWidget {
     final memberSince = profile.memberSinceText;
 
     return SizedBox(
-      height: safeTop + 230,
+      height: safeTop + 280,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           Positioned.fill(
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    accent.withOpacity(0.32),
+                    AppColors.xorangeColor.withOpacity(0.25),
                     AppColors.xbackgroundColor3,
                   ],
                 ),
@@ -175,89 +186,100 @@ class _ProfileHero extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: safeTop + 18,
+            top: safeTop - 40,
+            left: -60,
+            child: const _BlurredAccentCircle(
+              diameter: 240,
+              colors: [Colors.white24, Colors.transparent],
+            ),
+          ),
+          Positioned(
+            top: safeTop - 20,
+            right: -30,
+            child: _BlurredAccentCircle(
+              diameter: 200,
+              colors: [
+                AppColors.darkAccentColor.withOpacity(0.18),
+                AppColors.xorangeColor.withOpacity(0.06),
+              ],
+            ),
+          ),
+          Positioned(
+            top: safeTop + 90,
             left: 24,
             right: 24,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
-                    color: Colors.white.withOpacity(0.78),
-                    border: Border.all(color: Colors.white.withOpacity(0.4)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 18,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(28, 72, 28, 28),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(36),
+                color: Colors.white.withOpacity(0.96),
+                border: Border.all(color: Colors.white.withOpacity(0.6)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 32,
+                    offset: const Offset(0, 18),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    displayName.isEmpty ? '--' : displayName,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.getBoldStyle(
+                      fontSize: AppFontSize.size_20,
+                      color: AppColors.black23,
+                    ),
+                  ),
+                  if (subtitle.trim().isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyle.getRegularStyle(
+                        fontSize: AppFontSize.size_12,
+                        color: AppColors.secondPrimery,
+                      ),
+                    ),
+                  ],
+                  if (memberSince.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _MemberSincePill(date: memberSince),
+                  ],
+                  const SizedBox(height: 20),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    runSpacing: 12,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _AvatarBadge(text: initials),
-                          const SizedBox(width: 18),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  displayName,
-                                  style: AppTextStyle.getBoldStyle(
-                                    fontSize: AppFontSize.size_20,
-                                    color: AppColors.black23,
-                                  ),
-                                ),
-                                if (subtitle.trim().isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    subtitle,
-                                    style: AppTextStyle.getRegularStyle(
-                                      fontSize: AppFontSize.size_12,
-                                      color: AppColors.secondPrimery,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
+                      _MetricChip(
+                        icon: Icons.layers_outlined,
+                        label: 'floor'.tr(),
+                        value: floorText,
                       ),
-                      const SizedBox(height: 20),
-                      Wrap(
-                        spacing: 14,
-                        runSpacing: 12,
-                        children: [
-                          _MetricChip(
-                            icon: Icons.layers_outlined,
-                            label: 'floor'.tr(), // كان "Floor"
-                            value: floorText,
-                          ),
-                          _MetricChip(
-                            icon: Icons.apartment_outlined,
-                            label: 'office'.tr(), // كان "Office"
-                            value: officeText,
-                          ),
-                          if (memberSince.isNotEmpty)
-                            _MetricChip(
-                              icon: Icons.calendar_today_outlined,
-                              label: 'profile_member_since'.tr(),
-                              value: memberSince,
-                            ),
-                        ],
+                      _MetricChip(
+                        icon: Icons.apartment_outlined,
+                        label: 'office'.tr(),
+                        value: officeText,
                       ),
+                      if (profile.email?.trim().isNotEmpty ?? false)
+                        _MetricChip(
+                          icon: Icons.mail_outline,
+                          label: 'profile_email'.tr(),
+                          value: profile.email!.trim(),
+                        ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
+          ),
+          Positioned(
+            top: safeTop + 12,
+            left: 0,
+            right: 0,
+            child: Center(child: _AvatarBadge(text: initials)),
           ),
         ],
       ),
@@ -274,20 +296,27 @@ class _ProfileTabsShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.94),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(color: Colors.white.withOpacity(0.5)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+            border: Border.all(color: Colors.white.withOpacity(0.6)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 32,
+                offset: const Offset(0, -12),
+              ),
+            ],
           ),
           child: Column(
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _ProfileTabBar(controller: controller),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Expanded(
                 child: TabBarView(
                   controller: controller,
@@ -317,13 +346,13 @@ class _ProfileTabBar extends StatelessWidget {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: AppColors.xbackgroundColor3,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.greyE5),
       ),
       child: TabBar(
         controller: controller,
         indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           gradient: LinearGradient(
             colors: [AppColors.darkAccentColor, AppColors.xorangeColor],
           ),
@@ -359,43 +388,61 @@ class _OverviewTab extends StatelessWidget {
     final phone = (profile.phoneNumber ?? '').trim();
     final username = (profile.userName ?? '').trim();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _InfoCard(
-            icon: Icons.mail_outline,
-            title: 'profile_email'.tr(),
-            value: email.isNotEmpty ? email : 'profile_not_provided'.tr(),
-          ),
-          const SizedBox(height: 16),
-          _InfoCard(
-            icon: Icons.phone_outlined,
-            title: 'profile_phone'.tr(),
-            value: phone.isNotEmpty ? phone : 'profile_not_provided'.tr(),
-          ),
-          const SizedBox(height: 16),
-          _InfoCard(
-            icon: Icons.person_outline,
-            title: 'profile_username'.tr(),
-            value: username.isNotEmpty ? username : '—',
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'profile_quick_actions'.tr(),
-            style: AppTextStyle.getBoldStyle(
-              fontSize: AppFontSize.size_14,
-              color: AppColors.black23,
-            ),
-          ),
-          const SizedBox(height: 12),
-          // (أزرار إجراءات سريعة — معلّقة)
-          const SizedBox(height: 36),
-          const SignOutActionButton(),
-        ],
+    final infoCards = <Widget>[
+      _InfoCard(
+        icon: Icons.mail_outline,
+        title: 'profile_email'.tr(),
+        value: email.isNotEmpty ? email : 'profile_not_provided'.tr(),
       ),
+      _InfoCard(
+        icon: Icons.phone_outlined,
+        title: 'profile_phone'.tr(),
+        value: phone.isNotEmpty ? phone : 'profile_not_provided'.tr(),
+      ),
+      _InfoCard(
+        icon: Icons.person_outline,
+        title: 'profile_username'.tr(),
+        value: username.isNotEmpty ? username : '--',
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 500;
+        final spacing = 18.0;
+        final itemWidth = isWide
+            ? (constraints.maxWidth - spacing) / 2
+            : constraints.maxWidth;
+
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: infoCards
+                    .map((card) => SizedBox(width: itemWidth, child: card))
+                    .toList(),
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'profile_quick_actions'.tr(),
+                style: AppTextStyle.getBoldStyle(
+                  fontSize: AppFontSize.size_14,
+                  color: AppColors.black23,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _QuickActionsRow(profile: profile),
+              const SizedBox(height: 28),
+              const SignOutActionButton(),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -408,26 +455,47 @@ class _HistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      child: PaginationList<OrderModel>(
-        repositoryCallBack: (data) =>
-            context.read<OrderCubit>().fetchAllOrder(data),
-        loadingWidget: const HistorySkeleton(),
-        listBuilder: (orders) {
-          return ListView.separated(
-            physics: const BouncingScrollPhysics(),
-            itemCount: orders.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(height: AppPaddingSize.padding_12),
-            itemBuilder: (_, index) {
-              final order = orders[index];
-              return HistoryList(
-                orderModel: order,
-                profile: order.customerUser ?? profile,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: AppColors.greyE5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 22,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: PaginationList<OrderModel>(
+            repositoryCallBack: (data) =>
+                context.read<OrderCubit>().fetchAllOrder(data),
+            loadingWidget: const HistorySkeleton(),
+            listBuilder: (orders) {
+              return ListView.separated(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: orders.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppPaddingSize.padding_12),
+                itemBuilder: (_, index) {
+                  final order = orders[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: HistoryList(
+                      orderModel: order,
+                      profile: order.customerUser ?? profile,
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -446,55 +514,61 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppPaddingSize.padding_16),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          colors: [Colors.white, AppColors.xbackgroundColor3.withOpacity(0.5)],
+        ),
         border: Border.all(color: AppColors.greyE5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.xbackgroundColor3,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: AppColors.orange),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyle.getRegularStyle(
-                    fontSize: AppFontSize.size_12,
-                    color: AppColors.secondPrimery,
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [AppColors.darkAccentColor, AppColors.xorangeColor],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: AppTextStyle.getBoldStyle(
-                    fontSize: AppFontSize.size_14,
-                    color: AppColors.black23,
-                  ),
-                ),
-              ],
+              ),
+              child: Icon(icon, color: Colors.white),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyle.getRegularStyle(
+                      fontSize: AppFontSize.size_12,
+                      color: AppColors.secondPrimery,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    value,
+                    style: AppTextStyle.getBoldStyle(
+                      fontSize: AppFontSize.size_14,
+                      color: AppColors.black23,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -513,38 +587,48 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.greyE5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppColors.orange),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: AppTextStyle.getBoldStyle(
-                  fontSize: AppFontSize.size_13,
-                  color: AppColors.black23,
-                ),
-              ),
-              Text(
-                label,
-                style: AppTextStyle.getRegularStyle(
-                  fontSize: AppFontSize.size_10,
-                  color: AppColors.secondPrimery,
-                ),
-              ),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 8),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: AppColors.orange),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: AppTextStyle.getBoldStyle(
+                    fontSize: AppFontSize.size_13,
+                    color: AppColors.black23,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: AppTextStyle.getRegularStyle(
+                    fontSize: AppFontSize.size_10,
+                    color: AppColors.secondPrimery,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -558,20 +642,267 @@ class _AvatarBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 64,
-      height: 64,
+      width: 118,
+      height: 118,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [AppColors.darkAccentColor, AppColors.xorangeColor],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.darkAccentColor.withOpacity(0.35),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: AppTextStyle.getBoldStyle(
-          fontSize: AppFontSize.size_24,
-          color: Colors.white,
+      child: Center(
+        child: Container(
+          width: 108,
+          height: 108,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+          ),
+          child: Center(
+            child: Container(
+              width: 92,
+              height: 92,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [AppColors.xorangeColor, AppColors.darkAccentColor],
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                text,
+                style: AppTextStyle.getBoldStyle(
+                  fontSize: AppFontSize.size_24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MemberSincePill extends StatelessWidget {
+  const _MemberSincePill({required this.date});
+
+  final String date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.darkAccentColor.withOpacity(0.9),
+            AppColors.xorangeColor,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.darkAccentColor.withOpacity(0.24),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.calendar_today_outlined,
+            size: 16,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${'profile_member_since'.tr()} $date',
+            style: AppTextStyle.getRegularStyle(
+              fontSize: AppFontSize.size_12,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow({required this.profile});
+
+  final UserModel profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final email = (profile.email ?? '').trim();
+    final phone = (profile.phoneNumber ?? '').trim();
+    final username = (profile.userName ?? '').trim();
+
+    final actions = <Widget>[
+      if (email.isNotEmpty)
+        _QuickAction(
+          icon: Icons.email_outlined,
+          label: 'profile_email'.tr(),
+          value: email,
+        ),
+      if (phone.isNotEmpty)
+        _QuickAction(
+          icon: Icons.phone_outlined,
+          label: 'profile_phone'.tr(),
+          value: phone,
+        ),
+      if (username.isNotEmpty)
+        _QuickAction(
+          icon: Icons.person_outline,
+          label: 'profile_username'.tr(),
+          value: username,
+        ),
+    ];
+
+    if (actions.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        decoration: BoxDecoration(
+          color: AppColors.xbackgroundColor3,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.greyE5),
+        ),
+        child: Text(
+          'profile_not_provided'.tr(),
+          style: AppTextStyle.getRegularStyle(
+            fontSize: AppFontSize.size_12,
+            color: AppColors.secondPrimery,
+          ),
+        ),
+      );
+    }
+
+    return Wrap(spacing: 16, runSpacing: 16, children: actions);
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        await Clipboard.setData(ClipboardData(text: value));
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            content: Text(label),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 0, maxWidth: 280),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: AppColors.greyE5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 16,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [AppColors.darkAccentColor, AppColors.xorangeColor],
+                  ),
+                ),
+                child: Icon(icon, color: Colors.white, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: AppTextStyle.getRegularStyle(
+                        fontSize: AppFontSize.size_12,
+                        color: AppColors.secondPrimery,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.getBoldStyle(
+                        fontSize: AppFontSize.size_13,
+                        color: AppColors.black23,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(
+                Icons.copy_rounded,
+                size: 18,
+                color: AppColors.secondPrimery,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BlurredAccentCircle extends StatelessWidget {
+  const _BlurredAccentCircle({required this.diameter, required this.colors});
+
+  final double diameter;
+  final List<Color> colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 48, sigmaY: 48),
+      child: Container(
+        width: diameter,
+        height: diameter,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(colors: colors),
         ),
       ),
     );

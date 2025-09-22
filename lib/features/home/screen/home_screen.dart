@@ -1,6 +1,8 @@
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
+import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
+import 'package:enjaz/features/profile/data/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -17,7 +19,7 @@ class CoffeeAppHomeScreen extends StatefulWidget {
   const CoffeeAppHomeScreen({super.key});
 
   @override
-  State<CoffeeAppHomeScreen> createState() => _CoffeeAppHomeScreenState();
+  State<CoffeeAppHomeScreen> createState()  => _CoffeeAppHomeScreenState();
 }
 
 class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
@@ -44,7 +46,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Center(
             child: Text(
-              'home_no_coffee'.tr(), // "No coffee yet ☕"
+              'home_no_coffee'.tr(), 
               style: TextStyle(
                 color: AppColors.xsecondaryColor,
                 fontSize: AppFontSize.size_16,
@@ -116,8 +118,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // الصورة + الانتقال للتفاصيل
-                        GestureDetector(
+                         GestureDetector(
                           onTap: () {
                             Navigation.push(
                               CoffeeDetailScreen(heroTag: tag, drinkModel: api),
@@ -164,8 +165,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
 
                         const Spacer(),
 
-                        // === زر Add (Quick Add) ===
-                        Align(
+                         Align(
                           alignment: Alignment.centerRight,
                           child: StatefulBuilder(
                             builder: (context, setLocalState) {
@@ -260,6 +260,8 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
 }
 
 Padding headerParts(BuildContext context) {
+  final userModel = context.watch<ProfileCubit>().state; // UserModel?
+
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: AppPaddingSize.padding_22),
     child: Column(
@@ -269,13 +271,13 @@ Padding headerParts(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'home_location_label'.tr(), // "Location"
+        userModel?.userName ??'', // "Location"
               style: TextStyle(color: AppColors.xsecondaryColor),
             ),
             Row(
               children: [
                 Text(
-                  'home_location_value'.tr(), // "Kathmandu, Nepal" (مثال)
+                  'home_location_value'.tr(),  
                   style: const TextStyle(
                     color: AppColors.white,
                     fontSize: AppFontSize.size_16,
@@ -324,7 +326,7 @@ Padding headerParts(BuildContext context) {
                           contentPadding: EdgeInsets.zero,
                           isDense: true,
                           border: InputBorder.none,
-                          hintText: 'home_search_hint'.tr(), // "Search coffee"
+                          hintText: 'home_search_hint'.tr(), 
                           hintStyle: const TextStyle(
                             fontSize: AppFontSize.size_18,
                             color: AppColors.whiteF1,
@@ -378,8 +380,7 @@ SizedBox categorySelection(List<String> categories) {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            // TODO: فلترة حسب الفئة لو لزم
-          },
+           },
           child: Container(
             margin: EdgeInsets.only(
               left: index == 0 ? AppFontSize.size_25 : AppFontSize.size_10,
