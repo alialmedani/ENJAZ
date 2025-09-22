@@ -150,6 +150,70 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 }
 
+class _ProfileGlassSurface extends StatelessWidget {
+  const _ProfileGlassSurface({
+    required this.borderRadius,
+    required this.child,
+    this.padding,
+    this.margin,
+    this.blurSigma = 18,
+    this.backgroundOpacity = 0.94,
+    this.borderOpacity = 0.6,
+    this.shadows,
+  });
+
+  final BorderRadius borderRadius;
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final double blurSigma;
+  final double backgroundOpacity;
+  final double borderOpacity;
+  final List<BoxShadow>? shadows;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget surface = Container(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow:
+            shadows ??
+            [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 32,
+                offset: const Offset(0, 18),
+              ),
+            ],
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        clipBehavior: Clip.antiAlias,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          child: Container(
+            padding: padding,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(backgroundOpacity),
+              borderRadius: borderRadius,
+              border: Border.all(
+                color: Colors.white.withOpacity(borderOpacity),
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+
+    if (margin != null) {
+      surface = Padding(padding: margin!, child: surface);
+    }
+
+    return surface;
+  }
+}
+
 class _ProfileHero extends StatelessWidget {
   const _ProfileHero({required this.profile});
 
@@ -208,20 +272,9 @@ class _ProfileHero extends StatelessWidget {
             top: safeTop + 90,
             left: 24,
             right: 24,
-            child: Container(
+            child: _ProfileGlassSurface(
+              borderRadius: BorderRadius.circular(40),
               padding: const EdgeInsets.fromLTRB(28, 72, 28, 28),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(36),
-                color: Colors.white.withOpacity(0.96),
-                border: Border.all(color: Colors.white.withOpacity(0.6)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 32,
-                    offset: const Offset(0, 18),
-                  ),
-                ],
-              ),
               child: Column(
                 children: [
                   Text(
@@ -295,40 +348,24 @@ class _ProfileTabsShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.94),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-            border: Border.all(color: Colors.white.withOpacity(0.6)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 32,
-                offset: const Offset(0, -12),
-              ),
-            ],
+    return _ProfileGlassSurface(
+      borderRadius: BorderRadius.circular(40),
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          _ProfileTabBar(controller: controller),
+          const SizedBox(height: 16),
+          Expanded(
+            child: TabBarView(
+              controller: controller,
+              children: [
+                _OverviewTab(profile: profile),
+                _HistoryTab(profile: profile),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              _ProfileTabBar(controller: controller),
-              const SizedBox(height: 16),
-              Expanded(
-                child: TabBarView(
-                  controller: controller,
-                  children: [
-                    _OverviewTab(profile: profile),
-                    _HistoryTab(profile: profile),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -427,8 +464,7 @@ class _OverviewTab extends StatelessWidget {
                     .map((card) => SizedBox(width: itemWidth, child: card))
                     .toList(),
               ),
-                
-              
+
               const SizedBox(height: 28),
               const SignOutActionButton(),
             ],
@@ -729,7 +765,7 @@ class _MemberSincePill extends StatelessWidget {
     );
   }
 }
- 
+
 class _BlurredAccentCircle extends StatelessWidget {
   const _BlurredAccentCircle({required this.diameter, required this.colors});
 

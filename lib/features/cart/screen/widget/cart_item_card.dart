@@ -186,18 +186,13 @@ class _ItemThumbnail extends StatelessWidget {
         ),
         border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
       ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: CachedImage(
-              imageUrl:
-                  'https://task.jasim-erp.com/api/dms/file/get/${item.drink.id}/?entitytype=1',
-              fit: BoxFit.cover,
-            ),
-          ),
-          Positioned(bottom: 10, right: 10, child: _MiniBadge(text: alias)),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: CachedImage(
+          imageUrl:
+              'https://task.jasim-erp.com/api/dms/file/get/${item.drink.id}/?entitytype=1',
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

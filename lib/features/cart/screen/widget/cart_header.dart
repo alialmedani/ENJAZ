@@ -85,7 +85,7 @@ class _Toolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _GlassIconButton(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
+        // _GlassIconButton(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
         Expanded(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 240),
@@ -107,7 +107,7 @@ class _Toolbar extends StatelessWidget {
                     key: const ValueKey('cart-title-collapsed'),
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'cart_title'.tr(),
+                      'cart_titxssxle'.tr(),
                       style: AppTextStyle.getBoldStyle(
                         fontSize: AppFontSize.size_16,
                         color: AppColors.black23,
@@ -116,7 +116,7 @@ class _Toolbar extends StatelessWidget {
                   ),
           ),
         ),
-        _GlassIconButton(icon: Icons.delete_outline, onTap: onClear),
+        // _GlassIconButton(icon: Icons.delete_outline, onTap: onClear),
       ],
     );
   }
@@ -511,33 +511,33 @@ class _MetricPill extends StatelessWidget {
   }
 }
 
-class _GlassIconButton extends StatelessWidget {
-  const _GlassIconButton({required this.icon, required this.onTap});
+// class _GlassIconButton extends StatelessWidget {
+//   const _GlassIconButton({required this.icon, required this.onTap});
 
-  final IconData icon;
-  final VoidCallback onTap;
+//   final IconData icon;
+//   final VoidCallback onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Material(
-          color: Colors.white.withValues(alpha: 0.7),
-          child: InkWell(
-            onTap: onTap,
-            child: SizedBox(
-              width: 44,
-              height: 44,
-              child: Icon(icon, size: 20, color: AppColors.black23),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return ClipRRect(
+//       borderRadius: BorderRadius.circular(16),
+//       child: BackdropFilter(
+//         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+//         child: Material(
+//           color: Colors.white.withValues(alpha: 0.7),
+//           child: InkWell(
+//             onTap: onTap,
+//             child: SizedBox(
+//               width: 44,
+//               height: 44,
+//               child: Icon(icon, size: 20, color: AppColors.black23),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class _SummaryAvatar extends StatelessWidget {
   const _SummaryAvatar({required this.color});
