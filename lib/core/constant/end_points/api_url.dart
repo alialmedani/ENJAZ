@@ -11,7 +11,6 @@ const String createDrinkOrderUrl = '${baseUrl}api/app/order';
 const String getOrdersUrl = '${baseUrl}api/app/order';
 const String getCurrentUserOrdersUrl = '${baseUrl}api/app/Order/current_user';
  const String createDrinkOrderLiteUrl = "$baseUrl/api/app/order";
-
 /////auth_url////////////
 ///
 const loginUrl = '${baseUrl}connect/token';

@@ -4,8 +4,8 @@ import 'package:enjaz/features/profile/data/model/user_model.dart';
 class OrderModel {
   String? customerUserId;
   UserModel? customerUser;
-  int? floor;
-  String? office;
+  String? floorId;
+  String? officeId;
   List<OrderItems>? orderItems;
   int? status;
   String? creationTime;
@@ -14,8 +14,8 @@ class OrderModel {
   OrderModel({
     this.customerUserId,
     this.customerUser,
-    this.floor,
-    this.office,
+    this.floorId,
+    this.officeId,
     this.orderItems,
     this.status,
     this.creationTime,
@@ -27,8 +27,8 @@ class OrderModel {
     customerUser = json['customerUser'] != null
         ? UserModel.fromJson(json['customerUser'])
         : null;
-    floor = json['floor'];
-    office = json['office'];
+    floorId = json['floorId'];
+    officeId = json['officeId'];
     if (json['orderItems'] != null) {
       orderItems = <OrderItems>[];
       json['orderItems'].forEach((v) {
@@ -46,8 +46,8 @@ class OrderModel {
     if (customerUser != null) {
       data['customerUser'] = customerUser!.toJson();
     }
-    data['floor'] = floor;
-    data['office'] = office;
+    data['floorId'] = floorId;
+    data['office'] = officeId;
     if (orderItems != null) {
       data['orderItems'] = orderItems!.map((v) => v.toJson()).toList();
     }

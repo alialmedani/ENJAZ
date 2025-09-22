@@ -5,6 +5,7 @@ import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/auth/data/model/register_model.dart';
+import 'package:enjaz/features/auth/screen/login_screen.dart';
 import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,7 +41,7 @@ class FinishToRegister extends StatelessWidget {
 
           onSuccess: (_) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigation.pushAndRemoveUntil(const RootScreen());
+              Navigation.pushAndRemoveUntil(const LoginScreen());
             });
           },
 

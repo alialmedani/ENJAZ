@@ -174,7 +174,7 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
 
               return DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: value,
+                initialValue: value,
                 items: offices
                     .map(
                       (o) => _menuItem<String>(
@@ -197,8 +197,9 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
                     _deco('Office', prefix: Icons.apartment_outlined),
                 iconEnabledColor: AppColors.xprimaryColor,
                 validator: (_) {
-                  if (widget.floorId.isEmpty)
+                  if (widget.floorId.isEmpty) {
                     return null; // لا نُلزم بالمكتب قبل اختيار الطابق
+                  }
                   return (value == null || value.isEmpty)
                       ? 'اختر المكتب'
                       : null;
@@ -231,7 +232,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _obscurePass = true;
   bool _obscureConfirm = true;
-  bool _acceptedRules = false;
 
   void _safeSetState(VoidCallback fn) {
     if (!mounted) return;
@@ -455,7 +455,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 Expanded(
                                   child: DropdownButtonFormField<RoleType>(
                                     isExpanded: true,
-                                    value: currentRole,
+                                    initialValue: currentRole,
                                     items: RoleType.values
                                         .map(
                                           (rt) => DropdownMenuItem<RoleType>(

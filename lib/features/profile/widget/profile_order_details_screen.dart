@@ -110,7 +110,7 @@ class _DecorativeBackground extends StatelessWidget {
               begin: const Alignment(-0.2, -1),
               end: const Alignment(0.45, 1.1),
               colors: [
-                AppColors.xbackgroundColor.withOpacity(0.85),
+                AppColors.xbackgroundColor.withValues(alpha:0.85),
                 Colors.white,
               ],
             ),
@@ -163,7 +163,7 @@ class _FrostedBlob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tinted = color.withOpacity(opacity);
+    final tinted = color.withValues(alpha:opacity);
     return Align(
       alignment: alignment,
       child: SizedBox(
@@ -175,7 +175,7 @@ class _FrostedBlob extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
-                  colors: [tinted, tinted.withOpacity(0)],
+                  colors: [tinted, tinted.withValues(alpha:0)],
                   stops: const [0.1, 1],
                 ),
               ),
@@ -247,11 +247,11 @@ class _GlassIconButton extends StatelessWidget {
         height: 42,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: Colors.white.withOpacity(0.85),
-          border: Border.all(color: Colors.white.withOpacity(0.5)),
+          color: Colors.white.withValues(alpha:0.85),
+          border: Border.all(color: Colors.white.withValues(alpha:0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha:0.08),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -423,9 +423,9 @@ class _ContentSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.94),
+            color: Colors.white.withValues(alpha:0.94),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
-            border: Border.all(color: Colors.white.withOpacity(0.5)),
+            border: Border.all(color: Colors.white.withValues(alpha:0.5)),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 36, 20, 28),
@@ -457,11 +457,11 @@ class _HeaderHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemsCount = order.orderItems?.length ?? 0;
     final locationParts = <String>[];
-    if (order.floor != null) {
-      locationParts.add('Floor ${order.floor}');
+    if (order.floorId != null) {
+      locationParts.add('Floor ${order.floorId}');
     }
-    if (order.office?.trim().isNotEmpty == true) {
-      locationParts.add(order.office!.trim());
+    if (order.floorId?.trim().isNotEmpty == true) {
+      locationParts.add(order.floorId??'');
     }
     final location = locationParts.join(' | ');
 
@@ -497,12 +497,12 @@ class _HeaderHeroCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(34),
         boxShadow: [
           BoxShadow(
-            color: status.color.withOpacity(0.18),
+            color: status.color.withValues(alpha:0.18),
             blurRadius: 28,
             offset: const Offset(0, 18),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -518,7 +518,7 @@ class _HeaderHeroCard extends StatelessWidget {
                   begin: const Alignment(-0.6, -0.8),
                   end: const Alignment(0.8, 1.0),
                   colors: [
-                    AppColors.xprimaryColor.withOpacity(0.25),
+                    AppColors.xprimaryColor.withValues(alpha:0.25),
                     AppColors.xbackgroundColor3,
                     Colors.white,
                   ],
@@ -552,8 +552,8 @@ class _HeaderHeroCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(26),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.78),
-                  border: Border.all(color: Colors.white.withOpacity(0.55)),
+                  color: Colors.white.withValues(alpha:0.78),
+                  border: Border.all(color: Colors.white.withValues(alpha:0.55)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,9 +625,9 @@ class _OrderCodeBadge extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         gradient: LinearGradient(
-          colors: [tint.withOpacity(0.22), tint.withOpacity(0.12)],
+          colors: [tint.withValues(alpha:0.22), tint.withValues(alpha:0.12)],
         ),
-        border: Border.all(color: tint.withOpacity(0.35)),
+        border: Border.all(color: tint.withValues(alpha:0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -661,14 +661,14 @@ class _HeaderDetailPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
           colors: [
-            Colors.white.withOpacity(0.88),
-            Colors.white.withOpacity(0.68),
+            Colors.white.withValues(alpha:0.88),
+            Colors.white.withValues(alpha:0.68),
           ],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.4)),
+        border: Border.all(color: Colors.white.withValues(alpha:0.4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -707,14 +707,14 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final floorLabel = order.floor?.toString() ?? '-';
-    final officeLabel = order.office?.trim().isNotEmpty == true
-        ? order.office!.trim()
+    final floorLabel = order.floorId?.toString() ?? '-';
+    final officeLabel = order.officeId?.trim().isNotEmpty == true
+        ? order.officeId!.trim()
         : '-';
     final contact = profile.phoneNumber?.trim().isNotEmpty == true
         ? profile.phoneNumber!.trim()
-        : profile.email?.trim().isNotEmpty == true
-        ? profile.email!.trim()
+        : profile.name?.trim().isNotEmpty == true
+        ? profile.name!.trim()
         : 'Not provided';
 
     return Container(
@@ -725,17 +725,17 @@ class _SummaryCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: const Alignment(-0.2, -0.6),
           end: const Alignment(0.8, 1.0),
-          colors: [Colors.white, AppColors.xbackgroundColor.withOpacity(0.9)],
+          colors: [Colors.white, AppColors.xbackgroundColor.withValues(alpha:0.9)],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.7)),
+        border: Border.all(color: Colors.white.withValues(alpha:0.7)),
         boxShadow: [
           BoxShadow(
-            color: status.color.withOpacity(0.08),
+            color: status.color.withValues(alpha:0.08),
             blurRadius: 28,
             offset: const Offset(0, 18),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -773,7 +773,7 @@ class _SummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Divider(height: 1, color: Colors.white.withOpacity(0.6)),
+          Divider(height: 1, color: Colors.white.withValues(alpha:0.6)),
           const SizedBox(height: 20),
           Wrap(
             spacing: 14,
@@ -829,12 +829,12 @@ class _MetricChip extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.white, AppColors.xbackgroundColor3.withOpacity(0.7)],
+          colors: [Colors.white, AppColors.xbackgroundColor3.withValues(alpha:0.7)],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.6)),
+        border: Border.all(color: Colors.white.withValues(alpha:0.6)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -847,7 +847,7 @@ class _MetricChip extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppColors.xprimaryColor.withOpacity(0.16),
+              color: AppColors.xprimaryColor.withValues(alpha:0.16),
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
@@ -899,10 +899,10 @@ class _EmptyItemsPlaceholder extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [AppColors.xbackgroundColor3, Colors.white],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.7)),
+        border: Border.all(color: Colors.white.withValues(alpha:0.7)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -918,8 +918,8 @@ class _EmptyItemsPlaceholder extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  AppColors.xprimaryColor.withOpacity(0.24),
-                  AppColors.xorangeColor.withOpacity(0.18),
+                  AppColors.xprimaryColor.withValues(alpha:0.24),
+                  AppColors.xorangeColor.withValues(alpha:0.18),
                 ],
               ),
             ),
@@ -1012,7 +1012,7 @@ class _TimelineItemCard extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: accent.withOpacity(0.32),
+                      color: accent.withValues(alpha:0.32),
                       blurRadius: 18,
                       offset: const Offset(0, 6),
                     ),
@@ -1036,8 +1036,8 @@ class _TimelineItemCard extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        accent.withOpacity(0.4),
-                        accent.withOpacity(0.06),
+                        accent.withValues(alpha:0.4),
+                        accent.withValues(alpha:0.06),
                       ],
                     ),
                   ),
@@ -1055,13 +1055,13 @@ class _TimelineItemCard extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     Colors.white,
-                    AppColors.xbackgroundColor3.withOpacity(0.7),
+                    AppColors.xbackgroundColor3.withValues(alpha:0.7),
                   ],
                 ),
-                border: Border.all(color: Colors.white.withOpacity(0.6)),
+                border: Border.all(color: Colors.white.withValues(alpha:0.6)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha:0.04),
                     blurRadius: 18,
                     offset: const Offset(0, 10),
                   ),
@@ -1164,11 +1164,11 @@ class _InfoTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         gradient: LinearGradient(
           colors: [
-            AppColors.xprimaryColor.withOpacity(0.18),
-            AppColors.xorangeColor.withOpacity(0.14),
+            AppColors.xprimaryColor.withValues(alpha:0.18),
+            AppColors.xorangeColor.withValues(alpha:0.14),
           ],
         ),
-        border: Border.all(color: AppColors.xprimaryColor.withOpacity(0.2)),
+        border: Border.all(color: AppColors.xprimaryColor.withValues(alpha:0.2)),
       ),
       child: Text(
         label,
@@ -1194,14 +1194,14 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         gradient: LinearGradient(
           colors: [
-            status.color.withOpacity(0.22),
-            status.color.withOpacity(0.12),
+            status.color.withValues(alpha:0.22),
+            status.color.withValues(alpha:0.12),
           ],
         ),
-        border: Border.all(color: status.color.withOpacity(0.3)),
+        border: Border.all(color: status.color.withValues(alpha:0.3)),
         boxShadow: [
           BoxShadow(
-            color: status.color.withOpacity(0.16),
+            color: status.color.withValues(alpha:0.16),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -1215,7 +1215,7 @@ class _StatusBadge extends StatelessWidget {
             height: 24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha:0.9),
             ),
             alignment: Alignment.center,
             child: Icon(status.icon, size: 14, color: status.color),
@@ -1296,12 +1296,12 @@ class _InfoCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.white, AppColors.xbackgroundColor3.withOpacity(0.7)],
+          colors: [Colors.white, AppColors.xbackgroundColor3.withValues(alpha:0.7)],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.6)),
+        border: Border.all(color: Colors.white.withValues(alpha:0.6)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -1315,7 +1315,7 @@ class _InfoCard extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.xprimaryColor.withOpacity(0.16),
+              color: AppColors.xprimaryColor.withValues(alpha:0.16),
             ),
             alignment: Alignment.center,
             child: Icon(icon, color: AppColors.xprimaryColor, size: 20),
@@ -1445,7 +1445,7 @@ class SugarArcPainter extends CustomPainter {
       ..quadraticBezierTo(control.dx, control.dy, right.dx, right.dy);
 
     final trackPaint = Paint()
-      ..color = color.withOpacity(.18)
+      ..color = color.withValues(alpha:.18)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
@@ -1456,7 +1456,7 @@ class SugarArcPainter extends CustomPainter {
 
     final markerPositions = [0.0, 0.33, 0.67, 1.0];
     final markerPaint = Paint()
-      ..color = color.withOpacity(.45)
+      ..color = color.withValues(alpha:.45)
       ..style = PaintingStyle.fill;
 
     for (final pos in markerPositions) {

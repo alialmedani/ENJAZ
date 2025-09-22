@@ -6,7 +6,7 @@ import '../model/order_model.dart';
 import '../repository/order_repo.dart';
 
 class CreateOrderParams extends BaseParams {
-  int floor;
+  String floor;
   String office;
   List<CreateItemModel> orderItems;
 

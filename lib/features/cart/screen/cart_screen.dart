@@ -271,7 +271,7 @@ class _CartHeader extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Color.lerp(
-                      accent.withOpacity(0.45),
+                      accent.withValues(alpha:0.45),
                       Colors.white,
                       collapse,
                     )!,
@@ -327,9 +327,9 @@ class _CartHeader extends StatelessWidget {
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(28),
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha:0.7),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha:0.6),
                         ),
                       ),
                       child: Column(
@@ -431,7 +431,7 @@ class _CartItemCard extends StatelessWidget {
           border: Border.all(color: AppColors.greyE5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha:0.05),
               blurRadius: 16,
               offset: const Offset(0, 10),
             ),
@@ -493,7 +493,7 @@ class _CartItemCard extends StatelessWidget {
                           ),
                           color: Colors.white,
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.red.withOpacity(0.12),
+                            backgroundColor: Colors.red.withValues(alpha:0.12),
                           ),
                         ),
                       ],
@@ -527,7 +527,7 @@ class _CartItemCard extends StatelessWidget {
                                 height: 22,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: AppColors.orange.withOpacity(0.18),
+                                  color: AppColors.orange.withValues(alpha:0.18),
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
@@ -654,7 +654,7 @@ class _EmptyCartView extends StatelessWidget {
               child: Icon(
                 Icons.shopping_cart_outlined,
                 size: 54,
-                color: AppColors.orange.withOpacity(0.7),
+                color: AppColors.orange.withValues(alpha:0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -683,7 +683,7 @@ class _EmptyCartView extends StatelessWidget {
                   onPressed: onRefresh,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.orange,
-                    side: BorderSide(color: AppColors.orange.withOpacity(0.4)),
+                    side: BorderSide(color: AppColors.orange.withValues(alpha:0.4)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -735,7 +735,7 @@ class _ErrorView extends StatelessWidget {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: AppColors.orange.withOpacity(0.8),
+              color: AppColors.orange.withValues(alpha:0.8),
             ),
             const SizedBox(height: 16),
             Text(
@@ -782,9 +782,9 @@ class _CheckoutBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha:0.8),
             borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: Colors.white.withOpacity(0.6)),
+            border: Border.all(color: Colors.white.withValues(alpha:0.6)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -857,7 +857,7 @@ class _GlassIconButton extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Material(
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha:0.7),
           child: InkWell(
             onTap: onTap,
             child: SizedBox(
@@ -893,7 +893,7 @@ class _MetricChip extends StatelessWidget {
         border: Border.all(color: AppColors.greyE5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 10,
             offset: const Offset(0, 6),
           ),

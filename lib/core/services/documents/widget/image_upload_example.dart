@@ -185,7 +185,7 @@
 //       padding: const EdgeInsets.all(16),
 //       decoration: BoxDecoration(
 //         color: backgroundColor,
-//         border: Border.all(color: textColor.withOpacity(0.3)),
+//         border: Border.all(color: textColor.withValues(alpha:0.3)),
 //         borderRadius: BorderRadius.circular(8),
 //       ),
 //       child: Row(

@@ -24,8 +24,8 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   CreateOrderParams get createOrderParams => CreateOrderParams(
-    floor: 1,
-    office: 'Office 1',
+    floor: 'floorId',
+    office: 'officeId',
     orderItems: CacheHelper.getCartItems().map((cartItem) {
       return CreateItemModel(
         drinkId: cartItem.drink.id ?? "",
@@ -35,13 +35,13 @@ class OrderCubit extends Cubit<OrderState> {
       );
     }).toList(),
   );
-
+//a
   Future<Result> requestOrder() async {
     return await CreateOrderUsecase(
       OrderRepository(),
     ).call(params: createOrderParams);
   }
-
+//a
   Future<Result> fetchAllOrder(data) async {
     return await GetAllOrdersUsecase(
       OrderRepository(),

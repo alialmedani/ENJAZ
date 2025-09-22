@@ -17,6 +17,64 @@ import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/profile/data/model/user_model.dart';
 import 'package:enjaz/features/profile/widget/history_list.dart';
 import 'package:enjaz/features/profile/widget/skeletons.dart';
+import 'package:enjaz/core/results/result.dart';
+
+/// امتدادات العرض على UserModel
+extension UserModelDisplay on UserModel {
+  String get displayName {
+    final n = (name ?? '').trim();
+    final s = (surname ?? '').trim();
+    if (n.isEmpty && s.isEmpty) return (userName ?? '').trim();
+    return [n, s].where((e) => e.isNotEmpty).join(' ');
+  }
+
+  String get displayFloor {
+    final byName = (floorName ?? '').trim();
+    if (byName.isNotEmpty) return byName;
+    final byId = (floorId ?? '').trim();
+    return byId.isNotEmpty ? byId : '—';
+  }
+
+  String get displayOffice {
+    final byName = (officeName ?? '').trim();
+    if (byName.isNotEmpty) return byName;
+    final byId = (officeId ?? '').trim();
+    return byId.isNotEmpty ? byId : '—';
+  }
+
+  String get initials {
+    final nameStr = (name ?? '').trim();
+    final surStr = (surname ?? '').trim();
+    final userStr = (userName ?? '').trim();
+    if (nameStr.isNotEmpty || surStr.isNotEmpty) {
+      final n = nameStr.isNotEmpty ? nameStr[0] : '';
+      final s = surStr.isNotEmpty ? surStr[0] : '';
+      final both = (n + s).toUpperCase();
+      return both.isNotEmpty ? both : '?';
+    }
+    return userStr.isNotEmpty ? userStr[0].toUpperCase() : '?';
+  }
+
+  String get subtitle {
+    final r = roles ?? const [];
+    if (r.isNotEmpty) return r.join(' · ');
+    final userStr = (userName ?? '').trim();
+    return userStr;
+  }
+
+  /// يتحمّل DateTime? أو String ISO8601 في موديلك
+  String get memberSinceText {
+    final ct = creationTime;
+    DateTime? dt;
+    if (ct is DateTime) {
+     } else if (ct is String && ct.trim().isNotEmpty) {
+      // نجرب نعمل parse لو رجعت API نص
+      dt = DateTime.tryParse(ct);
+    }
+    if (dt == null) return '';
+    return DateFormat('d MMM yyyy').format(dt);
+  }
+}
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -57,6 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           top: false,
           bottom: false,
           child: GetModel<UserModel>(
+            // بيرجع Future<Result<UserModel>> من ProfileCubit (advanced repo/usecase)
             useCaseCallBack: () =>
                 context.read<ProfileCubit>().fetchCurrentCustomer(),
             loading: const ProfileSkeleton(),
@@ -84,10 +143,13 @@ class _ProfileHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.of(context).padding.top;
     final accent = AppColors.orange;
-    final name = _displayName(profile);
-    final subtitle = profile.roles?.isNotEmpty == true
-        ? profile.roles!.join(' - ')
-        : profile.userName ?? '';
+
+    final displayName = profile.displayName;
+    final initials = profile.initials;
+    final subtitle = profile.subtitle;
+    final floorText = profile.displayFloor;
+    final officeText = profile.displayOffice;
+    final memberSince = profile.memberSinceText;
 
     return SizedBox(
       height: safeTop + 230,
@@ -135,14 +197,14 @@ class _ProfileHero extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _AvatarBadge(text: name.isNotEmpty ? name[0] : '?'),
+                          _AvatarBadge(text: initials),
                           const SizedBox(width: 18),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  name,
+                                  displayName,
                                   style: AppTextStyle.getBoldStyle(
                                     fontSize: AppFontSize.size_20,
                                     color: AppColors.black23,
@@ -171,23 +233,18 @@ class _ProfileHero extends StatelessWidget {
                           _MetricChip(
                             icon: Icons.layers_outlined,
                             label: 'Floor',
-                            value: profile.floor?.toString() ?? '—',
+                            value: floorText, // ✅ كان String literal
                           ),
                           _MetricChip(
                             icon: Icons.apartment_outlined,
                             label: 'Office',
-                            value: profile.office?.trim().isNotEmpty == true
-                                ? profile.office!.trim()
-                                : '—',
+                            value: officeText, // ✅ كان String literal
                           ),
-                          if (profile.creationTime != null)
+                          if (memberSince.isNotEmpty)
                             _MetricChip(
                               icon: Icons.calendar_today_outlined,
                               label: 'Member since',
-                              value: DateFormat('d MMM yyyy').format(
-                                DateTime.tryParse(profile.creationTime!) ??
-                                    DateTime.now(),
-                              ),
+                              value: memberSince,
                             ),
                         ],
                       ),
@@ -293,8 +350,9 @@ class _OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final phone = profile.phoneNumber?.trim();
-    final email = profile.email?.trim();
+    final email = (profile.email ?? '').trim();
+    final phone = (profile.phoneNumber ?? '').trim();
+    final username = (profile.userName ?? '').trim();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
@@ -305,19 +363,19 @@ class _OverviewTab extends StatelessWidget {
           _InfoCard(
             icon: Icons.mail_outline,
             title: 'Email',
-            value: email?.isNotEmpty == true ? email! : 'Not provided',
+            value: email.isNotEmpty ? email : 'Not provided',
           ),
           const SizedBox(height: 16),
           _InfoCard(
             icon: Icons.phone_outlined,
             title: 'Phone',
-            value: phone?.isNotEmpty == true ? phone! : 'Not provided',
+            value: phone.isNotEmpty ? phone : 'Not provided',
           ),
           const SizedBox(height: 16),
           _InfoCard(
             icon: Icons.person_outline,
             title: 'Username',
-            value: profile.userName ?? '—',
+            value: username.isNotEmpty ? username : '—',
           ),
           const SizedBox(height: 24),
           Text(
@@ -332,7 +390,7 @@ class _OverviewTab extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: phone?.isNotEmpty == true ? () {} : null,
+                  onPressed: phone.isNotEmpty ? () {} : null,
                   icon: const Icon(Icons.chat_bubble_outline),
                   label: const Text('Message'),
                   style: OutlinedButton.styleFrom(
@@ -351,7 +409,7 @@ class _OverviewTab extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: phone?.isNotEmpty == true ? () {} : null,
+                  onPressed: phone.isNotEmpty ? () {} : null,
                   icon: const Icon(Icons.phone_outlined),
                   label: const Text('Call'),
                   style: ElevatedButton.styleFrom(
@@ -403,6 +461,7 @@ class _HistoryTab extends StatelessWidget {
               final order = orders[index];
               return HistoryList(
                 orderModel: order,
+                // لو الـ API رجّع customerUser داخل الطلب بنعرضه، غير هيك بنستخدم بروفايل الحالي
                 profile: order.customerUser ?? profile,
               );
             },
@@ -556,12 +615,4 @@ class _AvatarBadge extends StatelessWidget {
       ),
     );
   }
-}
-
-String _displayName(UserModel profile) {
-  final name = profile.name?.trim();
-  if (name != null && name.isNotEmpty) return name;
-  final surname = profile.surname?.trim();
-  if (surname != null && surname.isNotEmpty) return surname;
-  return profile.userName?.trim() ?? 'Guest';
 }

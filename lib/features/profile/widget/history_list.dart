@@ -56,7 +56,7 @@ class HistoryList extends StatelessWidget {
             border: Border.all(color: AppColors.greyE5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha:0.05),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -140,7 +140,7 @@ class _StatusGlyph extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [color.withOpacity(0.22), color.withOpacity(0.05)],
+          colors: [color.withValues(alpha:0.22), color.withValues(alpha:0.05)],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
@@ -173,7 +173,7 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha:0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
