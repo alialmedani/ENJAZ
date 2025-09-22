@@ -1,6 +1,7 @@
 import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
 import 'package:enjaz/core/boilerplate/pagination/models/get_list_request.dart';
@@ -67,13 +68,13 @@ class _FloorDropdownState extends State<FloorDropdown> {
               onChanged: null,
               decoration:
                   widget.decoration ??
-                  _deco('Loading floors...', prefix: Icons.business_rounded),
+                  _deco('floors_loading'.tr(), prefix: Icons.business_rounded),
             );
           }
 
           return DropdownButtonFormField<String>(
             isExpanded: true,
-            value: value, // مهم: controlled
+            value: value, // controlled
             items: floors
                 .map(
                   (f) => _menuItem<String>(
@@ -93,7 +94,10 @@ class _FloorDropdownState extends State<FloorDropdown> {
             },
             decoration:
                 widget.decoration ??
-                _deco('Floor', prefix: Icons.business_rounded),
+                _deco(
+                  'floor'.tr(),
+                  prefix: Icons.business_rounded,
+                ), // لديك مفتاح "floor"
             iconEnabledColor: AppColors.xprimaryColor,
           );
         },
@@ -179,8 +183,8 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
                       widget.decoration ??
                       _deco(
                         widget.noFloor
-                            ? 'Select floor first'
-                            : 'Loading offices...',
+                            ? 'select_floor_first'.tr()
+                            : 'offices_loading'.tr(),
                         prefix: Icons.apartment_outlined,
                       ),
                 );
@@ -188,7 +192,7 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
 
               return DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: value, // مهم: controlled
+                value: value, // controlled
                 items: offices
                     .map(
                       (o) => _menuItem<String>(
@@ -208,12 +212,15 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
                 },
                 decoration:
                     widget.decoration ??
-                    _deco('Office', prefix: Icons.apartment_outlined),
+                    _deco(
+                      'office'.tr(),
+                      prefix: Icons.apartment_outlined,
+                    ), // لديك مفتاح "office"
                 iconEnabledColor: AppColors.xprimaryColor,
                 validator: (_) {
                   if (widget.floorId.isEmpty) return null;
                   return (value == null || value.isEmpty)
-                      ? 'اختر المكتب'
+                      ? 'err_select_office'.tr()
                       : null;
                 },
               );
@@ -225,7 +232,7 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
   }
 }
 
-// ===== Utils (صغيرة ومشتركة) =====
+// ===== Utils =====
 
 DropdownMenuItem<T> _menuItem<T>({
   required T value,

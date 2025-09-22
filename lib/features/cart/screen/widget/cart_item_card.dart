@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
@@ -27,7 +28,7 @@ class CartItemCard extends StatelessWidget {
         : '?';
     final sugarLabel = _sugarLevelLabel(
       _percentageToSugarLevel(item.sugarPercentage),
-    );
+    ).tr();
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -82,7 +83,8 @@ class CartItemCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.drink.name ?? 'Unknown drink',
+                                item.drink.name ??
+                                    'cart_item_unknown_drink'.tr(),
                                 style: AppTextStyle.getBoldStyle(
                                   fontSize: AppFontSize.size_16,
                                   color: AppColors.black23,
@@ -90,7 +92,7 @@ class CartItemCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Size ${item.size} | Sugar $sugarLabel',
+                                '${'cart_item_size'.tr(namedArgs: {'size': '${item.size}'})} | ${'cart_item_sugar'.tr(namedArgs: {'level': sugarLabel})}',
                                 style: AppTextStyle.getRegularStyle(
                                   fontSize: AppFontSize.size_12,
                                   color: AppColors.secondPrimery,
@@ -158,7 +160,9 @@ class CartItemCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Sugar $sugarLabel',
+                                'cart_item_sugar'.tr(
+                                  namedArgs: {'level': sugarLabel},
+                                ),
                                 style: AppTextStyle.getRegularStyle(
                                   fontSize: AppFontSize.size_12,
                                   color: AppColors.black23,
@@ -254,12 +258,12 @@ SugarLevel _percentageToSugarLevel(double value) {
 String _sugarLevelLabel(SugarLevel level) {
   switch (level) {
     case SugarLevel.none:
-      return 'None';
+      return 'sugar_none';
     case SugarLevel.light:
-      return 'Light';
+      return 'sugar_light';
     case SugarLevel.medium:
-      return 'Medium';
+      return 'sugar_medium';
     case SugarLevel.high:
-      return 'High';
+      return 'sugar_high';
   }
 }

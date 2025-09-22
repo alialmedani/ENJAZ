@@ -3,6 +3,8 @@ import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
@@ -10,14 +12,6 @@ import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
 import 'package:enjaz/features/drink/data/model/drink_model.dart';
 import 'package:enjaz/features/drink/screen/coffee_detai_screen.dart';
 import '../../drink/cubit/drink_cubit.dart';
-
-final coffeeCategories = [
-  'All Coffee',
-  'Machiato',
-  'Latte',
-  'Americano',
-  'Cappuccino',
-];
 
 class CoffeeAppHomeScreen extends StatefulWidget {
   const CoffeeAppHomeScreen({super.key});
@@ -29,8 +23,18 @@ class CoffeeAppHomeScreen extends StatefulWidget {
 class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
   int selectedIndex = 0;
 
+  List<String> get _categories => [
+    'cat_all'.tr(),
+    'cat_macchiato'.tr(),
+    'cat_latte'.tr(),
+    'cat_americano'.tr(),
+    'cat_cappuccino'.tr(),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final categories = _categories;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6EDE7),
       body: PaginationList<DrinkModel>(
@@ -40,7 +44,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Center(
             child: Text(
-              'No coffee yet ☕',
+              'home_no_coffee'.tr(), // "No coffee yet ☕"
               style: TextStyle(
                 color: AppColors.xsecondaryColor,
                 fontSize: AppFontSize.size_16,
@@ -71,11 +75,11 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                       ),
                     ),
                   ),
-                  headerParts(),
+                  headerParts(context),
                 ],
               ),
               SizedBox(height: AppFontSize.size_35),
-              categorySelection(),
+              categorySelection(categories),
               SizedBox(height: AppFontSize.size_20),
 
               GridView.builder(
@@ -94,9 +98,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                 itemBuilder: (context, index) {
                   final api = apiList[index];
                   final tag = 'coffee-hero-${api.id}';
-
                   final sub = api.description;
-
                   final imageUrl =
                       "https://task.jasim-erp.com/api/dms/file/get/${api.id}/?entitytype=1";
 
@@ -167,60 +169,61 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                           alignment: Alignment.centerRight,
                           child: StatefulBuilder(
                             builder: (context, setLocalState) {
-                              bool adding = false; // حارس للنقرات المتتالية
+                              bool adding = false;
 
                               return InkWell(
-                                onTap:  
-                                
-                                () async {
-                                        setLocalState(() => adding = true);
-                                        try {
-                                          await context.read<CartCubit>().addToCart(
-                                            CartItemModel(
-                                              drink:
-                                                  api, // ← نفس المتغير داخل itemBuilder
-                                              quantity: 1,
-                                              size: 'M', // افتراضي
-                                              sugarPercentage:
-                                                  0.50, // 0 / .25 / .50 / .75
-                                            ),
-                                          );
+                                onTap: () async {
+                                  if (adding) return;
+                                  setLocalState(() => adding = true);
+                                  try {
+                                    await context.read<CartCubit>().addToCart(
+                                      CartItemModel(
+                                        drink: api,
+                                        quantity: 1,
+                                        size: 'M', // افتراضي
+                                        sugarPercentage:
+                                            0.50, // 0 / .25 / .50 / .75
+                                      ),
+                                    );
 
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  '${api.name ?? "Item"} added to cart!',
-                                                ),
-                                                duration: const Duration(
-                                                  seconds: 2,
-                                                ),
-                                                backgroundColor:
-                                                    AppColors.xprimaryColor,
-                                              ),
-                                            );
-                                          }
-                                        } catch (_) {
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Failed to add item to cart',
-                                                ),
-                                                duration: Duration(seconds: 2),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        } finally {
-                                          if (context.mounted)
-                                            setLocalState(() => adding = false);
-                                        }
-                                      },
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'toast_added_to_cart'.tr(
+                                              namedArgs: {
+                                                'name': api.name ?? '',
+                                              },
+                                            ),
+                                          ),
+                                          duration: const Duration(seconds: 2),
+                                          backgroundColor:
+                                              AppColors.xprimaryColor,
+                                        ),
+                                      );
+                                    }
+                                  } catch (_) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'toast_failed_add'.tr(),
+                                          ),
+                                          duration: const Duration(seconds: 2),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    if (context.mounted) {
+                                      setLocalState(() => adding = false);
+                                    }
+                                  }
+                                },
                                 borderRadius: BorderRadius.circular(
                                   AppFontSize.size_8,
                                 ),
@@ -242,8 +245,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                               );
                             },
                           ),
-                        )
-
+                        ),
                       ],
                     ),
                   );
@@ -257,7 +259,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
   }
 }
 
-Padding headerParts() {
+Padding headerParts(BuildContext context) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: AppPaddingSize.padding_22),
     child: Column(
@@ -267,14 +269,14 @@ Padding headerParts() {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Location',
+              'home_location_label'.tr(), // "Location"
               style: TextStyle(color: AppColors.xsecondaryColor),
             ),
             Row(
               children: [
-                const Text(
-                  'Kathmandu, Nepal',
-                  style: TextStyle(
+                Text(
+                  'home_location_value'.tr(), // "Kathmandu, Nepal" (مثال)
+                  style: const TextStyle(
                     color: AppColors.white,
                     fontSize: AppFontSize.size_16,
                     fontWeight: FontWeight.w600,
@@ -312,9 +314,9 @@ Padding headerParts() {
                           const Icon(Icons.search, color: AppColors.white),
                     ),
                     SizedBox(width: AppFontSize.size_8),
-                    const Expanded(
+                    Expanded(
                       child: TextField(
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: AppFontSize.size_18,
                           color: AppColors.white,
                         ),
@@ -322,8 +324,8 @@ Padding headerParts() {
                           contentPadding: EdgeInsets.zero,
                           isDense: true,
                           border: InputBorder.none,
-                          hintText: 'Search coffee',
-                          hintStyle: TextStyle(
+                          hintText: 'home_search_hint'.tr(), // "Search coffee"
+                          hintStyle: const TextStyle(
                             fontSize: AppFontSize.size_18,
                             color: AppColors.whiteF1,
                           ),
@@ -366,20 +368,22 @@ Padding headerParts() {
   );
 }
 
-SizedBox categorySelection() {
+SizedBox categorySelection(List<String> categories) {
   return SizedBox(
     height: AppFontSize.size_30,
     child: ListView.builder(
-      itemCount: coffeeCategories.length,
+      itemCount: categories.length,
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {},
+          onTap: () {
+            // TODO: فلترة حسب الفئة لو لزم
+          },
           child: Container(
             margin: EdgeInsets.only(
               left: index == 0 ? AppFontSize.size_25 : AppFontSize.size_10,
-              right: index == coffeeCategories.length - 1
+              right: index == categories.length - 1
                   ? AppFontSize.size_25
                   : AppFontSize.size_10,
             ),
@@ -392,8 +396,8 @@ SizedBox categorySelection() {
             ),
             alignment: Alignment.center,
             child: Text(
-              coffeeCategories[index],
-              style: TextStyle(
+              categories[index],
+              style: const TextStyle(
                 fontWeight: FontWeight.normal,
                 fontSize: AppFontSize.size_16,
                 color: AppColors.black,

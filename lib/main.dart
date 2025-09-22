@@ -25,10 +25,12 @@ void main() async {
   await EasyLocalization.ensureInitialized();
 
   runApp(
-    EasyLocalization(
+     EasyLocalization(
       supportedLocales: const [Locale('ar'), Locale('en')],
-      path: 'assets/translations',
+      path: 'assets/translations',  
       fallbackLocale: const Locale('ar'),
+      startLocale: const Locale('en'),
+      useOnlyLangCode: true, 
       saveLocale: true,
       child: const MyApp(),
     ),
@@ -57,6 +59,9 @@ class MyApp extends StatelessWidget {
         splitScreenMode: false,
         builder: (BuildContext context, Widget? child) {
           return MaterialApp(
+            locale: context.locale,
+            supportedLocales: context.supportedLocales,
+            localizationsDelegates: context.localizationDelegates,
             debugShowCheckedModeBanner: false,
             navigatorKey: Keys.navigatorKey,
             title: 'Task App',

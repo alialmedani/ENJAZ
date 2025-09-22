@@ -44,8 +44,10 @@ class HistoryList extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) =>
-                  ProfileOrderDetailsScreen(order: orderModel, profile: profile),
+              builder: (_) => ProfileOrderDetailsScreen(
+                order: orderModel,
+                profile: profile,
+              ),
             ),
           );
         },
@@ -56,7 +58,7 @@ class HistoryList extends StatelessWidget {
             border: Border.all(color: AppColors.greyE5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha:0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -140,7 +142,10 @@ class _StatusGlyph extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [color.withValues(alpha:0.22), color.withValues(alpha:0.05)],
+          colors: [
+            color.withValues(alpha: 0.22),
+            color.withValues(alpha: 0.05),
+          ],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
@@ -173,7 +178,7 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha:0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -209,9 +214,10 @@ class _QuickSummary extends StatelessWidget {
       spacing: 10,
       runSpacing: 6,
       children: [
-        _SummaryChip(label: 'Qty ${items.length}'),
+        _SummaryChip(label: 'history_qty'.tr(args: ['${items.length}'])),
         if (drinkName.isNotEmpty) _SummaryChip(label: drinkName),
-        if (sugar != null) _SummaryChip(label: 'Sugar $sugar'),
+        if (sugar != null)
+          _SummaryChip(label: 'history_sugar'.tr(args: ['${sugar}'])),
       ],
     );
   }
@@ -266,9 +272,3 @@ String _formatDate(String? iso) {
     return iso;
   }
 }
-
-
-
-
-
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
@@ -37,7 +38,7 @@ class EmptyCartView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Your cart is feeling light',
+              'empty_cart_title'.tr(),
               style: AppTextStyle.getBoldStyle(
                 fontSize: AppFontSize.size_18,
                 color: AppColors.black23,
@@ -46,7 +47,7 @@ class EmptyCartView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Explore drinks and add them here to build your perfect order.',
+              'empty_cart_subtitle'.tr(),
               style: AppTextStyle.getRegularStyle(
                 fontSize: AppFontSize.size_13,
                 color: AppColors.secondPrimery,
@@ -72,7 +73,7 @@ class EmptyCartView extends StatelessWidget {
                       vertical: 14,
                     ),
                   ),
-                  child: const Text('Refresh'),
+                  child: Text('common_refresh'.tr()),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
@@ -87,7 +88,7 @@ class EmptyCartView extends StatelessWidget {
                       vertical: 14,
                     ),
                   ),
-                  child: const Text('Browse drinks'),
+                  child: Text('empty_cart_browse'.tr()),
                 ),
               ],
             ),
@@ -138,7 +139,7 @@ class ErrorView extends StatelessWidget {
                   vertical: 12,
                 ),
               ),
-              child: const Text('Retry'),
+              child: Text('common_retry'.tr()),
             ),
           ],
         ),

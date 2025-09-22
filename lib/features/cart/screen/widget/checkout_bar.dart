@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
@@ -14,7 +15,7 @@ import 'package:enjaz/features/order/data/model/order_model.dart';
 import 'package:enjaz/features/FO/data/model/place_model.dart';
 
 import 'place_dropdowns.dart';
-import 'states.dart';
+import 'empty_cart_view.dart';
 import 'package:enjaz/core/results/result.dart';
 
 class CheckoutBar extends StatefulWidget {
@@ -59,7 +60,7 @@ class _CheckoutBarState extends State<CheckoutBar> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Total cups in cart',
+                      'checkout_total_cups_in_cart'.tr(),
                       style: AppTextStyle.getRegularStyle(
                         fontSize: AppFontSize.size_13,
                         color: AppColors.black23,
@@ -97,7 +98,7 @@ class _CheckoutBarState extends State<CheckoutBar> {
               CreateModel<OrderModel>(
                 withValidation: false,
                 onSuccess: (_) {
-                  Dialogs.showSnackBar(message: 'Successfully placed order');
+                  Dialogs.showSnackBar(message: 'checkout_success'.tr());
                   // تفريغ السلة من الشاشة الأم
                 },
                 useCaseCallBack: (_) {
@@ -105,11 +106,11 @@ class _CheckoutBarState extends State<CheckoutBar> {
                   final oId = _selectedOffice?.id?.toString() ?? '';
 
                   if (fId.isEmpty) {
-                    Dialogs.showSnackBar(message: 'الرجاء اختيار الطابق');
+                    Dialogs.showSnackBar(message: 'err_select_floor'.tr());
                     return _fail<OrderModel>('floor required');
                   }
                   if (oId.isEmpty) {
-                    Dialogs.showSnackBar(message: 'الرجاء اختيار المكتب');
+                    Dialogs.showSnackBar(message: 'err_select_office'.tr());
                     return _fail<OrderModel>('office required');
                   }
 
@@ -122,7 +123,7 @@ class _CheckoutBarState extends State<CheckoutBar> {
                   width: double.infinity,
                   child: CustomButton(
                     color: AppColors.orange,
-                    text: 'Proceed to checkout',
+                    text: 'checkout_proceed'.tr(),
                     textStyle: AppTextStyle.getBoldStyle(
                       fontSize: AppFontSize.size_16,
                       color: Colors.white,
@@ -142,4 +143,3 @@ class _CheckoutBarState extends State<CheckoutBar> {
 Future<Result<T>> _fail<T>(String message) async {
   return Result<T>(error: message); // أو RemoteResult<T>(error: message)
 }
-

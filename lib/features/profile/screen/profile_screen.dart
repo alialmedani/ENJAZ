@@ -17,7 +17,7 @@ import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/profile/data/model/user_model.dart';
 import 'package:enjaz/features/profile/widget/history_list.dart';
 import 'package:enjaz/features/profile/widget/skeletons.dart';
- 
+
 /// امتدادات العرض على UserModel
 extension UserModelDisplay on UserModel {
   String get displayName {
@@ -54,26 +54,33 @@ extension UserModelDisplay on UserModel {
     return userStr.isNotEmpty ? userStr[0].toUpperCase() : '?';
   }
 
-  String get subtitle {
+String get subtitle {
     final r = roles ?? const [];
     if (r.isNotEmpty) return r.join(' · ');
     final userStr = (userName ?? '').trim();
     return userStr;
   }
 
-  /// يتحمّل DateTime? أو String ISO8601 في موديلك
+
   String get memberSinceText {
-    final ct = creationTime;
+    final ct = creationTime; // ممكن يكون DateTime/String/int
     DateTime? dt;
+
     if (ct is DateTime) {
-     } else if (ct is String && ct.trim().isNotEmpty) {
-      // نجرب نعمل parse لو رجعت API نص
+      dt = ct as DateTime?;
+    } else if (ct is String && ct.trim().isNotEmpty) {
       dt = DateTime.tryParse(ct);
+    } else if (ct is int) {
+      dt = DateTime.fromMillisecondsSinceEpoch(ct as int);
+    } else if (ct is num) {
+      dt = DateTime.fromMillisecondsSinceEpoch(ct as int);
     }
+
     if (dt == null) return '';
     return DateFormat('d MMM yyyy').format(dt);
   }
 }
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -114,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           top: false,
           bottom: false,
           child: GetModel<UserModel>(
-             useCaseCallBack: () =>
+            useCaseCallBack: () =>
                 context.read<ProfileCubit>().fetchCurrentCustomer(),
             loading: const ProfileSkeleton(),
             modelBuilder: (profile) => Column(
@@ -230,18 +237,18 @@ class _ProfileHero extends StatelessWidget {
                         children: [
                           _MetricChip(
                             icon: Icons.layers_outlined,
-                            label: 'Floor',
-                            value: floorText, // ✅ كان String literal
+                            label: 'floor'.tr(), // كان "Floor"
+                            value: floorText,
                           ),
                           _MetricChip(
                             icon: Icons.apartment_outlined,
-                            label: 'Office',
-                            value: officeText, // ✅ كان String literal
+                            label: 'office'.tr(), // كان "Office"
+                            value: officeText,
                           ),
                           if (memberSince.isNotEmpty)
                             _MetricChip(
                               icon: Icons.calendar_today_outlined,
-                              label: 'Member since',
+                              label: 'profile_member_since'.tr(),
                               value: memberSince,
                             ),
                         ],
@@ -360,74 +367,31 @@ class _OverviewTab extends StatelessWidget {
         children: [
           _InfoCard(
             icon: Icons.mail_outline,
-            title: 'Email',
-            value: email.isNotEmpty ? email : 'Not provided',
+            title: 'profile_email'.tr(),
+            value: email.isNotEmpty ? email : 'profile_not_provided'.tr(),
           ),
           const SizedBox(height: 16),
           _InfoCard(
             icon: Icons.phone_outlined,
-            title: 'Phone',
-            value: phone.isNotEmpty ? phone : 'Not provided',
+            title: 'profile_phone'.tr(),
+            value: phone.isNotEmpty ? phone : 'profile_not_provided'.tr(),
           ),
           const SizedBox(height: 16),
           _InfoCard(
             icon: Icons.person_outline,
-            title: 'Username',
+            title: 'profile_username'.tr(),
             value: username.isNotEmpty ? username : '—',
           ),
           const SizedBox(height: 24),
           Text(
-            'Quick actions',
+            'profile_quick_actions'.tr(),
             style: AppTextStyle.getBoldStyle(
               fontSize: AppFontSize.size_14,
               color: AppColors.black23,
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: phone.isNotEmpty ? () {} : null,
-                  icon: const Icon(Icons.chat_bubble_outline),
-                  label: const Text('Message'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.orange,
-                    side: BorderSide(color: AppColors.orange.withOpacity(0.4)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 14,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: phone.isNotEmpty ? () {} : null,
-                  icon: const Icon(Icons.phone_outlined),
-                  label: const Text('Call'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.orange,
-                    disabledForegroundColor: AppColors.secondPrimery
-                        .withOpacity(0.4),
-                    disabledBackgroundColor: AppColors.secondPrimery
-                        .withOpacity(0.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 14,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // (أزرار إجراءات سريعة — معلّقة)
           const SizedBox(height: 36),
           const SignOutActionButton(),
         ],
@@ -459,7 +423,6 @@ class _HistoryTab extends StatelessWidget {
               final order = orders[index];
               return HistoryList(
                 orderModel: order,
-                // لو الـ API رجّع customerUser داخل الطلب بنعرضه، غير هيك بنستخدم بروفايل الحالي
                 profile: order.customerUser ?? profile,
               );
             },

@@ -9,9 +9,11 @@ import 'package:enjaz/features/FO/cubit/place_cubit.dart';
 import 'package:enjaz/features/FO/data/model/place_model.dart';
 import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
 import 'package:enjaz/features/FO/widget/place_dropdown.dart'; // (Floor - type=1)
-import 'package:enjaz/features/auth/cubit/auth_cubit.dart'  ;
- import 'package:flutter/material.dart';
+import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 import 'finish_to_register.dart';
 
 /// -----------------------------
@@ -193,14 +195,14 @@ class _OfficeDropdownState extends State<OfficeDropdown> {
                 },
                 decoration:
                     widget.decoration ??
-                    _deco('Office', prefix: Icons.apartment_outlined),
+                    _deco('office'.tr(), prefix: Icons.apartment_outlined),
                 iconEnabledColor: AppColors.xprimaryColor,
                 validator: (_) {
                   if (widget.floorId.isEmpty) {
                     return null; // لا نُلزم بالمكتب قبل اختيار الطابق
                   }
                   return (value == null || value.isEmpty)
-                      ? 'اختر المكتب'
+                      ? 'err_select_office'.tr()
                       : null;
                 },
               );
@@ -326,7 +328,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             const SizedBox(height: AppPaddingSize.padding_16),
                             Text(
-                              'Create Account',
+                              'signup_title'.tr(),
                               style: AppTextStyle.getBoldStyle(
                                 fontSize: AppFontSize.size_20,
                                 color: AppColors.black23,
@@ -339,7 +341,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               controller: _userCtrl,
                               textInputAction: TextInputAction.next,
                               decoration: _deco(
-                                'Username',
+                                'signup_username'.tr(),
                                 prefix: Icons.person_outline,
                               ),
                               onChanged: (v) {
@@ -348,7 +350,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               },
                               validator: (v) =>
                                   (v == null || v.trim().length < 3)
-                                  ? 'أدخل اسم مستخدم (3 أحرف على الأقل)'
+                                  ? 'err_username_min'.tr(
+                                      namedArgs: {'min': '3'},
+                                    )
                                   : null,
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
@@ -359,15 +363,15 @@ class _SignupScreenState extends State<SignupScreen> {
                               keyboardType: TextInputType.phone,
                               textInputAction: TextInputAction.next,
                               decoration: _deco(
-                                'Phone Number',
+                                'signup_phone'.tr(),
                                 prefix: Icons.phone_iphone,
                               ),
                               onChanged: (v) => params.phoneNumber = v,
                               validator: (v) {
                                 final x = v?.trim() ?? '';
-                                if (x.isEmpty) return 'أدخل رقم الهاتف';
+                                if (x.isEmpty) return 'err_phone_required'.tr();
                                 if (!RegExp(r'^[0-9]{8,14}$').hasMatch(x)) {
-                                  return 'رقم غير صالح';
+                                  return 'err_phone_invalid'.tr();
                                 }
                                 return null;
                               },
@@ -380,7 +384,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               obscureText: _obscurePass,
                               textInputAction: TextInputAction.next,
                               decoration: _deco(
-                                'Password',
+                                'signup_password'.tr(),
                                 prefix: Icons.lock_outline,
                                 suffix: IconButton(
                                   icon: Icon(
@@ -396,7 +400,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               onChanged: (v) => params.password = v,
                               validator: (v) => (v == null || v.length < 6)
-                                  ? 'كلمة المرور لا تقل عن 6'
+                                  ? 'err_password_min'.tr(
+                                      namedArgs: {'min': '6'},
+                                    )
                                   : null,
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
@@ -406,7 +412,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               controller: _confirmCtrl,
                               obscureText: _obscureConfirm,
                               decoration: _deco(
-                                'Confirm Password',
+                                'signup_confirm_password'.tr(),
                                 prefix: Icons.lock_outline,
                                 suffix: IconButton(
                                   icon: Icon(
@@ -421,7 +427,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                               validator: (v) => (v != _passCtrl.text)
-                                  ? 'عدم تطابق كلمة المرور'
+                                  ? 'err_password_mismatch'.tr()
                                   : null,
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
@@ -436,12 +442,12 @@ class _SignupScreenState extends State<SignupScreen> {
                                         ? null
                                         : params.floorId,
                                     decoration: _deco(
-                                      'Floor',
+                                      // لديك مفتاح "floor" جاهز في ملفّك
+                                      'floor'.tr(),
                                       prefix: Icons.layers_outlined,
                                     ),
                                     onChanged: (place) {
                                       params.floorId = place?.id ?? '';
-
                                       _safeSetState(() {});
                                     },
                                   ),
@@ -460,7 +466,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                           (rt) => DropdownMenuItem<RoleType>(
                                             value: rt,
                                             child: Text(
-                                              rt.displayString(),
+                                              rt.displayString(), // نفترض displayString() مترجم داخليًا لديك
                                               style:
                                                   AppTextStyle.getRegularStyle(
                                                     fontSize:
@@ -478,10 +484,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                       _safeSetState(() {});
                                     },
                                     decoration: _deco(
-                                      'Role',
+                                      'signup_role'.tr(),
                                       prefix: Icons.badge_outlined,
                                     ),
-
                                     iconEnabledColor: AppColors.xprimaryColor,
                                   ),
                                 ),
@@ -503,7 +508,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               hideWhenNoFloor:
                                   true, // اجعلها false لعرضه معطَّلاً بدل إخفائه
                               decoration: _deco(
-                                'Office',
+                                'office'.tr(),
                                 prefix: Icons.apartment_outlined,
                               ),
                             ),
@@ -519,7 +524,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'يمكنك تعديل المكتب/الطابق لاحقًا من الإعدادات إن كانت الصلاحيات تسمح.',
+                                    'signup_hint_edit_later'.tr(),
                                     style: AppTextStyle.getRegularStyle(
                                       fontSize: AppFontSize.size_12,
                                       color: AppColors.secondPrimery,
@@ -533,7 +538,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
                               child: Text(
-                                'لديك حساب؟ تسجيل الدخول',
+                                'signup_have_account_login'.tr(),
                                 style: AppTextStyle.getSemiBoldStyle(
                                   fontSize: AppFontSize.size_14,
                                   color: AppColors.xprimaryColor,
@@ -557,10 +562,10 @@ class _SignupScreenState extends State<SignupScreen> {
           if (!valid) return;
           final p = context.read<AuthCubit>().registerParams;
           if (p.floorId.isEmpty) {
-            return _showError('الرجاء اختيار الطابق (Floor)');
+            return _showError('err_select_floor'.tr());
           }
           if (p.officeId.isEmpty) {
-            return _showError('الرجاء اختيار المكتب (Office)');
+            return _showError('err_select_office'.tr());
           }
           if ((p.name).trim().isEmpty) p.name = p.userName;
           Navigator.of(
@@ -613,7 +618,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 child: Text(
-                  'Create Account',
+                  'signup_create_account'.tr(),
                   style: AppTextStyle.getBoldStyle(
                     fontSize: AppFontSize.size_15,
                     color: AppColors.white,

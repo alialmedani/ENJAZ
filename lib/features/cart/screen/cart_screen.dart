@@ -2,13 +2,13 @@ import 'dart:ui';
 import 'package:enjaz/features/cart/screen/widget/cart_header.dart';
 import 'package:enjaz/features/cart/screen/widget/cart_item_card.dart';
 import 'package:enjaz/features/cart/screen/widget/checkout_bar.dart';
-import 'package:enjaz/features/cart/screen/widget/states.dart';
+import 'package:enjaz/features/cart/screen/widget/empty_cart_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
- 
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -177,21 +177,22 @@ class _ClearDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Clear cart'),
-      content: const Text(
-        'Are you sure you want to remove every item from your cart?',
-      ),
+      title: Text('cart_clear_title'.tr()), // "Clear cart"
+      content: Text('cart_clear_body'.tr()),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('common_cancel'.tr()),
         ),
         TextButton(
           onPressed: () {
             context.read<CartCubit>().clearCart();
             Navigator.of(context).pop();
           },
-          child: const Text('Clear', style: TextStyle(color: Colors.red)),
+          child: Text(
+            'cart_clear_action'.tr(), // "Clear"
+            style: const TextStyle(color: Colors.red),
+          ),
         ),
       ],
     );

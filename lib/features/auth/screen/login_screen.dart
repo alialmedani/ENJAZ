@@ -12,6 +12,7 @@ import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -97,7 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: AppPaddingSize.padding_16),
 
                     Text(
-                      'HELLO AGAIN!',
+                      'login_hello_again'.tr(),
+                      textAlign: TextAlign.center,
                       style: AppTextStyle.getBoldStyle(
                         fontSize: AppFontSize.size_22,
                         color: AppColors.black23,
@@ -105,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppPaddingSize.padding_8),
                     Text(
-                      "Welcome back, you've been missed!",
+                      'login_welcome_back'.tr(),
                       textAlign: TextAlign.center,
                       style: AppTextStyle.getRegularStyle(
                         fontSize: AppFontSize.size_14,
@@ -125,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         LengthLimitingTextInputFormatter(30),
                       ],
                       decoration: _deco(
-                        'Phone / Username',
+                        'login_phone_or_username'.tr(),
                         prefix: Icons.person_outline,
                       ),
                       onChanged: (_) =>
@@ -133,9 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               _phoneCtl.text.trim(),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'أدخل اسم المستخدم/الهاتف';
+                        if (value.isEmpty)
+                          return 'err_enter_username_or_phone'.tr();
                         if (!RegExp(r'^[A-Za-z0-9]+$').hasMatch(value)) {
-                          return 'يسمح بالأحرف والأرقام فقط';
+                          return 'err_alnum_only'.tr();
                         }
                         return null;
                       },
@@ -143,12 +146,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: AppPaddingSize.padding_12),
 
-                    // PASSWORD (لا يرسل أي شبكة عند onChanged)
                     TextFormField(
                       controller: _passCtl,
                       obscureText: _obscure,
                       decoration: _deco(
-                        'Password',
+                        'login_password'.tr(),
                         prefix: Icons.lock_outline,
                         suffix: IconButton(
                           icon: Icon(
@@ -163,9 +165,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               _passCtl.text.trim(),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'أدخل كلمة المرور';
+                        if (value.isEmpty) return 'err_enter_password'.tr();
                         if (value.length < 6) {
-                          return 'كلمة المرور يجب ألا تقل عن 6 أحرف/أرقام';
+                          return 'err_password_min_length'.tr(
+                            namedArgs: {'min': '6'},
+                          );
                         }
                         return null;
                       },
@@ -178,6 +182,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: AppPaddingSize.padding_52,
                       child: CreateModel<LoginModel>(
                         useCaseCallBack: (model) {
+                          if (_formKey.currentState?.validate() != true) {
+                            return Future.error('validation_failed');
+                          }
                           return context.read<AuthCubit>().login();
                         },
                         withValidation: false,
@@ -190,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigation.pushAndRemoveUntil(const RootScreen());
                         },
                         child: ElevatedButton(
-                          onPressed: null, // CreateModel مسؤول عن onTap
+                          onPressed: null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.xprimaryColor,
                             disabledBackgroundColor: AppColors.xprimaryColor,
@@ -201,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           child: Text(
-                            'Sign In',
+                            'login_sign_in'.tr(),
                             style: AppTextStyle.getBoldStyle(
                               fontSize: AppFontSize.size_16,
                               color: AppColors.white,
@@ -212,13 +219,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
 
                     const SizedBox(height: AppPaddingSize.padding_12),
+
                     TextButton(
                       onPressed: () {
-                        // إلى شاشة التسجيل
-                        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignupScreen()));
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SignupScreen(),
+                          ),
+                        );
                       },
                       child: Text(
-                        'ليس لديك حساب؟ إنشاء حساب',
+                        'login_no_account_create'.tr(),
+                        textAlign: TextAlign.center,
                         style: AppTextStyle.getSemiBoldStyle(
                           fontSize: AppFontSize.size_14,
                           color: AppColors.xprimaryColor,

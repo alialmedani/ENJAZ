@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:enjaz/features/drink/data/model/drink_model.dart';
@@ -10,6 +11,7 @@ import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/enum/enum.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CoffeeDetailScreen extends StatefulWidget {
   final String heroTag;
@@ -126,7 +128,8 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                         physics: const BouncingScrollPhysics(),
                         children: [
                           Text(
-                            widget.drinkModel.name ?? 'Signature Coffee',
+                            widget.drinkModel.name ??
+                                'coffee_signature_title'.tr(),
                             style: AppTextStyle.getBoldStyle(
                               fontSize: AppFontSize.size_22,
                               color: AppColors.black,
@@ -134,7 +137,9 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            tagline,
+                            tagline.isNotEmpty
+                                ? tagline
+                                : 'coffee_default_tagline'.tr(),
                             style: AppTextStyle.getRegularStyle(
                               fontSize: AppFontSize.size_13,
                               color: AppColors.secondPrimery,
@@ -143,9 +148,9 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                           const SizedBox(height: 20),
                           _MetaInfoRow(items: _buildMetaInfo(description)),
                           const SizedBox(height: 28),
-                          const _SectionTitle(
-                            title: 'Choose your size',
-                            subtitle: 'Dial in the cup that fits your moment',
+                          _SectionTitle(
+                            title: 'section_choose_size_title'.tr(),
+                            subtitle: 'section_choose_size_sub'.tr(),
                           ),
                           const SizedBox(height: 16),
                           _SizeSelector(
@@ -153,10 +158,9 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                             onChanged: (code) => setState(() => _size = code),
                           ),
                           const SizedBox(height: 32),
-                          const _SectionTitle(
-                            title: 'Sugar level',
-                            subtitle:
-                                'Slide to fine tune the sweetness profile',
+                          _SectionTitle(
+                            title: 'section_sugar_title'.tr(),
+                            subtitle: 'section_sugar_sub'.tr(),
                           ),
                           const SizedBox(height: 14),
                           SugarAmountSection(
@@ -169,27 +173,28 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                           const SizedBox(height: 28),
                           _SelectionSummary(
                             sizeLabel: _sizeLabel(_size),
-                            sugarLabel: _sugarLabel(_sugarLevel),
+                            sugarLabel: _sugarPhrase(_sugarLevel),
                             quantity: _qty,
                             accent: accent,
                           ),
                           const SizedBox(height: 32),
-                          const _SectionTitle(
-                            title: 'Story',
-                            subtitle: 'Savor the craft behind every cup',
+                          _SectionTitle(
+                            title: 'section_story_title'.tr(),
+                            subtitle: null,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             description?.isNotEmpty == true
                                 ? description!
-                                : 'Our roasters built this blend to deliver a smooth, layered profile that works beautifully with or without milk. Expect a velvety mouthfeel, gentle sweetness, and a lingering cocoa finish.',
+                                : 'story_default_paragraph'.tr(),
                             style:
                                 AppTextStyle.getRegularStyle(
                                   fontSize: AppFontSize.size_13,
                                   color: AppColors.black23,
                                 ).copyWith(
                                   color: AppColors.black23.withValues(
-                                    alpha: 0.65),
+                                    alpha: 0.65,
+                                  ),
                                   height: 1.5,
                                 ),
                           ),
@@ -232,7 +237,11 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${widget.drinkModel.name} added to cart!'),
+            content: Text(
+              'toast_added_to_cart'.tr(
+                namedArgs: {'name': widget.drinkModel.name ?? ''},
+              ),
+            ),
             backgroundColor: AppColors.orange,
             duration: const Duration(seconds: 2),
           ),
@@ -241,10 +250,10 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to add item to cart'),
+          SnackBar(
+            content: Text('toast_failed_add'.tr()),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -270,7 +279,7 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
 
   String _tagline(String? description) {
     if (description == null || description.isEmpty) {
-      return 'Slow-roasted beans with a velvety finish and caramel glow.';
+      return '';
     }
     final sentences = description.split(RegExp(r'[.!?]'));
     for (final sentence in sentences) {
@@ -286,18 +295,18 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
     return [
       _MetaInfo(
         icon: Icons.local_fire_department_outlined,
-        label: 'Intensity',
+        label: 'meta_intensity'.tr(),
         value: _guessIntensity(description),
       ),
-      const _MetaInfo(
+      _MetaInfo(
         icon: Icons.timer_outlined,
-        label: 'Brew',
-        value: '3-5 min',
+        label: 'meta_brew'.tr(),
+        value: 'meta_brew_value'.tr(),
       ),
-      const _MetaInfo(
+      _MetaInfo(
         icon: Icons.opacity_outlined,
-        label: 'Serve',
-        value: 'Hot or iced',
+        label: 'meta_serve'.tr(),
+        value: 'meta_serve_value'.tr(),
       ),
     ];
   }
@@ -305,39 +314,39 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
   String _guessIntensity(String? description) {
     final text = description?.toLowerCase() ?? '';
     if (text.contains('strong') || text.contains('bold')) {
-      return 'Bold';
+      return 'meta_intensity_bold'.tr();
     }
     if (text.contains('light') || text.contains('smooth')) {
-      return 'Smooth';
+      return 'meta_intensity_smooth'.tr();
     }
     if (text.contains('dark')) {
-      return 'Dark';
+      return 'meta_intensity_dark'.tr();
     }
-    return 'Balanced';
+    return 'meta_intensity_balanced'.tr();
   }
 
   String _sizeLabel(String code) {
     switch (code) {
       case 'S':
-        return 'Small 180 ml';
+        return 'size_small_full'.tr(namedArgs: {'ml': '180'});
       case 'L':
-        return 'Large 360 ml';
+        return 'size_large_full'.tr(namedArgs: {'ml': '360'});
       case 'M':
       default:
-        return 'Medium 240 ml';
+        return 'size_medium_full'.tr(namedArgs: {'ml': '240'});
     }
   }
 
-  String _sugarLabel(SugarLevel level) {
+  String _sugarPhrase(SugarLevel level) {
     switch (level) {
       case SugarLevel.none:
-        return 'No added sugar';
+        return 'sugar_phrase_none'.tr();
       case SugarLevel.light:
-        return 'Light sweetness';
+        return 'sugar_phrase_light'.tr();
       case SugarLevel.medium:
-        return 'Balanced sweetness';
+        return 'sugar_phrase_medium'.tr();
       case SugarLevel.high:
-        return 'Extra sweet';
+        return 'sugar_phrase_high'.tr();
     }
   }
 }
@@ -533,18 +542,30 @@ class _SizeSelector extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onChanged;
 
-  static const _options = [
-    _SizeOptionData(code: 'S', label: 'Small', description: '180 ml'),
-    _SizeOptionData(code: 'M', label: 'Medium', description: '240 ml'),
-    _SizeOptionData(code: 'L', label: 'Large', description: '360 ml'),
-  ];
-
   const _SizeSelector({required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    final options = [
+      _SizeOptionData(
+        code: 'S',
+        label: 'size_small'.tr(),
+        description: 'size_ml'.tr(namedArgs: {'ml': '180'}),
+      ),
+      _SizeOptionData(
+        code: 'M',
+        label: 'size_medium'.tr(),
+        description: 'size_ml'.tr(namedArgs: {'ml': '240'}),
+      ),
+      _SizeOptionData(
+        code: 'L',
+        label: 'size_large'.tr(),
+        description: 'size_ml'.tr(namedArgs: {'ml': '360'}),
+      ),
+    ];
+
     return Row(
-      children: _options
+      children: options
           .map(
             (option) => Expanded(
               child: Padding(
@@ -671,6 +692,10 @@ class _SelectionSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cupsLabel = quantity == 1
+        ? 'selection_cup'.tr(namedArgs: {'count': '$quantity'})
+        : 'selection_cups'.tr(namedArgs: {'count': '$quantity'});
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
@@ -695,7 +720,7 @@ class _SelectionSummary extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your recipe',
+            'selection_your_recipe'.tr(),
             style: AppTextStyle.getBoldStyle(
               fontSize: AppFontSize.size_14,
               color: AppColors.black23,
@@ -718,7 +743,7 @@ class _SelectionSummary extends StatelessWidget {
               ),
               _SummaryPill(
                 icon: Icons.format_list_numbered,
-                label: '${quantity} cup${quantity > 1 ? 's' : ''}',
+                label: cupsLabel,
                 accent: accent,
               ),
             ],
@@ -823,7 +848,7 @@ class _BottomBar extends StatelessWidget {
                           ),
                         )
                       : Text(
-                          'Add to cart',
+                          'add_to_cart'.tr(),
                           style: AppTextStyle.getBoldStyle(
                             fontSize: AppFontSize.size_15,
                             color: Colors.white,
@@ -978,6 +1003,11 @@ class SugarAmountSection extends StatelessWidget {
                 color: color,
                 sugarLevel: sugarLevel,
                 pad: pad,
+                sugarWord: 'sugar_word'.tr(),
+                labelNone: 'sugar_none'.tr(),
+                labelLight: 'sugar_light'.tr(),
+                labelMedium: 'sugar_medium'.tr(),
+                labelHigh: 'sugar_high'.tr(),
               ),
             ),
           );
@@ -992,10 +1022,22 @@ class SugarArcPainter extends CustomPainter {
   final SugarLevel sugarLevel;
   final double pad;
 
+  // localized labels:
+  final String sugarWord;
+  final String labelNone;
+  final String labelLight;
+  final String labelMedium;
+  final String labelHigh;
+
   SugarArcPainter({
     required this.color,
     required this.sugarLevel,
     this.pad = 24.0,
+    required this.sugarWord,
+    required this.labelNone,
+    required this.labelLight,
+    required this.labelMedium,
+    required this.labelHigh,
   });
 
   double get percent {
@@ -1078,17 +1120,17 @@ class SugarArcPainter extends CustomPainter {
       );
     }
 
-    final label = _getSugarLevelDisplayName(sugarLevel);
+    final levelLabel = _getSugarLevelDisplayName(sugarLevel);
     final painter = TextPainter(
       text: TextSpan(
-        text: '$label sugar',
+        text: '$levelLabel $sugarWord',
         style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.black87,
           fontSize: 14,
         ),
       ),
-      textDirection: TextDirection.ltr,
+// textDirection: TextDirection.ltr, // بشرط عدم وجود تظليل للاسم
     )..layout();
     painter.paint(
       canvas,
@@ -1099,17 +1141,24 @@ class SugarArcPainter extends CustomPainter {
   String _getSugarLevelDisplayName(SugarLevel level) {
     switch (level) {
       case SugarLevel.none:
-        return 'No';
+        return labelNone;
       case SugarLevel.light:
-        return 'Light';
+        return labelLight;
       case SugarLevel.medium:
-        return 'Medium';
+        return labelMedium;
       case SugarLevel.high:
-        return 'High';
+        return labelHigh;
     }
   }
 
   @override
   bool shouldRepaint(covariant SugarArcPainter old) =>
-      old.color != color || old.sugarLevel != sugarLevel || old.pad != pad;
+      old.color != color ||
+      old.sugarLevel != sugarLevel ||
+      old.pad != pad ||
+      old.sugarWord != sugarWord ||
+      old.labelNone != labelNone ||
+      old.labelLight != labelLight ||
+      old.labelMedium != labelMedium ||
+      old.labelHigh != labelHigh;
 }

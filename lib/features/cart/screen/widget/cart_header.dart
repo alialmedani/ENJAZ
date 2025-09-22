@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
@@ -65,7 +66,7 @@ class CartHeader extends StatelessWidget {
                     opacity: 1 - collapse,
                     child: Center(
                       child: Text(
-                        'Cart',
+                        'cart_title'.tr(), // "Cart"
                         style: AppTextStyle.getBoldStyle(
                           fontSize: AppFontSize.size_18,
                           color: AppColors.black23,
@@ -104,7 +105,7 @@ class CartHeader extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Order summary',
+                            'cart_order_summary'.tr(),
                             style: AppTextStyle.getBoldStyle(
                               fontSize: AppFontSize.size_16,
                               color: AppColors.black23,
@@ -112,7 +113,7 @@ class CartHeader extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'You are moments away from fresh coffee.',
+                            'cart_intro'.tr(),
                             style: AppTextStyle.getRegularStyle(
                               fontSize: AppFontSize.size_12,
                               color: AppColors.secondPrimery,
@@ -122,18 +123,18 @@ class CartHeader extends StatelessWidget {
                           Wrap(
                             spacing: 12,
                             runSpacing: 12,
-                            children: const [
+                            children: [
                               _MetricChip(
                                 icon: Icons.coffee_outlined,
-                                label: 'Items',
+                                label: 'cart_metric_items'.tr(),
                               ),
                               _MetricChip(
                                 icon: Icons.local_drink_outlined,
-                                label: 'Total cups',
+                                label: 'cart_metric_total_cups'.tr(),
                               ),
                               _MetricChip(
                                 icon: Icons.water_drop_outlined,
-                                label: 'Sugar sets',
+                                label: 'cart_metric_sugar_sets'.tr(),
                               ),
                             ],
                           ),
@@ -185,7 +186,6 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // القيم الحقيقية بتنعرض من CartScreen => مش لازم نكرر هنا
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -208,7 +208,6 @@ class _MetricChip extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // placeholder—القيم تعرض فوق مع الـ summary
               Text(
                 '-',
                 style: AppTextStyle.getBoldStyle(

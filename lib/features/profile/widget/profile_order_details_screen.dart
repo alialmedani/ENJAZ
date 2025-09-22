@@ -57,8 +57,8 @@ class ProfileOrderDetailsScreen extends StatelessWidget {
                     _SectionTitle(
                       title: 'items'.tr(),
                       subtitle: items.isEmpty
-                          ? 'No drinks were attached to this order yet'
-                          : 'Handcrafted drinks prepared for this request',
+                          ? 'items_empty_subtitle'.tr()
+                          : 'items_list_subtitle'.tr(),
                     ),
                     const SizedBox(height: 18),
                     if (items.isEmpty)
@@ -80,7 +80,7 @@ class ProfileOrderDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 32),
                       _SectionTitle(
                         title: 'created_at'.tr(),
-                        subtitle: 'When the roasting journey began',
+                        subtitle: 'created_at_hint'.tr(),
                       ),
                       const SizedBox(height: 16),
                       _InfoCard(icon: Icons.schedule, lines: [dateLabel]),
@@ -456,18 +456,19 @@ class _HeaderHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemsCount = order.orderItems?.length ?? 0;
-    final locationParts = <String>[];
-    if (order.floorId != null) {
-      locationParts.add('Floor ${order.floorName}');
+
+    final parts = <String>[];
+    if ((order.floorName ?? '').trim().isNotEmpty) {
+      parts.add('${'floor'.tr()} ${order.floorName}');
     }
-    if (order.floorId?.trim().isNotEmpty == true) {
-      locationParts.add(order.officeName ?? '');
+    if ((order.officeName ?? '').trim().isNotEmpty) {
+      parts.add('${'office'.tr()} ${order.officeName}');
     }
-    final location = locationParts.join(' | ');
+    final location = parts.join(' | ');
 
     final customerName = profile.name?.trim().isNotEmpty == true
         ? profile.name!.trim()
-        : profile.userName ?? 'Guest';
+        : profile.userName ?? 'guest'.tr();
 
     final orderId = order.id?.trim();
     String? orderCode;
@@ -482,8 +483,10 @@ class _HeaderHeroCard extends StatelessWidget {
       _HeaderDetailPill(
         icon: Icons.local_cafe_outlined,
         label: itemsCount == 0
-            ? 'Awaiting items'
-            : '$itemsCount ${itemsCount == 1 ? 'item' : 'items'}',
+            ? 'awaiting_items'.tr()
+            : itemsCount == 1
+            ? 'item'.tr()
+            : '${itemsCount} ${'items'.tr()}',
       ),
     ];
     if (createdAtLabel.isNotEmpty) {
@@ -717,7 +720,7 @@ class _SummaryCard extends StatelessWidget {
         ? profile.phoneNumber!.trim()
         : profile.name?.trim().isNotEmpty == true
         ? profile.name!.trim()
-        : 'Not provided';
+        : 'not_provided'.tr();
 
     return Container(
       width: double.infinity,
@@ -786,24 +789,24 @@ class _SummaryCard extends StatelessWidget {
             children: [
               _MetricChip(
                 icon: Icons.person_outline,
-                label: 'Customer',
+                label: 'customer'.tr(),
                 value: profile.name?.trim().isNotEmpty == true
                     ? profile.name!.trim()
-                    : profile.userName ?? 'Guest',
+                    : profile.userName ?? 'guest'.tr(),
               ),
               _MetricChip(
                 icon: Icons.location_city_outlined,
-                label: 'Floor',
+                label: 'floor'.tr(),
                 value: floorLabel,
               ),
               _MetricChip(
                 icon: Icons.apartment_outlined,
-                label: 'Office',
+                label: 'office'.tr(),
                 value: officeLabel,
               ),
               _MetricChip(
                 icon: Icons.call_outlined,
-                label: 'Contact',
+                label: 'contact'.tr(),
                 value: contact,
               ),
             ],
@@ -939,7 +942,7 @@ class _EmptyItemsPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Text(
-            'No drinks were attached to this order',
+            'no_drinks_attached_title'.tr(),
             textAlign: TextAlign.center,
             style: AppTextStyle.getBoldStyle(
               fontSize: AppFontSize.size_15,
@@ -948,7 +951,7 @@ class _EmptyItemsPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Once items are added, we will trace them here with roasting notes.',
+            'no_drinks_attached_sub'.tr(),
             textAlign: TextAlign.center,
             style: AppTextStyle.getRegularStyle(
               fontSize: AppFontSize.size_12,
@@ -979,7 +982,7 @@ class _TimelineItemCard extends StatelessWidget {
         ? item.drink!.name!.trim()
         : item.drinkId?.trim().isNotEmpty == true
         ? item.drinkId!.trim()
-        : 'Signature drink';
+        : 'signature_drink'.tr();
     final createdAt = _formatDate(item.creationTime);
     final sugarLevel = SugarLevel.fromInt(item.sugarLevel);
     final sugarLabel = _sugarLevelDisplay(sugarLevel);
@@ -988,10 +991,10 @@ class _TimelineItemCard extends StatelessWidget {
 
     final tags = <String>[];
     if (quantity > 0) {
-      tags.add('Qty x$quantity');
+      tags.add('qty_x'.tr(args: ['${quantity}']));
     }
     if (sugarLabel.isNotEmpty) {
-      tags.add('$sugarLabel sugar');
+      tags.add('$sugarLabel ${'sugar'.tr()}');
     }
 
     return TweenAnimationBuilder<double>(
@@ -1120,7 +1123,7 @@ class _TimelineItemCard extends StatelessWidget {
                   if (notes != null && notes.isNotEmpty) ...[
                     const SizedBox(height: 14),
                     Text(
-                      'Barista notes',
+                      'barista_notes'.tr(),
                       style: AppTextStyle.getBoldStyle(
                         fontSize: AppFontSize.size_12,
                         color: AppColors.black23,
@@ -1149,13 +1152,13 @@ String _sugarLevelDisplay(SugarLevel? level) {
   if (level == null) return '';
   switch (level) {
     case SugarLevel.none:
-      return 'No';
+      return 'sugar_none'.tr();
     case SugarLevel.light:
-      return 'Light';
+      return 'sugar_light'.tr();
     case SugarLevel.medium:
-      return 'Medium';
+      return 'sugar_medium'.tr();
     case SugarLevel.high:
-      return 'High';
+      return 'sugar_high'.tr();
   }
 }
 
@@ -1514,10 +1517,14 @@ class SugarArcPainter extends CustomPainter {
       );
     }
 
-    final label = _sugarLevelDisplay(sugarLevel);
+    final adjective = _sugarLevelDisplay(sugarLevel); // localized adjective
+    final textToPaint = adjective.isEmpty
+        ? 'sugar'.tr()
+        : '$adjective ${'sugar'.tr()}';
+
     final painter = TextPainter(
       text: TextSpan(
-        text: label.isEmpty ? 'Sugar' : '$label sugar',
+        text: textToPaint,
         style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.black87,

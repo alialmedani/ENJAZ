@@ -6,9 +6,9 @@ import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/auth/data/model/register_model.dart';
 import 'package:enjaz/features/auth/screen/login_screen.dart';
-import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../cubit/auth_cubit.dart';
 
@@ -21,7 +21,7 @@ class FinishToRegister extends StatelessWidget {
       backgroundColor: AppColors.xbackgroundColor,
       appBar: AppBar(
         title: Text(
-          'إنهاء التسجيل',
+          'register_finish_title'.tr(),
           style: AppTextStyle.getBoldStyle(
             fontSize: AppFontSize.size_16,
             color: AppColors.white,
@@ -38,13 +38,11 @@ class FinishToRegister extends StatelessWidget {
             physics: AlwaysScrollableScrollPhysics(),
             child: SizedBox.shrink(),
           ),
-
           onSuccess: (_) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigation.pushAndRemoveUntil(const LoginScreen());
             });
           },
-
           loading: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -52,7 +50,7 @@ class FinishToRegister extends StatelessWidget {
                 CircularProgressIndicator(color: AppColors.xprimaryColor),
                 const SizedBox(height: AppPaddingSize.padding_12),
                 Text(
-                  'جاري إنشاء الحساب...',
+                  'register_creating_account'.tr(),
                   style: AppTextStyle.getRegularStyle(
                     fontSize: AppFontSize.size_14,
                     color: AppColors.black23,
@@ -61,11 +59,10 @@ class FinishToRegister extends StatelessWidget {
               ],
             ),
           ),
-
           onError: (msg) {
             final message = (msg?.toString().isNotEmpty ?? false)
                 ? msg.toString()
-                : 'حدث خطأ غير متوقع';
+                : 'err_unexpected'.tr();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(message),
