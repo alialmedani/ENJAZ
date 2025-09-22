@@ -274,7 +274,7 @@ class _QuantityButton extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(icon, color: Colors.white, size: 20),
+          child: Icon(icon, color: AppColors.orange, size: 20),
         ),
       ),
     );
@@ -294,9 +294,9 @@ class _InfoChip extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [Colors.white, Colors.white.withValues(alpha: 0.85)],
+          colors: [ AppColors.orange, AppColors.white .withValues(alpha: 0.6)],
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+        border: Border.all(color: AppColors.orange .withValues(alpha: 0.85)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

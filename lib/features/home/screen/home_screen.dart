@@ -19,7 +19,7 @@ class CoffeeAppHomeScreen extends StatefulWidget {
   const CoffeeAppHomeScreen({super.key});
 
   @override
-  State<CoffeeAppHomeScreen> createState()  => _CoffeeAppHomeScreenState();
+  State<CoffeeAppHomeScreen> createState() => _CoffeeAppHomeScreenState();
 }
 
 class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
@@ -46,7 +46,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Center(
             child: Text(
-              'home_no_coffee'.tr(), 
+              'home_no_coffee'.tr(),
               style: TextStyle(
                 color: AppColors.xsecondaryColor,
                 fontSize: AppFontSize.size_16,
@@ -118,7 +118,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                         GestureDetector(
+                        GestureDetector(
                           onTap: () {
                             Navigation.push(
                               CoffeeDetailScreen(heroTag: tag, drinkModel: api),
@@ -165,7 +165,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
 
                         const Spacer(),
 
-                         Align(
+                        Align(
                           alignment: Alignment.centerRight,
                           child: StatefulBuilder(
                             builder: (context, setLocalState) {
@@ -271,13 +271,13 @@ Padding headerParts(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-        userModel?.userName ??'', // "Location"
+              'Welcome ', // "Location"
               style: TextStyle(color: AppColors.xsecondaryColor),
             ),
             Row(
               children: [
                 Text(
-                  'home_location_value'.tr(),  
+                  userModel?.userName ?? '',
                   style: const TextStyle(
                     color: AppColors.white,
                     fontSize: AppFontSize.size_16,
@@ -285,10 +285,6 @@ Padding headerParts(BuildContext context) {
                   ),
                 ),
                 SizedBox(width: AppFontSize.size_5),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.xsecondaryColor,
-                ),
               ],
             ),
           ],
@@ -326,7 +322,7 @@ Padding headerParts(BuildContext context) {
                           contentPadding: EdgeInsets.zero,
                           isDense: true,
                           border: InputBorder.none,
-                          hintText: 'home_search_hint'.tr(), 
+                          hintText: 'home_search_hint'.tr(),
                           hintStyle: const TextStyle(
                             fontSize: AppFontSize.size_18,
                             color: AppColors.whiteF1,
@@ -379,8 +375,7 @@ SizedBox categorySelection(List<String> categories) {
       physics: const BouncingScrollPhysics(),
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-           },
+          onTap: () {},
           child: Container(
             margin: EdgeInsets.only(
               left: index == 0 ? AppFontSize.size_25 : AppFontSize.size_10,
