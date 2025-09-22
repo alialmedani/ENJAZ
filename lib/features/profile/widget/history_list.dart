@@ -136,7 +136,7 @@ class _StatusGlyph extends StatelessWidget {
     final (label, color, icon) = _mapStatus(status);
     return Container(
       width: 48,
-      height: 72,
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 72),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
@@ -272,3 +272,4 @@ String _formatDate(String? iso) {
     return iso;
   }
 }
+

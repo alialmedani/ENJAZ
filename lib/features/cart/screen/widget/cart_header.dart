@@ -430,11 +430,11 @@ class _SummaryCard extends StatelessWidget {
                     label: 'cart_metric_total_cups'.tr(),
                     value: totalQuantity,
                   ),
-                  _MetricPill(
-                    icon: Icons.water_drop_rounded,
-                    label: 'cart_metric_sugar_sets'.tr(),
-                    value: sugarVariety,
-                  ),
+                  // _MetricPill(
+                  //   icon: Icons.water_drop_rounded,
+                  //   label: 'cart_metric_sugar_sets'.tr(),
+                  //   value: sugarVariety,
+                  // ),
                 ],
               ),
             ],
