@@ -17,8 +17,7 @@ import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/profile/data/model/user_model.dart';
 import 'package:enjaz/features/profile/widget/history_list.dart';
 import 'package:enjaz/features/profile/widget/skeletons.dart';
-import 'package:enjaz/core/results/result.dart';
-
+ 
 /// امتدادات العرض على UserModel
 extension UserModelDisplay on UserModel {
   String get displayName {
@@ -115,8 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           top: false,
           bottom: false,
           child: GetModel<UserModel>(
-            // بيرجع Future<Result<UserModel>> من ProfileCubit (advanced repo/usecase)
-            useCaseCallBack: () =>
+             useCaseCallBack: () =>
                 context.read<ProfileCubit>().fetchCurrentCustomer(),
             loading: const ProfileSkeleton(),
             modelBuilder: (profile) => Column(

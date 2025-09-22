@@ -6,6 +6,8 @@ import '../../../../core/usecase/usecase.dart';
 import '../repository/order_repo.dart';
 
 class GetAllOrdersParams extends BaseParams {
+
+  
   final GetListRequest? request;
 
   GetAllOrdersParams({required this.request});

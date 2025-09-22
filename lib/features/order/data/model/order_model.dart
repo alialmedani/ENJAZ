@@ -6,6 +6,8 @@ class OrderModel {
   UserModel? customerUser;
   String? floorId;
   String? officeId;
+  String? floorName;   
+  String? officeName;   
   List<OrderItems>? orderItems;
   int? status;
   String? creationTime;
@@ -16,6 +18,8 @@ class OrderModel {
     this.customerUser,
     this.floorId,
     this.officeId,
+    this.floorName,   
+    this.officeName,   
     this.orderItems,
     this.status,
     this.creationTime,
@@ -29,11 +33,13 @@ class OrderModel {
         : null;
     floorId = json['floorId'];
     officeId = json['officeId'];
+    floorName = json['floorName'];   // ✅ مضاف
+    officeName = json['officeName']; // ✅ مضاف
     if (json['orderItems'] != null) {
       orderItems = <OrderItems>[];
-      json['orderItems'].forEach((v) {
+      for (var v in (json['orderItems'] as List)) {
         orderItems!.add(OrderItems.fromJson(v));
-      });
+      }
     }
     status = json['status'];
     creationTime = json['creationTime'];
@@ -47,7 +53,9 @@ class OrderModel {
       data['customerUser'] = customerUser!.toJson();
     }
     data['floorId'] = floorId;
-    data['office'] = officeId;
+    data['officeId'] = officeId;     
+    data['floorName'] = floorName;   
+    data['officeName'] = officeName;  
     if (orderItems != null) {
       data['orderItems'] = orderItems!.map((v) => v.toJson()).toList();
     }

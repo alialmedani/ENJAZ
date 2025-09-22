@@ -9,9 +9,8 @@ import 'package:enjaz/features/FO/cubit/place_cubit.dart';
 import 'package:enjaz/features/FO/data/model/place_model.dart';
 import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
 import 'package:enjaz/features/FO/widget/place_dropdown.dart'; // (Floor - type=1)
-import 'package:enjaz/features/auth/cubit/auth_cubit.dart' show AuthCubit;
-import 'package:enjaz/features/auth/data/model/register_model.dart';
-import 'package:flutter/material.dart';
+import 'package:enjaz/features/auth/cubit/auth_cubit.dart'  ;
+ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'finish_to_register.dart';
 

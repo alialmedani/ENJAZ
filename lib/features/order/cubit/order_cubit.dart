@@ -16,6 +16,19 @@ class OrderCubit extends Cubit<OrderState> {
   PaginationCubit? orderCubit;
   OrderCubit() : super(OrderInitial());
 
+  // --- تخزين اختيار المكان (الطابق والمكتب) ---
+  String? _floorId;
+  String? _officeId;
+
+  void setDeliveryPlace({required String floorId, required String officeId}) {
+    _floorId = floorId;
+    _officeId = officeId;
+  }
+
+  bool get hasValidPlace =>
+      (_floorId != null && _floorId!.isNotEmpty) &&
+      (_officeId != null && _officeId!.isNotEmpty);
+
   SugarLevel _percentageToSugarLevel(double percentage) {
     if (percentage <= 0.0) return SugarLevel.none;
     if (percentage <= 0.25) return SugarLevel.light;
@@ -24,8 +37,6 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   CreateOrderParams get createOrderParams => CreateOrderParams(
-    floor: 'floorId',
-    office: 'officeId',
     orderItems: CacheHelper.getCartItems().map((cartItem) {
       return CreateItemModel(
         drinkId: cartItem.drink.id ?? "",
@@ -34,14 +45,16 @@ class OrderCubit extends Cubit<OrderState> {
         sugarLevel: _percentageToSugarLevel(cartItem.sugarPercentage).toInt(),
       );
     }).toList(),
+    floorId: _floorId ?? '', // ← تعبئة من الاختيار المخزّن
+    officeId: _officeId ?? '', // ← تعبئة من الاختيار المخزّن
   );
-//a
+
   Future<Result> requestOrder() async {
     return await CreateOrderUsecase(
       OrderRepository(),
     ).call(params: createOrderParams);
   }
-//a
+
   Future<Result> fetchAllOrder(data) async {
     return await GetAllOrdersUsecase(
       OrderRepository(),

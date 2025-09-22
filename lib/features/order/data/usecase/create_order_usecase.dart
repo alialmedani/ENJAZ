@@ -6,20 +6,20 @@ import '../model/order_model.dart';
 import '../repository/order_repo.dart';
 
 class CreateOrderParams extends BaseParams {
-  String floor;
-  String office;
+  String floorId;
+  String officeId;
   List<CreateItemModel> orderItems;
 
   CreateOrderParams({
-    required this.floor,
-    required this.office,
+    required this.floorId,
+    required this.officeId,
     required this.orderItems,
   });
 
   toJson() {
     return {
-      "Floor": floor,
-      "Office": office,
+      "floorId": floorId,
+      "officeId": officeId,
       "OrderItems": orderItems.map((item) => item.toJson()).toList(),
     };
   }
