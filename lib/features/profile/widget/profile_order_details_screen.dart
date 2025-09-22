@@ -29,7 +29,7 @@ class ProfileOrderDetailsScreen extends StatelessWidget {
     final dateLabel = _formatDate(order.creationTime);
     final statusVisual = _statusVisual(order.status ?? 0);
     final displayProfile = order.customerUser ?? profile;
-
+ final totalQty = items.fold<int>(0, (sum, it) => sum + (it.quantity ?? 1));
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -47,6 +47,7 @@ class ProfileOrderDetailsScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: _ContentSheet(
                   children: [
+                    
                     _SummaryCard(
                       status: statusVisual,
                       createdAtLabel: dateLabel,
@@ -54,12 +55,13 @@ class ProfileOrderDetailsScreen extends StatelessWidget {
                       profile: displayProfile,
                     ),
                     const SizedBox(height: 28),
-                    _SectionTitle(
-                      title: 'items'.tr(),
-                      subtitle: items.isEmpty
-                          ? 'items_empty_subtitle'.tr()
-                          : 'items_list_subtitle'.tr(),
-                    ),
+                   _SectionTitle(
+  title: 'items'.tr(),
+  subtitle: items.isEmpty
+      ? 'items_empty_subtitle'.tr()
+      : 'items_list_subtitle'.tr(),
+  count: totalQty, // ✅
+),
                     const SizedBox(height: 18),
                     if (items.isEmpty)
                       const _EmptyItemsPlaceholder()
@@ -186,25 +188,37 @@ class _FrostedBlob extends StatelessWidget {
     );
   }
 }
-
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, this.subtitle});
+  const _SectionTitle({
+    required this.title,
+    this.subtitle,
+    this.count, // ✅ جديد
+  });
 
   final String title;
   final String? subtitle;
+  final int? count; // ✅ جديد
 
   @override
   Widget build(BuildContext context) {
     final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: AppTextStyle.getBoldStyle(
-            fontSize: AppFontSize.size_18,
-            color: AppColors.black23,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyle.getBoldStyle(
+                  fontSize: AppFontSize.size_18,
+                  color: AppColors.black23,
+                ),
+              ),
+            ),
+            if (count != null) _QtyBadge(count: count!), // ✅ badge
+          ],
         ),
         const SizedBox(height: 6),
         Container(
@@ -232,37 +246,68 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _GlassIconButton extends StatelessWidget {
-  const _GlassIconButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
+class _QtyBadge extends StatelessWidget {
+  const _QtyBadge({required this.count});
+  final int count;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: Colors.white.withValues(alpha: 0.85),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.xprimaryColor.withValues(alpha: 0.18),
+            AppColors.xorangeColor.withValues(alpha: 0.14),
           ],
         ),
-        alignment: Alignment.center,
-        child: Icon(icon, size: 18, color: AppColors.secondPrimery),
+        border: Border.all(
+          color: AppColors.xprimaryColor.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Text(
+        '× $count', // أو فقط '$count'
+        style: AppTextStyle.getBoldStyle(
+          fontSize: AppFontSize.size_12,
+          color: AppColors.xprimaryColor,
+        ),
       ),
     );
   }
 }
+
+// class _GlassIconButton extends StatelessWidget {
+//   const _GlassIconButton({required this.icon, required this.onTap});
+
+//   final IconData icon;
+//   final VoidCallback onTap;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         width: 42,
+//         height: 42,
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(14),
+//           color: Colors.white.withValues(alpha: 0.85),
+//           border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black.withValues(alpha: 0.08),
+//               blurRadius: 12,
+//               offset: const Offset(0, 6),
+//             ),
+//           ],
+//         ),
+//         alignment: Alignment.center,
+//         child: Icon(icon, size: 18, color: AppColors.secondPrimery),
+//       ),
+//     );
+//   }
+// }
 
 class _ContentSheet extends StatelessWidget {
   const _ContentSheet({required this.children});
@@ -584,18 +629,20 @@ class _TimelineItemCard extends StatelessWidget {
     final createdAt = _formatDate(item.creationTime);
     final sugarLevel = SugarLevel.fromInt(item.sugarLevel);
     final sugarLabel = _sugarLevelDisplay(sugarLevel);
-    final quantity = item.quantity ?? 1;
     final notes = item.notes?.trim();
+    final int quantity = () {
+      final qRaw = item.quantity;
+      if (qRaw is int) return qRaw;
+      return int.tryParse(qRaw ?? '') ?? 1;
+    }().clamp(1, 999); // ما نخليه أقل من 1
 
     final tags = <String>[];
-    if (quantity > 0) {
-      tags.add('qty_x'.tr(args: ['$quantity']));
-    }
+    // دايماً أضف التاغ (أو خليها تظهر بس لما تكون > 1 حسب ذوقك)
+    tags.add('qty_x'.tr(args: [quantity.toString()]));
+
     if (sugarLabel.isNotEmpty) {
       tags.add('$sugarLabel ${'sugar'.tr()}');
     }
-
-
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -711,14 +758,19 @@ class _TimelineItemCard extends StatelessWidget {
                     ],
                   ),
                   if (tags.isNotEmpty) ...[
-                    const SizedBox(height: 14),
+                  const SizedBox(height: 14),
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: tags
-                          .map((tag) => _InfoTag(label: tag))
-                          .toList(),
+                      children: [
+                        _InfoTag(
+                          label: '× $quantity',
+                        ), // أو 'qty_x'.tr(args: [quantity.toString()])
+                        if (sugarLabel.isNotEmpty)
+                          _InfoTag(label: '$sugarLabel ${'sugar'.tr()}'),
+                      ],
                     ),
+
                   ],
                   if (notes != null && notes.isNotEmpty) ...[
                     const SizedBox(height: 14),

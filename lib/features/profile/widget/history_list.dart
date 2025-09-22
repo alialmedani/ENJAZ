@@ -26,6 +26,7 @@ class HistoryList extends StatelessWidget {
     final items = orderModel.orderItems ?? const [];
     final dateLabel = _formatDate(orderModel.creationTime);
     final status = orderModel.status ?? 0;
+final totalQty = items.fold<int>(0, (sum, it) => sum + (it.quantity ?? 1));
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -78,7 +79,7 @@ class HistoryList extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              '${items.length} ${'items'.tr()}',
+'$totalQty ${'items'.tr()}',
                               style: AppTextStyle.getBoldStyle(
                                 fontSize: AppFontSize.size_14,
                                 color: AppColors.black23,
@@ -107,7 +108,7 @@ class HistoryList extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _QuickSummary(items: items),
+                      // _QuickSummary(items: items),
                     ],
                   ),
                 ),
