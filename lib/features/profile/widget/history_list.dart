@@ -2,8 +2,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
+ 
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
@@ -69,7 +68,7 @@ class HistoryList extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _StatusGlyph(status: status),
+                // _StatusGlyph(status: status),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -126,46 +125,46 @@ class HistoryList extends StatelessWidget {
   }
 }
 
-class _StatusGlyph extends StatelessWidget {
-  const _StatusGlyph({required this.status});
+// class _StatusGlyph extends StatelessWidget {
+//   const _StatusGlyph({required this.status});
 
-  final int status;
+//   final int status;
 
-  @override
-  Widget build(BuildContext context) {
-    final (label, color, icon) = _mapStatus(status);
-    return Container(
-      width: 48,
-      constraints: const BoxConstraints(minWidth: 48, minHeight: 72),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            color.withValues(alpha: 0.22),
-            color.withValues(alpha: 0.05),
-          ],
-        ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Icon(icon, color: color, size: 20),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppTextStyle.getRegularStyle(
-              fontSize: AppFontSize.size_10,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final (label, color, icon) = _mapStatus(status);
+//     return Container(
+//       width: 48,
+//       constraints: const BoxConstraints(minWidth: 48, minHeight: 72),
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(18),
+//         gradient: LinearGradient(
+//           begin: Alignment.topCenter,
+//           end: Alignment.bottomCenter,
+//           colors: [
+//             color.withValues(alpha: 0.22),
+//             color.withValues(alpha: 0.05),
+//           ],
+//         ),
+//       ),
+//       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Icon(icon, color: color, size: 20),
+//           Text(
+//             label,
+//             textAlign: TextAlign.center,
+//             style: AppTextStyle.getRegularStyle(
+//               fontSize: AppFontSize.size_10,
+//               color: color,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.status});
@@ -217,7 +216,7 @@ class _QuickSummary extends StatelessWidget {
         _SummaryChip(label: 'history_qty'.tr(args: ['${items.length}'])),
         if (drinkName.isNotEmpty) _SummaryChip(label: drinkName),
         if (sugar != null)
-          _SummaryChip(label: 'history_sugar'.tr(args: ['${sugar}'])),
+          _SummaryChip(label: 'history_sugar'.tr(args: ['$sugar'])),
       ],
     );
   }

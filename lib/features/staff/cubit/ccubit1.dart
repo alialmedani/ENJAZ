@@ -2085,6 +2085,4 @@ String _scheduledStatusKey(StaffOrderStatus s) {
 String _statusLabel(BuildContext context, StaffOrderStatus s) =>
     _statusKey(s).tr();
 
-/// ===============================
-/// (8) END
-/// ===============================
+ 
