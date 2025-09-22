@@ -74,75 +74,84 @@ class CartItemCard extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _ItemThumbnail(item: item, alias: alias),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: Column(
+                  _ItemThumbnail(item: item, alias: alias),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              displayTitle,
-                              style: AppTextStyle.getBoldStyle(
-                                fontSize: AppFontSize.size_16,
-                                color: AppColors.black23,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayTitle,
+                                    style: AppTextStyle.getBoldStyle(
+                                      fontSize: AppFontSize.size_16,
+                                      color: AppColors.black23,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    item.drink.description ?? 'cart_intro'.tr(),
+                                    style: AppTextStyle.getRegularStyle(
+                                      fontSize: AppFontSize.size_12,
+                                      color: AppColors.secondPrimery,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              item.drink.description ?? 'cart_intro'.tr(),
-                              style: AppTextStyle.getRegularStyle(
-                                fontSize: AppFontSize.size_12,
-                                color: AppColors.secondPrimery,
+                            const SizedBox(width: 12),
+                            _RemoveButton(onTap: onRemove),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          children: [
+                            _InfoChip(
+                              icon: Icons.straighten_rounded,
+                              label: 'cart_item_size'.tr(
+                                namedArgs: {'size': item.size},
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            _InfoChip(
+                              icon: Icons.water_drop_rounded,
+                              label: 'cart_item_sugar'.tr(
+                                namedArgs: {'level': sugarLabel},
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      _RemoveButton(onTap: onRemove),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 10,
-                    children: [
-                      _InfoChip(
-                        icon: Icons.straighten_rounded,
-                        label: 'cart_item_size'.tr(
-                          namedArgs: {'size': item.size},
+                        const SizedBox(height: 14),
+                        const Divider(height: 1, color: Color(0x1FFFFFFF)),
+                        const SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _QuantityControl(
+                              quantity: item.quantity,
+                              onDecrement: item.quantity > 1
+                                  ? () => onQuantityChanged(item.quantity - 1)
+                                  : null,
+                              onIncrement: () =>
+                                  onQuantityChanged(item.quantity + 1),
+                            ),
+                            _Badge(label: sugarLabel),
+                          ],
                         ),
-                      ),
-                      _InfoChip(
-                        icon: Icons.water_drop_rounded,
-                        label: 'cart_item_sugar'.tr(
-                          namedArgs: {'level': sugarLabel},
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Divider(height: 1, color: Color(0x1FFFFFFF)),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _QuantityControl(
-                        quantity: item.quantity,
-                        onDecrement: item.quantity > 1
-                            ? () => onQuantityChanged(item.quantity - 1)
-                            : null,
-                        onIncrement: () => onQuantityChanged(item.quantity + 1),
-                      ),
-                      _Badge(label: sugarLabel),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

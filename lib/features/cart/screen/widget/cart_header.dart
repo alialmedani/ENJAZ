@@ -28,72 +28,188 @@ class CartHeader extends StatelessWidget {
     final safeTop = MediaQuery.of(context).padding.top;
     final collapse = progress.clamp(0.0, 1.0);
     final accent = AppColors.orange;
-    final cardOffset = lerpDouble(0, 48, collapse)!;
 
     return SizedBox(
-      height: safeTop + 320,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(
-            child: _HeaderBackground(progress: collapse, accent: accent),
-          ),
-          Positioned(
-            top: safeTop + 12,
-            left: 20,
-            right: 20,
-            child: Row(
+      height: safeTop + 300,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _HeaderBackground(progress: collapse, accent: accent),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _GlassIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () => Navigator.of(context).maybePop(),
-                ),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 240),
-                    child: collapse < 0.8
-                        ? SizedBox(
-                            key: const ValueKey('cart-title-expanded'),
-                            height: 44,
-                            child: Center(
-                              child: Text(
-                                'cart_title'.tr(),
-                                style: AppTextStyle.getBoldStyle(
-                                  fontSize: AppFontSize.size_18,
-                                  color: AppColors.black23,
-                                ),
-                              ),
-                            ),
-                          )
-                        : Align(
-                            key: const ValueKey('cart-title-collapsed'),
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'cart_title'.tr(),
-                              style: AppTextStyle.getBoldStyle(
-                                fontSize: AppFontSize.size_16,
-                                color: AppColors.black23,
-                              ),
-                            ),
-                          ),
+                SizedBox(height: safeTop + 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _Toolbar(
+                    collapse: collapse,
+                    onBack: () => Navigator.of(context).maybePop(),
+                    onClear: onClear,
                   ),
                 ),
-                _GlassIconButton(icon: Icons.delete_outline, onTap: onClear),
+                const SizedBox(height: 18),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _SummaryStage(
+                      collapse: collapse,
+                      totalItems: totalItems,
+                      totalQuantity: totalQuantity,
+                      sugarVariety: sugarVariety,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Toolbar extends StatelessWidget {
+  const _Toolbar({
+    required this.collapse,
+    required this.onBack,
+    required this.onClear,
+  });
+
+  final double collapse;
+  final VoidCallback onBack;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _GlassIconButton(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 240),
+            child: collapse < 0.8
+                ? SizedBox(
+                    key: const ValueKey('cart-title-expanded'),
+                    height: 44,
+                    child: Center(
+                      child: Text(
+                        'cart_title'.tr(),
+                        style: AppTextStyle.getBoldStyle(
+                          fontSize: AppFontSize.size_18,
+                          color: AppColors.black23,
+                        ),
+                      ),
+                    ),
+                  )
+                : Align(
+                    key: const ValueKey('cart-title-collapsed'),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'cart_title'.tr(),
+                      style: AppTextStyle.getBoldStyle(
+                        fontSize: AppFontSize.size_16,
+                        color: AppColors.black23,
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+        _GlassIconButton(icon: Icons.delete_outline, onTap: onClear),
+      ],
+    );
+  }
+}
+
+class _SummaryStage extends StatelessWidget {
+  const _SummaryStage({
+    required this.collapse,
+    required this.totalItems,
+    required this.totalQuantity,
+    required this.sugarVariety,
+  });
+
+  final double collapse;
+  final int totalItems;
+  final int totalQuantity;
+  final int sugarVariety;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: collapse),
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        final slide = lerpDouble(0, 48, value)!;
+        final scale = lerpDouble(1.0, 0.94, value)!;
+        final haloOpacity = lerpDouble(1.0, 0.25, value)!;
+
+        return Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: Opacity(
+                opacity: haloOpacity,
+                child: _SummaryAura(accent: AppColors.orange),
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, slide),
+              child: Transform.scale(
+                scale: scale,
+                alignment: Alignment.topCenter,
+                child: _SummaryCard(
+                  collapse: value,
+                  totalItems: totalItems,
+                  totalQuantity: totalQuantity,
+                  sugarVariety: sugarVariety,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SummaryAura extends StatelessWidget {
+  const _SummaryAura({required this.accent});
+
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 220,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Align(
+            alignment: const Alignment(-0.8, -0.4),
+            child: _Halo(
+              size: 220,
+              colors: [accent.withValues(alpha: 0.3), Colors.transparent],
+            ),
+          ),
+          Align(
+            alignment: const Alignment(0.9, -0.2),
+            child: _Halo(
+              size: 160,
+              colors: [
+                AppColors.secondPrimery.withValues(alpha: 0.22),
+                Colors.transparent,
               ],
             ),
           ),
-          Positioned(
-            left: 20,
-            right: 20,
-            top: safeTop + 86,
-            child: Transform.translate(
-              offset: Offset(0, cardOffset),
-              child: _SummaryCard(
-                collapse: collapse,
-                totalItems: totalItems,
-                totalQuantity: totalQuantity,
-                sugarVariety: sugarVariety,
-              ),
+          Align(
+            alignment: const Alignment(0.0, 0.8),
+            child: _Halo(
+              size: 240,
+              colors: [accent.withValues(alpha: 0.18), Colors.transparent],
             ),
           ),
         ],
@@ -126,52 +242,88 @@ class _HeaderBackground extends StatelessWidget {
           colors: [topColor, Colors.white],
         ),
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -100 + (progress * 60),
-            right: -40,
-            child: _Halo(
-              size: 220,
-              colors: [accent.withValues(alpha: 0.3), Colors.transparent],
-            ),
-          ),
-          Positioned(
-            top: 140,
-            left: -70,
-            child: _Halo(
-              size: 280,
-              colors: [
-                AppColors.secondPrimery.withValues(alpha: 0.2),
-                Colors.transparent,
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: -130,
-            right: -90,
-            child: _Halo(
-              size: 320,
-              colors: [accent.withValues(alpha: 0.24), Colors.transparent],
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.4, 1.0],
-                  colors: [
-                    Colors.white.withValues(alpha: 0.0),
-                    Colors.white.withValues(alpha: 0.18),
-                    Colors.white,
-                  ],
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: progress),
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutQuart,
+        builder: (context, value, child) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment(
+                  lerpDouble(0.4, 0.9, value)!,
+                  lerpDouble(-1.2, -0.6, value)!,
                 ),
+                child: Transform.translate(
+                  offset: Offset(
+                    lerpDouble(0, -30, value)!,
+                    lerpDouble(-100, -60, value)!,
+                  ),
+                  child: _Halo(
+                    size: 220,
+                    colors: [accent.withValues(alpha: 0.3), Colors.transparent],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment(
+                  lerpDouble(-1.2, -0.8, value)!,
+                  lerpDouble(0.3, 0.6, value)!,
+                ),
+                child: Transform.translate(
+                  offset: Offset(
+                    lerpDouble(-60, -40, value)!,
+                    lerpDouble(40, 20, value)!,
+                  ),
+                  child: _Halo(
+                    size: 280,
+                    colors: [
+                      AppColors.secondPrimery.withValues(alpha: 0.2),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment(
+                  lerpDouble(1.2, 1.0, value)!,
+                  lerpDouble(1.2, 0.9, value)!,
+                ),
+                child: Transform.translate(
+                  offset: Offset(
+                    lerpDouble(60, 20, value)!,
+                    lerpDouble(80, 40, value)!,
+                  ),
+                  child: _Halo(
+                    size: 320,
+                    colors: [
+                      accent.withValues(alpha: 0.24),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              if (child != null) child!,
+            ],
+          );
+        },
+        child: SizedBox.expand(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.4, 1.0],
+                colors: [
+                  Colors.white.withValues(alpha: 0.0),
+                  Colors.white.withValues(alpha: 0.18),
+                  Colors.white,
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -203,8 +355,8 @@ class _SummaryCard extends StatelessWidget {
           duration: const Duration(milliseconds: 320),
           curve: Curves.easeOutCubic,
           padding: EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: lerpDouble(28, 22, collapse)!,
+            horizontal: 22,
+            vertical: lerpDouble(24, 18, collapse)!,
           ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -261,12 +413,12 @@ class _SummaryCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               const Divider(height: 1, color: Color(0x1FFFFFFF)),
               const SizedBox(height: 18),
               Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: 10,
+                runSpacing: 10,
                 children: [
                   _MetricPill(
                     icon: Icons.grid_view_rounded,
@@ -307,7 +459,7 @@ class _MetricPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
@@ -328,16 +480,16 @@ class _MetricPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.orange.withValues(alpha: 0.14),
             ),
             alignment: Alignment.center,
-            child: Icon(icon, size: 18, color: AppColors.orange),
+            child: Icon(icon, size: 16, color: AppColors.orange),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -395,8 +547,8 @@ class _SummaryAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 56,
-      height: 56,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -407,7 +559,7 @@ class _SummaryAvatar extends StatelessWidget {
         ),
         border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
       ),
-      child: Icon(Icons.receipt_long, color: color, size: 26),
+      child: Icon(Icons.receipt_long, color: color, size: 24),
     );
   }
 }
@@ -426,7 +578,7 @@ class _AnimatedCount extends StatelessWidget {
       builder: (context, animated, child) => Text(
         animated.toStringAsFixed(0),
         style: AppTextStyle.getBoldStyle(
-          fontSize: AppFontSize.size_16,
+          fontSize: AppFontSize.size_15,
           color: AppColors.black23,
         ),
       ),
