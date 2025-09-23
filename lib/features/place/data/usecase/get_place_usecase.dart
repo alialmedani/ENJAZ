@@ -1,5 +1,5 @@
-import 'package:enjaz/features/FO/data/model/place_model.dart';
-import 'package:enjaz/features/FO/data/repo/place_repository.dart';
+import 'package:enjaz/features/place/data/model/place_model.dart';
+import 'package:enjaz/features/place/data/repo/place_repository.dart';
 
 import '../../../../core/boilerplate/pagination/models/get_list_request.dart';
 import '../../../../core/params/base_params.dart';

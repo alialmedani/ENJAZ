@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:enjaz/core/boilerplate/pagination/models/get_list_request.dart';
 import 'package:enjaz/core/results/result.dart';
-import 'package:enjaz/features/FO/data/repo/place_repository.dart';
-import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
+import 'package:enjaz/features/place/data/repo/place_repository.dart';
+import 'package:enjaz/features/place/data/usecase/get_place_usecase.dart';
 import 'package:meta/meta.dart';
 
 part 'place_state.dart';

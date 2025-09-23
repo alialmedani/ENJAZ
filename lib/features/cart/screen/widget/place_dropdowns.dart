@@ -9,9 +9,9 @@ import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
-import 'package:enjaz/features/FO/cubit/place_cubit.dart';
-import 'package:enjaz/features/FO/data/model/place_model.dart';
-import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
+import 'package:enjaz/features/place/cubit/place_cubit.dart';
+import 'package:enjaz/features/place/data/model/place_model.dart';
+import 'package:enjaz/features/place/data/usecase/get_place_usecase.dart';
 
 class FloorDropdown extends StatefulWidget {
   const FloorDropdown({

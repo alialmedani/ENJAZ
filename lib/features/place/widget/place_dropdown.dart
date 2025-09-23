@@ -1,6 +1,6 @@
 import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
-import 'package:enjaz/features/FO/cubit/place_cubit.dart';
-import 'package:enjaz/features/FO/data/model/place_model.dart';
+import 'package:enjaz/features/place/cubit/place_cubit.dart';
+import 'package:enjaz/features/place/data/model/place_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

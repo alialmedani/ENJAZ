@@ -3,8 +3,8 @@ import 'package:enjaz/core/data_source/remote_data_source.dart';
 import 'package:enjaz/core/http/http_method.dart';
 import 'package:enjaz/core/repository/core_repository.dart';
 import 'package:enjaz/core/results/result.dart';
-import 'package:enjaz/features/FO/data/model/place_model.dart';
-import 'package:enjaz/features/FO/data/usecase/get_place_usecase.dart';
+import 'package:enjaz/features/place/data/model/place_model.dart';
+import 'package:enjaz/features/place/data/usecase/get_place_usecase.dart';
 
 class PlaceRepository extends CoreRepository {
   Future<Result<List<PlaceModel>>> getPlace({

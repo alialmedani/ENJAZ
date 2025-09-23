@@ -12,7 +12,7 @@ import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
 
 import 'package:enjaz/features/order/cubit/order_cubit.dart';
 import 'package:enjaz/features/order/data/model/order_model.dart';
-import 'package:enjaz/features/FO/data/model/place_model.dart';
+import 'package:enjaz/features/place/data/model/place_model.dart';
 
 import 'place_dropdowns.dart';
 import 'package:enjaz/core/results/result.dart';
