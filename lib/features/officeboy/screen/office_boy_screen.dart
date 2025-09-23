@@ -1,7 +1,10 @@
 // lib/features/staff/screen/office_boy_home_root.dart
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:enjaz/core/constant/enum/enum.dart' as Core;
+import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
+import 'package:enjaz/core/ui/dialogs/dialogs.dart';
+import 'package:enjaz/core/ui/widgets/custom_button.dart';
+import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/officeboy/screen/widget/3.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,9 +21,9 @@ import 'package:enjaz/core/results/result.dart';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
 import 'package:enjaz/features/officeboy/screen/widget/segmented_status_tabs.dart';
 import 'package:enjaz/features/officeboy/data/model/officeboy_model.dart';
-  
+
 // ====== البروفايل (عندك جاهز) ======
- 
+
 class OfficeBoyHomeRoot extends StatefulWidget {
   const OfficeBoyHomeRoot({super.key});
   @override
@@ -43,54 +46,51 @@ class _OfficeBoyHomeRootState extends State<OfficeBoyHomeRoot> {
       ),
     ];
 
-    return BlocProvider(
-      create: (_) => OfficeBoyCubit(),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF6EDE7),
-        body: SafeArea(
-          child: IndexedStack(index: _index, children: pages),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _index,
-          onTap: (i) => setState(() => _index = i),
-          selectedItemColor: AppColors.xprimaryColor,
-          unselectedItemColor: AppColors.secondPrimery,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.coffee_outlined),
-              label: 'Orders',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Profile',
-            ),
-          ],
-        ),
-        floatingActionButton: _index == 0
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FloatingActionButton.small(
-                    heroTag: 'refresh',
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      // لو بدك ترفّرش الليست
-                      // تقدر توصل للكيوبيت اللي جوّا OrdersTabShell لو عملته GlobalKey
-                    },
-                    backgroundColor: Colors.white,
-                    child: const Icon(Icons.refresh, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 8),
-                  FloatingActionButton(
-                    heroTag: 'scan',
-                    onPressed: () => HapticFeedback.selectionClick(),
-                    backgroundColor: AppColors.xprimaryColor,
-                    child: const Icon(Icons.qr_code_scanner),
-                  ),
-                ],
-              )
-            : null,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6EDE7),
+      body: SafeArea(
+        child: IndexedStack(index: _index, children: pages),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        onTap: (i) => setState(() => _index = i),
+        selectedItemColor: AppColors.xprimaryColor,
+        unselectedItemColor: AppColors.secondPrimery,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.coffee_outlined),
+            label: 'Orders',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+        ],
+      ),
+      floatingActionButton: _index == 0
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'refresh',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    // لو بدك ترفّرش الليست
+                    // تقدر توصل للكيوبيت اللي جوّا OrdersTabShell لو عملته GlobalKey
+                  },
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.refresh, color: Colors.black87),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'scan',
+                  onPressed: () => HapticFeedback.selectionClick(),
+                  backgroundColor: AppColors.xprimaryColor,
+                  child: const Icon(Icons.qr_code_scanner),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }
@@ -717,36 +717,28 @@ void _showStatusSheet(
                   ],
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.xprimaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save'),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    final ok = await context
-                          .read<OfficeBoyCubit>()
-                          .updateOrderStatusBool(
-                            orderId: item.id ?? '',
-                            status: Core.OrderStatus.ready, // مثال
-                          );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            ok ? 'Status updated' : 'Update failed',
-                          ),
-                        ),
-                      );
-
-                    },
-                  ),
+                CreateModel(
+                  useCaseCallBack: (data) {
+                    context
+                            .read<OfficeBoyCubit>()
+                            .updateOrderStatusParams
+                            .orderId =
+                        item.id ?? '';
+                    context
+                        .read<OfficeBoyCubit>()
+                        .updateOrderStatusParams
+                        .status = selected
+                        .toInt();
+                    return context
+                        .read<OfficeBoyCubit>()
+                        .updateOrderStatusBool();
+                  },
+                  withValidation: false,
+                  onSuccess: (model) {
+                    Dialogs.showSnackBar(message: "Status updated");
+                    Navigation.pop();
+                  },
+                  child: CustomButton(text: "Save"),
                 ),
                 const SizedBox(height: 6),
               ],
@@ -1072,6 +1064,7 @@ List<String> _distinct(Iterable<String?> it) {
   }
   return out;
 }
+
 // === CHIPS BAR ===
 class _ChipsBar extends StatelessWidget {
   final List<String> floors;

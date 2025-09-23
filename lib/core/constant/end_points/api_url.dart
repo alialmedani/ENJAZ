@@ -8,6 +8,7 @@ const getlistdrink = '${baseUrl}api/app/drink'; // GET
 /////order url////////////
 
 const String createDrinkOrderUrl = '${baseUrl}api/app/order';
+const String changeDrinkOrderStatusUrl = '${baseUrl}api/app/Order/change-status';
 const String getOrdersUrl = '${baseUrl}api/app/order';
 const String getCurrentUserOrdersUrl = '${baseUrl}api/app/Order/current_user';
  const String createDrinkOrderLiteUrl = "$baseUrl/api/app/order";

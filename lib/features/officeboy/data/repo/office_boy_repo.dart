@@ -30,7 +30,7 @@ import 'package:enjaz/features/officeboy/data/usecase/status_order_usecase.dart'
     final result = await RemoteDataSource.request<SatusOrderModel>(
       withAuthentication: true,
       data: params.toJson(),
-      url: createDrinkOrderUrl,
+      url: "$changeDrinkOrderStatusUrl/${params.orderId}",
       method: HttpMethod.POST,
       converter: (json) {
         return SatusOrderModel.fromJson(json);

@@ -7,16 +7,19 @@ import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 import 'package:enjaz/features/drink/cubit/drink_cubit.dart';
 import 'package:enjaz/features/order/cubit/order_cubit.dart';
 import 'package:enjaz/features/root/screen/root_screen.dart';
- import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
+import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/root/cubit/root_cubit.dart';
 import 'package:enjaz/features/officeboy/cubit/ccubit1.dart';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
 import 'package:enjaz/features/officeboy/screen/office_boy_screen.dart';
+import 'package:enjaz/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/classes/keys.dart';
+import 'core/classes/notification.dart';
 import 'core/constant/app_theme/app_theme.dart';
 
 SharedPreferences? prefs;
@@ -25,14 +28,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CacheHelper.init();
   await EasyLocalization.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FireBaseNotification().initNotification();
 
   runApp(
-     EasyLocalization(
+    EasyLocalization(
       supportedLocales: const [Locale('ar'), Locale('en')],
-      path: 'assets/translations',  
+      path: 'assets/translations',
       fallbackLocale: const Locale('ar'),
       startLocale: const Locale('ar'),
-      useOnlyLangCode: true, 
+      useOnlyLangCode: true,
       saveLocale: true,
       child: const MyApp(),
     ),
