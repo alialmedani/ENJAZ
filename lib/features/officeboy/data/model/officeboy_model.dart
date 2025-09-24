@@ -175,6 +175,7 @@ class OrderItems {
   int? sugarLevel;
   int? quantity;
   String? notes;
+  String? bengaliNotes;
   String? creationTime;
 
   OrderItems({
@@ -185,6 +186,7 @@ class OrderItems {
     sugarLevel,
     quantity,
     notes,
+    bengaliNotes,
     creationTime,
   });
 
@@ -196,6 +198,7 @@ class OrderItems {
     sugarLevel = json['sugarLevel'];
     quantity = json['quantity'];
     notes = json['notes'];
+    bengaliNotes = json['bengaliNotes'];
     creationTime = json['creationTime'];
   }
 
@@ -210,6 +213,7 @@ class OrderItems {
     data['sugarLevel'] = sugarLevel;
     data['quantity'] = quantity;
     data['notes'] = notes;
+    data['bengaliNotes'] = bengaliNotes;
     data['creationTime'] = creationTime;
     return data;
   }

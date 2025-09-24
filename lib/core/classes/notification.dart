@@ -24,9 +24,8 @@ class FireBaseNotification {
 
     await _firebaseMessaging.subscribeToTopic("all");
 
-    if (CacheHelper.getRole != "User") {
-      await _firebaseMessaging.subscribeToTopic("officeboy");
-    }
+    // Topic subscriptions will be managed after login based on user role
+    // Initial subscription is avoided to prevent incorrect subscriptions
 
     // if (defaultTargetPlatform == TargetPlatform.iOS) {
     final String? apnsToken = await _firebaseMessaging.getAPNSToken();
@@ -260,5 +259,23 @@ class FireBaseNotification {
     Keys.navigatorKey.currentState?.push(
       MaterialPageRoute(builder: (context) => const SplashSscreen1()),
     );
+  }
+
+  Future<void> updateTopicSubscriptions() async {
+    final String? userRole = CacheHelper.getRole;
+
+    if (userRole == "User") {
+      // User role should only subscribe to "all" topic, unsubscribe from "officeboy"
+      await _firebaseMessaging.unsubscribeFromTopic("officeboy");
+      if (kDebugMode) {
+        print('Unsubscribed from officeboy topic for User role');
+      }
+    } else {
+      // Non-user roles should subscribe to "officeboy" topic
+      await _firebaseMessaging.subscribeToTopic("officeboy");
+      if (kDebugMode) {
+        print('Subscribed to officeboy topic for role: $userRole');
+      }
+    }
   }
 }

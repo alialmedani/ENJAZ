@@ -2,7 +2,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
- 
+
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
@@ -26,7 +26,7 @@ class HistoryList extends StatelessWidget {
     final items = orderModel.orderItems ?? const [];
     final dateLabel = _formatDate(orderModel.creationTime);
     final status = orderModel.status ?? 0;
-final totalQty = items.fold<int>(0, (sum, it) => sum + (it.quantity ?? 1));
+    final totalQty = items.fold<int>(0, (sum, it) => sum + (it.quantity ?? 1));
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -56,13 +56,6 @@ final totalQty = items.fold<int>(0, (sum, it) => sum + (it.quantity ?? 1));
             color: Colors.white,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(color: AppColors.greyE5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppPaddingSize.padding_16),
@@ -79,7 +72,7 @@ final totalQty = items.fold<int>(0, (sum, it) => sum + (it.quantity ?? 1));
                         children: [
                           Expanded(
                             child: Text(
-'$totalQty ${'items'.tr()}',
+                              '$totalQty ${'items'.tr()}',
                               style: AppTextStyle.getBoldStyle(
                                 fontSize: AppFontSize.size_14,
                                 color: AppColors.black23,
@@ -199,53 +192,53 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-class _QuickSummary extends StatelessWidget {
-  const _QuickSummary({required this.items});
+// class _QuickSummary extends StatelessWidget {
+//   const _QuickSummary({required this.items});
 
-  final List<OrderItems> items;
+//   final List<OrderItems> items;
 
-  @override
-  Widget build(BuildContext context) {
-    final primary = items.isNotEmpty ? items.first : null;
-    final drinkName = primary?.drink?.name ?? '';
-    final sugar = primary?.sugarLevel;
+//   @override
+//   Widget build(BuildContext context) {
+//     final primary = items.isNotEmpty ? items.first : null;
+//     final drinkName = primary?.drink?.name ?? '';
+//     final sugar = primary?.sugarLevel;
 
-    return Wrap(
-      spacing: 10,
-      runSpacing: 6,
-      children: [
-        _SummaryChip(label: 'history_qty'.tr(args: ['${items.length}'])),
-        if (drinkName.isNotEmpty) _SummaryChip(label: drinkName),
-        if (sugar != null)
-          _SummaryChip(label: 'history_sugar'.tr(args: ['$sugar'])),
-      ],
-    );
-  }
-}
+//     return Wrap(
+//       spacing: 10,
+//       runSpacing: 6,
+//       children: [
+//         _SummaryChip(label: 'history_qty'.tr(args: ['${items.length}'])),
+//         if (drinkName.isNotEmpty) _SummaryChip(label: drinkName),
+//         if (sugar != null)
+//           _SummaryChip(label: 'history_sugar'.tr(args: ['$sugar'])),
+//       ],
+//     );
+//   }
+// }
 
-class _SummaryChip extends StatelessWidget {
-  const _SummaryChip({required this.label});
+// class _SummaryChip extends StatelessWidget {
+//   const _SummaryChip({required this.label});
 
-  final String label;
+//   final String label;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.xbackgroundColor3,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyle.getRegularStyle(
-          fontSize: AppFontSize.size_11,
-          color: AppColors.black23,
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+//       decoration: BoxDecoration(
+//         color: AppColors.xbackgroundColor3,
+//         borderRadius: BorderRadius.circular(12),
+//       ),
+//       child: Text(
+//         label,
+//         style: AppTextStyle.getRegularStyle(
+//           fontSize: AppFontSize.size_11,
+//           color: AppColors.black23,
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 (String, Color, IconData) _mapStatus(int status) {
   switch (status) {
@@ -253,9 +246,9 @@ class _SummaryChip extends StatelessWidget {
       return ('preparing'.tr(), AppColors.xpurpleColor, Icons.coffee);
     case 2:
       return ('on_the_way'.tr(), AppColors.xorangeColor, Icons.delivery_dining);
-    case 3:
-      return ('completed'.tr(), Colors.green.shade600, Icons.check_circle);
     case 4:
+      return ('completed'.tr(), Colors.green.shade600, Icons.check_circle);
+    case 5:
       return ('canceled'.tr(), Colors.red.shade600, Icons.cancel);
     default:
       return ('pending'.tr(), AppColors.secondPrimery, Icons.hourglass_bottom);
@@ -272,4 +265,3 @@ String _formatDate(String? iso) {
     return iso;
   }
 }
-

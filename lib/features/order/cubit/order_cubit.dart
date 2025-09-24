@@ -41,7 +41,7 @@ class OrderCubit extends Cubit<OrderState> {
       return CreateItemModel(
         drinkId: cartItem.drink.id ?? "",
         quantity: cartItem.quantity,
-        notes: "",
+        notes: cartItem.notes ?? "",
         sugarLevel: _percentageToSugarLevel(cartItem.sugarPercentage).toInt(),
       );
     }).toList(),

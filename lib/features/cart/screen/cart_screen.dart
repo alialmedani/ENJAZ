@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:enjaz/features/cart/screen/widget/cart_item_card.dart';
 import 'package:enjaz/features/cart/screen/widget/checkout_bar.dart';
 import 'package:enjaz/features/cart/screen/widget/empty_cart_view.dart';
+import 'package:enjaz/features/root/cubit/root_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
@@ -90,8 +91,7 @@ class _CartScreenState extends State<CartScreen>
       if (state.cartItems.isEmpty) {
         return EmptyCartView(
           key: const ValueKey('cart-empty'),
-          onBrowse: () => Navigator.of(context).maybePop(),
-          onRefresh: () => context.read<CartCubit>().loadCart(),
+          onBrowse: () => context.read<RootCubit>().changePageIndex(0),
         );
       }
 
@@ -162,8 +162,6 @@ class _CartScreenState extends State<CartScreen>
 
     return const SizedBox(key: ValueKey('cart-idle'));
   }
-
- 
 }
 
 class _CartBackground extends StatelessWidget {
@@ -268,5 +266,3 @@ class _BlurredOrb extends StatelessWidget {
     );
   }
 }
-
-

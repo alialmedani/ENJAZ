@@ -8,14 +8,9 @@ import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 
 class EmptyCartView extends StatelessWidget {
-  const EmptyCartView({
-    super.key,
-    required this.onBrowse,
-    required this.onRefresh,
-  });
+  const EmptyCartView({super.key, required this.onBrowse});
 
   final VoidCallback onBrowse;
-  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +84,6 @@ class EmptyCartView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _GhostButton(
-                          label: 'common_refresh'.tr(),
-                          onTap: onRefresh,
-                        ),
                         const SizedBox(width: 14),
                         _PrimaryButton(
                           label: 'empty_cart_browse'.tr(),

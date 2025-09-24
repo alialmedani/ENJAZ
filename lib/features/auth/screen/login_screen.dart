@@ -1,5 +1,6 @@
 import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
+import 'package:enjaz/core/classes/notification.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
@@ -203,8 +204,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (result.hasDataOnly) {
                             if (result.data?.roles?.contains('User') == true) {
                               CacheHelper.setRole('User');
+                              await FireBaseNotification()
+                                  .updateTopicSubscriptions();
                               Navigation.pushAndRemoveUntil(const RootScreen());
                             } else {
+                              await FireBaseNotification()
+                                  .updateTopicSubscriptions();
                               Navigation.pushAndRemoveUntil(
                                 const OfficeBoyOrdersScreen(),
                               );

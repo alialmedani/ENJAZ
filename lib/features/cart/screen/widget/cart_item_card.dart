@@ -131,6 +131,11 @@ class CartItemCard extends StatelessWidget {
                                 namedArgs: {'level': sugarLabel},
                               ),
                             ),
+                            if (item.notes?.isNotEmpty == true)
+                              _InfoChip(
+                                icon: Icons.edit_note_rounded,
+                                label: item.notes!,
+                              ),
                           ],
                         ),
                         const SizedBox(height: 14),
@@ -289,20 +294,24 @@ class _InfoChip extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [ AppColors.orange, AppColors.white .withValues(alpha: 0.6)],
+          colors: [AppColors.orange, AppColors.white.withValues(alpha: 0.6)],
         ),
-        border: Border.all(color: AppColors.orange .withValues(alpha: 0.85)),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.85)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 18, color: AppColors.orange),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: AppTextStyle.getRegularStyle(
-              fontSize: AppFontSize.size_12,
-              color: AppColors.black23,
+          Expanded(
+            child: Text(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              label,
+              style: AppTextStyle.getRegularStyle(
+                fontSize: AppFontSize.size_12,
+                color: AppColors.black23,
+              ),
             ),
           ),
         ],
@@ -373,29 +382,29 @@ class _Badge extends StatelessWidget {
   }
 }
 
-class _MiniBadge extends StatelessWidget {
-  const _MiniBadge({required this.text});
+// class _MiniBadge extends StatelessWidget {
+//   const _MiniBadge({required this.text});
 
-  final String text;
+//   final String text;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: Colors.white.withValues(alpha: 0.9),
-      ),
-      child: Text(
-        text,
-        style: AppTextStyle.getBoldStyle(
-          fontSize: AppFontSize.size_11,
-          color: AppColors.orange,
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(14),
+//         color: Colors.white.withValues(alpha: 0.9),
+//       ),
+//       child: Text(
+//         text,
+//         style: AppTextStyle.getBoldStyle(
+//           fontSize: AppFontSize.size_11,
+//           color: AppColors.orange,
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 SugarLevel _percentageToSugarLevel(double value) {
   if (value <= 0) return SugarLevel.none;

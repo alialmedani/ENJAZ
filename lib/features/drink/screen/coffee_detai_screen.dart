@@ -1,6 +1,6 @@
-import 'dart:ui' as ui;
 import 'dart:ui';
 
+import 'package:enjaz/core/ui/widgets/custom_text_form_field.dart';
 import 'package:enjaz/features/drink/data/model/drink_model.dart';
 import 'package:enjaz/features/cart/data/model/cart_item_model.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
@@ -32,6 +32,7 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
   int _qty = 1;
   SugarLevel _sugarLevel = SugarLevel.medium;
   bool _submitting = false;
+  final _notesController = TextEditingController();
 
   String get _imageUrl =>
       'https://task.jasim-erp.com/api/dms/file/get/${widget.drinkModel.id}/?entitytype=1';
@@ -198,6 +199,74 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
                                   height: 1.5,
                                 ),
                           ),
+                          const SizedBox(height: 28),
+                          _SectionTitle(
+                            title: 'Notes',
+                            subtitle:
+                                'Share any special preferences or requests',
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(22),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withValues(alpha: 0.95),
+                                  const Color(0xFFFFF7EE),
+                                  Colors.white.withValues(alpha: 0.90),
+                                ],
+                              ),
+                              border: Border.all(
+                                color: accent.withValues(alpha: 0.15),
+                                width: 1.2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accent.withValues(alpha: 0.08),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 12),
+                                ),
+                              ],
+                            ),
+                            child: CustomTextFormField(
+                              controller: _notesController,
+                              borderRadius: 22,
+                              hintText: "Add your special notes...",
+                              fillColor: Colors.transparent,
+                              maxLines: 3,
+                              borderColor: Colors.transparent,
+                              prefixIcon: Container(
+                                margin: const EdgeInsets.only(
+                                  left: 12,
+                                  right: 8,
+                                  top: 4,
+                                ),
+                                child: Icon(
+                                  Icons.edit_note_rounded,
+                                  color: accent.withValues(alpha: 0.7),
+                                  size: 22,
+                                ),
+                              ),
+                              hintStyle: AppTextStyle.getRegularStyle(
+                                fontSize: AppFontSize.size_14,
+                                color: AppColors.secondPrimery.withValues(
+                                  alpha: 0.7,
+                                ),
+                              ),
+                              textStyle: AppTextStyle.getRegularStyle(
+                                fontSize: AppFontSize.size_14,
+                                color: AppColors.black23,
+                              ).copyWith(height: 1.4),
+                              paddingTop: 16,
+                            ),
+                          ),
                           const SizedBox(height: 48),
                         ],
                       ),
@@ -221,6 +290,12 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
     );
   }
 
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
   Future<void> _addToCart() async {
     setState(() => _submitting = true);
 
@@ -230,6 +305,9 @@ class _CoffeeDetailScreenState extends State<CoffeeDetailScreen> {
         quantity: _qty,
         size: _size,
         sugarPercentage: _sugarLevelToPercent(_sugarLevel),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
       );
 
       await context.read<CartCubit>().addToCart(cartItem);
@@ -1130,7 +1208,7 @@ class SugarArcPainter extends CustomPainter {
           fontSize: 14,
         ),
       ),
-// textDirection: TextDirection.ltr, // بشرط عدم وجود تظليل للاسم
+      // textDirection: TextDirection.ltr, // بشرط عدم وجود تظليل للاسم
     )..layout();
     painter.paint(
       canvas,
