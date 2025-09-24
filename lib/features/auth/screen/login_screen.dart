@@ -1,22 +1,18 @@
 import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
-import 'package:enjaz/core/classes/notification.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
+import 'package:enjaz/core/ui/screens/splash_screen.dart';
 import 'package:enjaz/core/utils/Navigation/navigation.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
 import 'package:enjaz/features/auth/data/model/login_model.dart';
 import 'package:enjaz/features/auth/screen/signup_screen.dart';
-import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-
-import '../../officeboy/screen/office_boy_screen.dart';
-import '../../profile/cubit/profile_cubit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -139,8 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               _phoneCtl.text.trim(),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty)
+                        if (value.isEmpty) {
                           return 'err_enter_username_or_phone'.tr();
+                        }
                         if (!RegExp(r'^[A-Za-z0-9]+$').hasMatch(value)) {
                           return 'err_alnum_only'.tr();
                         }
@@ -198,23 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           CacheHelper.setRefreshToken(res.refreshToken);
                           CacheHelper.setExpiresIn(res.expiresIn);
                           CacheHelper.setDateWithExpiry(res.expiresIn ?? 3600);
-                          final result = await context
-                              .read<ProfileCubit>()
-                              .fetchCurrentCustomer();
-                          if (result.hasDataOnly) {
-                            if (result.data?.roles?.contains('User') == true) {
-                              CacheHelper.setRole('User');
-                              await FireBaseNotification()
-                                  .updateTopicSubscriptions();
-                              Navigation.pushAndRemoveUntil(const RootScreen());
-                            } else {
-                              await FireBaseNotification()
-                                  .updateTopicSubscriptions();
-                              Navigation.pushAndRemoveUntil(
-                                const OfficeBoyOrdersScreen(),
-                              );
-                            }
-                          }
+                          Navigation.push(SplashSscreen1());
                         },
                         child: ElevatedButton(
                           onPressed: null,
