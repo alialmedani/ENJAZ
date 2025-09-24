@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:enjaz/core/classes/cashe_helper.dart';
 import 'package:enjaz/core/ui/screens/splash_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +23,10 @@ class FireBaseNotification {
     // CacheHelper.setDeviceToken(token);
 
     await _firebaseMessaging.subscribeToTopic("all");
-    //TODO
-    await _firebaseMessaging.subscribeToTopic("officeboy");
+
+    if (CacheHelper.getRole != "User") {
+      await _firebaseMessaging.subscribeToTopic("officeboy");
+    }
 
     // if (defaultTargetPlatform == TargetPlatform.iOS) {
     final String? apnsToken = await _firebaseMessaging.getAPNSToken();
@@ -44,10 +47,10 @@ class FireBaseNotification {
     );
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+          alert: true,
+          badge: true,
+          sound: true,
+        );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       if (kDebugMode) {
@@ -68,12 +71,9 @@ class FireBaseNotification {
   Future<void> _requestIOSPermissions() async {
     final bool? result = await _localNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
 
     if (result == true) {
       if (kDebugMode) {
@@ -90,16 +90,17 @@ class FireBaseNotification {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (kDebugMode) {
         print(
-            "Foreground notification received: ${message.notification?.title}");
+          "Foreground notification received: ${message.notification?.title}",
+        );
       }
       _handleForegroundNotification(message);
     });
   }
 
   void handleBackgroundNotifications() {
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then(_navigateToSplashScreen);
+    FirebaseMessaging.instance.getInitialMessage().then(
+      _navigateToSplashScreen,
+    );
     FirebaseMessaging.onMessageOpenedApp.listen(_navigateToSplashScreen);
   }
 
@@ -108,7 +109,8 @@ class FireBaseNotification {
 
     final String title = message.notification!.title ?? "No Title";
     final String body = message.notification!.body ?? "No Body";
-    final String? imageUrl = message.notification!.android?.imageUrl ??
+    final String? imageUrl =
+        message.notification!.android?.imageUrl ??
         message.notification!.apple?.imageUrl;
 
     if (imageUrl != null) {
@@ -139,7 +141,10 @@ class FireBaseNotification {
   }
 
   Future<NotificationDetails> _createImageNotificationDetails(
-      String imageUrl, String title, String body) async {
+    String imageUrl,
+    String title,
+    String body,
+  ) async {
     try {
       final String base64Image = await _downloadAndConvertImage(imageUrl);
       final bigPictureStyleInformation = BigPictureStyleInformation(
@@ -173,7 +178,10 @@ class FireBaseNotification {
   }
 
   Future<void> _showProgressNotification(
-      RemoteMessage message, String title, String body) async {
+    RemoteMessage message,
+    String title,
+    String body,
+  ) async {
     final int progress = int.tryParse(message.data['progress'] ?? '0') ?? 0;
 
     for (int i = progress; i <= 100; i += 10) {
@@ -213,21 +221,21 @@ class FireBaseNotification {
   NotificationDetails _createDefaultNotificationDetails() {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-      'default_channel_id',
-      'Default Notifications',
-      channelDescription: 'Simple notifications',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      icon: "@mipmap/ic_launcher",
-    );
+          'default_channel_id',
+          'Default Notifications',
+          channelDescription: 'Simple notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          icon: "@mipmap/ic_launcher",
+        );
 
     const DarwinNotificationDetails iosNotificationDetails =
         DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
 
     return const NotificationDetails(
       android: androidNotificationDetails,

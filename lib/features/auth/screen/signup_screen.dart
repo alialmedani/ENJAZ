@@ -432,17 +432,17 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             const SizedBox(height: AppPaddingSize.padding_12),
 
-                            // Floor + Role
+
                             Row(
                               children: [
-                                // Floor (type=1)
+
                                 Expanded(
                                   child: PlaceDropdown(
                                     initialPlaceId: params.floorId.isEmpty
                                         ? null
                                         : params.floorId,
                                     decoration: _deco(
-                                      // لديك مفتاح "floor" جاهز في ملفّك
+
                                       'floor'.tr(),
                                       prefix: Icons.layers_outlined,
                                     ),
@@ -455,8 +455,6 @@ class _SignupScreenState extends State<SignupScreen> {
                                 const SizedBox(
                                   width: AppPaddingSize.padding_12,
                                 ),
-
-                                // Role
                                 Expanded(
                                   child: DropdownButtonFormField<RoleType>(
                                     isExpanded: true,
@@ -466,7 +464,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                           (rt) => DropdownMenuItem<RoleType>(
                                             value: rt,
                                             child: Text(
-                                              rt.displayString(), // نفترض displayString() مترجم داخليًا لديك
+                                              rt.displayString(), 
                                               style:
                                                   AppTextStyle.getRegularStyle(
                                                     fontSize:

@@ -1,21 +1,18 @@
+import 'package:enjaz/core/utils/Navigation/navigation.dart';
+import 'package:enjaz/features/auth/screen/login_screen.dart';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
 import 'package:enjaz/features/officeboy/data/usecase/get_order_usecase.dart';
 import 'package:enjaz/features/officeboy/data/usecase/status_order_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
 import 'package:enjaz/core/boilerplate/pagination/cubits/pagination_cubit.dart';
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/core/constant/text_styles/font_size.dart';
 import 'package:enjaz/core/constant/app_padding/app_padding.dart';
-
 import 'package:enjaz/features/officeboy/data/model/officeboy_model.dart';
+import '../../../core/classes/cashe_helper.dart';
 
-/// شاشة طلبات Office Boy بأربعة تبويبات حسب الحالة (0 / 1 / 4 / 5)
-/// - لا تعديل على core.
-/// - لكل تبويب OfficeBoyCubit مستقل.
-/// - PaginationList كما هي، ونفرد items للعرض.
 class OfficeBoyOrdersScreen extends StatefulWidget {
   const OfficeBoyOrdersScreen({super.key});
 
@@ -27,7 +24,6 @@ class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  /// نخزن PaginationCubit لكل حالة لتحديثها بالزر.
   final Map<int, PaginationCubit?> _tabPaginationCubits = {
     0: null,
     1: null,
@@ -59,58 +55,54 @@ class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
   }
 
   Widget _buildStatusTab({required int status, required String emptyTitle}) {
-    return BlocProvider<OfficeBoyCubit>(
-      create: (_) => OfficeBoyCubit(),
-      child: Builder(
-        builder: (context) {
-          final officeBoyCubit = context.read<OfficeBoyCubit>();
+    return Builder(
+      builder: (context) {
+        final officeBoyCubit = context.read<OfficeBoyCubit>();
 
-          return PaginationList<OfficeBoyModel>(
-            key: PageStorageKey('officeboy-status-$status'),
-            physics: const BouncingScrollPhysics(),
-            withRefresh: false,
-            onCubitCreated: (PaginationCubit cubit) {
-              _tabPaginationCubits[status] = cubit;
-              officeBoyCubit.drinkCubit = cubit;
-            },
-            repositoryCallBack: (data) {
-              officeBoyCubit.getOrderOfficeBoyParams = GetOrderOfficeBoyParams(
-                request: data,
-                status: status,
-              );
-              return officeBoyCubit.fetchAllOrderServies(data);
-            },
-            listBuilder: (List<OfficeBoyModel> apiList) {
-              final List<Items> orders = <Items>[
-                for (final page in apiList)
-                  if (page.items != null) ...page.items!,
-              ];
+        return PaginationList<OfficeBoyModel>(
+          key: PageStorageKey('officeboy-status-$status'),
+          physics: const BouncingScrollPhysics(),
+          withRefresh: false,
+          onCubitCreated: (PaginationCubit cubit) {
+            _tabPaginationCubits[status] = cubit;
+            officeBoyCubit.drinkCubit = cubit;
+          },
+          repositoryCallBack: (data) {
+            officeBoyCubit.getOrderOfficeBoyParams = GetOrderOfficeBoyParams(
+              request: data,
+              status: status,
+            );
+            return officeBoyCubit.fetchAllOrderServies(data);
+          },
+          listBuilder: (List<OfficeBoyModel> apiList) {
+            final List<Items> orders = <Items>[
+              for (final page in apiList)
+                if (page.items != null) ...page.items!,
+            ];
 
-              return CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppPaddingSize.padding_16,
-                      vertical: AppPaddingSize.padding_12,
-                    ),
-                    sliver: SliverList.separated(
-                      itemCount: orders.length,
-                      itemBuilder: (_, index) =>
-                          _OrderCard(order: orders[index]),
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: AppPaddingSize.padding_10),
-                    ),
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppPaddingSize.padding_16,
+                    vertical: AppPaddingSize.padding_12,
                   ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: AppFontSize.size_60),
+                  sliver: SliverList.separated(
+                    itemCount: orders.length,
+                    itemBuilder: (_, index) => _OrderCard(order: orders[index]),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppPaddingSize.padding_10),
                   ),
-                ],
-              );
-            },
-          );
-        },
-      ),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: AppFontSize.size_60),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -129,6 +121,15 @@ class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
             fontWeight: FontWeight.w600,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await CacheHelper.box.clear();
+              Navigation.pushAndRemoveUntil(LoginScreen());
+            },
+            icon: Icon(Icons.logout, color: AppColors.red),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
@@ -195,9 +196,7 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String? orderId = order.id;
     final int? status = order.status;
-
     final String? customerName = order.customerUser?.name; // مباشرة من الموديل
     final String? floorName = order.floorName; // مباشرة من الموديل
     final String? officeName = order.officeName; // مباشرة من الموديل

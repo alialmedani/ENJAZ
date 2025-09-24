@@ -14,6 +14,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../../officeboy/screen/office_boy_screen.dart';
+import '../../profile/cubit/profile_cubit.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -189,12 +192,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         withValidation: false,
                         onTap: () {},
-                        onSuccess: (LoginModel res) {
+                        onSuccess: (LoginModel res) async {
                           CacheHelper.setToken(res.accessToken);
                           CacheHelper.setRefreshToken(res.refreshToken);
                           CacheHelper.setExpiresIn(res.expiresIn);
                           CacheHelper.setDateWithExpiry(res.expiresIn ?? 3600);
-                          Navigation.pushAndRemoveUntil(const RootScreen());
+                          final result = await context
+                              .read<ProfileCubit>()
+                              .fetchCurrentCustomer();
+                          if (result.hasDataOnly) {
+                            if (result.data?.roles?.contains('User') == true) {
+                              CacheHelper.setRole('User');
+                              Navigation.pushAndRemoveUntil(const RootScreen());
+                            } else {
+                              Navigation.pushAndRemoveUntil(
+                                const OfficeBoyOrdersScreen(),
+                              );
+                            }
+                          }
                         },
                         child: ElevatedButton(
                           onPressed: null,

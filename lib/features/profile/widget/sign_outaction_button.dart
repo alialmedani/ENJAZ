@@ -85,10 +85,7 @@ class _SignOutActionButtonState extends State<SignOutActionButton>
     if (!mounted || _busy) return;
     setState(() => _busy = true);
     try {
-      await CacheHelper.box.delete(accessToken);
-      await CacheHelper.box.delete(refreshToken);
-      await CacheHelper.box.delete('current_user_phone');
-      await CacheHelper.box.delete('current_user_role');
+      await CacheHelper.box.clear();
 
       await _showNeoToast('signed_out'.tr());
       if (!mounted) return;
@@ -152,7 +149,7 @@ class _SignOutActionButtonState extends State<SignOutActionButton>
                 borderRadius: BorderRadius.circular(radius),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-                  child: Container(color: Colors.orange ),
+                  child: Container(color: Colors.orange),
                 ),
               ),
               // النص

@@ -1,12 +1,9 @@
 import 'dart:ui';
-import 'package:enjaz/features/cart/screen/widget/cart_header.dart';
 import 'package:enjaz/features/cart/screen/widget/cart_item_card.dart';
 import 'package:enjaz/features/cart/screen/widget/checkout_bar.dart';
 import 'package:enjaz/features/cart/screen/widget/empty_cart_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:easy_localization/easy_localization.dart';
-
 import 'package:enjaz/core/constant/app_colors/app_colors.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 
@@ -100,7 +97,7 @@ class _CartScreenState extends State<CartScreen>
 
       final items = state.cartItems;
       final totalQuantity = items.fold<int>(0, (sum, it) => sum + it.quantity);
-      final sugarVariety = items.map((it) => it.sugarPercentage).toSet().length;
+      // final sugarVariety = items.map((it) => it.sugarPercentage).toSet().length;
       final safeBottom = MediaQuery.of(context).padding.bottom;
 
       return Stack(
@@ -110,16 +107,16 @@ class _CartScreenState extends State<CartScreen>
             controller: _scrollController,
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(
-                child: CartHeader(
-                  progress: _headerProgress,
-                  totalItems: state.totalItems,
-                  totalQuantity: totalQuantity,
-                  sugarVariety: sugarVariety,
-                  onClear: () => _showClearCartDialog(context),
-                ),
-              ),
-              SliverToBoxAdapter(child: SizedBox(height: 12)),
+              // SliverToBoxAdapter(
+              //   child: CartHeader(
+              //     progress: _headerProgress,
+              //     totalItems: state.totalItems,
+              //     totalQuantity: totalQuantity,
+              //     sugarVariety: sugarVariety,
+              //     onClear: () => _showClearCartDialog(context),
+              //   ),
+              // ),
+              SliverToBoxAdapter(child: SizedBox(height: 40)),
 
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
@@ -166,12 +163,7 @@ class _CartScreenState extends State<CartScreen>
     return const SizedBox(key: ValueKey('cart-idle'));
   }
 
-  void _showClearCartDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => const _ClearDialog(),
-    );
-  }
+ 
 }
 
 class _CartBackground extends StatelessWidget {
@@ -277,30 +269,4 @@ class _BlurredOrb extends StatelessWidget {
   }
 }
 
-class _ClearDialog extends StatelessWidget {
-  const _ClearDialog();
 
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('cart_clear_title'.tr()), // "Clear cart"
-      content: Text('cart_clear_body'.tr()),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('common_cancel'.tr()),
-        ),
-        TextButton(
-          onPressed: () {
-            context.read<CartCubit>().clearCart();
-            Navigator.of(context).pop();
-          },
-          child: Text(
-            'cart_clear_action'.tr(), // "Clear"
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      ],
-    );
-  }
-}

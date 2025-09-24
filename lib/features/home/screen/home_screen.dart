@@ -118,7 +118,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
               Icon(
                 Icons.local_cafe_outlined,
                 size: AppFontSize.size_42,
-                color: AppColors.xsecondaryColor.withOpacity(0.7),
+                color: AppColors.xsecondaryColor.withValues(alpha: 0.7),
               ),
               SizedBox(height: AppFontSize.size_12),
               Text(
@@ -245,7 +245,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
               width: bigCircleSize,
               height: bigCircleSize,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
             ),
@@ -259,7 +259,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
               width: smallCircleSize,
               height: smallCircleSize,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -278,7 +278,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                     Text(
                       'home_location_label'.tr(),
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.75),
+                        color: Colors.white.withValues(alpha: 0.75),
                         fontSize: AppFontSize.size_14,
                       ),
                     ),
@@ -319,7 +319,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                         children: [
                           Icon(
                             Icons.blur_on,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             size: AppFontSize.size_18,
                           ),
                           SizedBox(width: AppFontSize.size_8),
@@ -327,7 +327,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                             child: Text(
                               'cart_intro'.tr(),
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withValues(alpha: 0.85),
                                 fontSize: AppFontSize.size_14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -355,9 +355,9 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
         child: Container(
           height: AppFontSize.size_60,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.14),
+            color: Colors.white.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(AppFontSize.size_18),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: AppPaddingSize.padding_18,
@@ -375,7 +375,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                   decoration: InputDecoration(
                     hintText: 'home_search_hint'.tr(),
                     hintStyle: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: AppFontSize.size_16,
                     ),
                     border: InputBorder.none,
@@ -418,7 +418,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
           borderRadius: BorderRadius.circular(AppFontSize.size_14),
           boxShadow: [
             BoxShadow(
-              color: palette.first.withOpacity(0.25),
+              color: palette.first.withValues(alpha: 0.25),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -435,7 +435,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
 
   Widget _buildPromoCarousel() {
     return SizedBox(
-      height: AppFontSize.size_190,
+      height: AppFontSize.size_250,
       child: Column(
         children: [
           Expanded(
@@ -473,8 +473,8 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                 height: AppFontSize.size_8,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppFontSize.size_12),
-                  color: _promoCards[index].gradient.first.withOpacity(
-                    lerpDouble(0.3, 0.9, 1 - progress)!,
+                  color: _promoCards[index].gradient.first.withValues(
+                    alpha: lerpDouble(0.3, 0.9, 1 - progress)!,
                   ),
                 ),
               );
@@ -546,7 +546,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: palette.first.withOpacity(0.3),
+                                color: palette.first.withValues(alpha: 0.3),
                                 blurRadius: 16,
                                 offset: const Offset(0, 8),
                               ),
@@ -599,7 +599,7 @@ class _PromoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppFontSize.size_24),
         boxShadow: [
           BoxShadow(
-            color: data.gradient.first.withOpacity(isActive ? 0.3 : 0.12),
+            color: data.gradient.first.withValues(alpha: isActive ? 0.3 : 0.12),
             blurRadius: isActive ? 25 : 12,
             offset: const Offset(0, 14),
           ),
@@ -637,7 +637,7 @@ class _PromoCard extends StatelessWidget {
                     vertical: AppPaddingSize.padding_6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.16),
+                    color: Colors.white.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(AppFontSize.size_20),
                   ),
                   child: Text(
@@ -663,7 +663,7 @@ class _PromoCard extends StatelessWidget {
                   child: Text(
                     data.subtitleKey.tr(),
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.88),
+                      color: Colors.white.withValues(alpha: 0.88),
                       fontSize: AppFontSize.size_14,
                       height: 1.4,
                     ),
@@ -674,7 +674,9 @@ class _PromoCard extends StatelessWidget {
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOut,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(isActive ? 0.22 : 0.15),
+                    color: Colors.white.withValues(
+                      alpha: isActive ? 0.22 : 0.15,
+                    ),
                     borderRadius: BorderRadius.circular(AppFontSize.size_16),
                   ),
                   padding: const EdgeInsets.symmetric(
@@ -773,7 +775,7 @@ class _DrinkCardState extends State<_DrinkCard> {
                     borderRadius: BorderRadius.circular(AppFontSize.size_18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.black.withOpacity(0.04),
+                        color: AppColors.black.withValues(alpha: 0.04),
                         blurRadius: 20,
                         offset: const Offset(0, 12),
                       ),
@@ -830,7 +832,9 @@ class _DrinkCardState extends State<_DrinkCard> {
                                           vertical: AppPaddingSize.padding_6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.45),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.45,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             AppFontSize.size_20,
                                           ),
@@ -992,7 +996,7 @@ class _AddToCartButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppFontSize.size_16),
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.25),
+            color: colors.first.withValues(alpha: 0.25),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),

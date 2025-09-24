@@ -35,7 +35,6 @@ class _PlaceDropdownState extends State<PlaceDropdown> {
   PlaceModel? _findById(List<PlaceModel> items, String? id) {
     if (id == null) return null;
     for (final p in items) {
-      // عدّل الحقول حسب موديلك لو مش id/name
       if ((p.id?.toString() ?? '') == id) return p;
     }
     return null;
@@ -44,33 +43,27 @@ class _PlaceDropdownState extends State<PlaceDropdown> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 56,
       child: PaginationList(
-        // نفس اللي عندك: بينادي الكيوبت ويرجع Future<Result<List<PlaceModel>>>
         repositoryCallBack: (data) {
           return context.read<PlaceCubit>().fetchPLaceServies(data);
         },
-      
-        // بنينا الدروب داون مباشرة من الليست
+
         listBuilder: (list) {
           final places = list.cast<PlaceModel>();
-      
+
           return DropdownButtonFormField<String>(
             isExpanded: true,
             initialValue: _selectedId == null
                 ? null
                 : places.any((p) => (p.id?.toString() ?? '') == _selectedId)
                 ? _selectedId
-                : null, // لو id مش موجودة ضمن الصفحة الحالية
+                : null,
             items: places
                 .map(
                   (p) => DropdownMenuItem<String>(
-                    value:
-                        (p.id?.toString() ?? ''), // عدّل إذا id نوعه غير String
-                    child: Text(
-                      p.name ?? '—', // عدّل إذا اسم الحقل غير name
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    value: (p.id?.toString() ?? ''),
+                    child: Text(p.name ?? '—', overflow: TextOverflow.ellipsis),
                   ),
                 )
                 .toList(),

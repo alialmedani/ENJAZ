@@ -20,3 +20,4 @@ const fromNotification = 'fromNotification';
 const wishList = 'wishlist';
 const cartItems = 'cart_items';
 const currency = '\$';
+const role = 'role';

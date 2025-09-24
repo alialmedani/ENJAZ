@@ -163,20 +163,18 @@ class _CheckoutBarState extends State<CheckoutBar>
                             color: AppColors.black23,
                           ),
                           menuStyle: MenuStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
+                            backgroundColor: WidgetStateProperty.all<Color>(
                               Colors.white,
                             ),
-                            elevation: MaterialStateProperty.all<double>(8),
-                            shadowColor: MaterialStateProperty.all<Color>(
+                            elevation: WidgetStateProperty.all<double>(8),
+                            shadowColor: WidgetStateProperty.all<Color>(
                               Colors.black.withValues(alpha: 0.18),
                             ),
-                            surfaceTintColor: MaterialStateProperty.all<Color>(
+                            surfaceTintColor: WidgetStateProperty.all<Color>(
                               Colors.white,
                             ),
                             shape:
-                                MaterialStateProperty.all<
-                                  RoundedRectangleBorder
-                                >(
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -189,29 +187,6 @@ class _CheckoutBarState extends State<CheckoutBar>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                _StepIndicator(
-                                  index: 1,
-                                  label: 'floor'.tr(),
-                                  active: true,
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    height: 1,
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    color: Colors.white.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                                _StepIndicator(
-                                  index: 2,
-                                  label: 'office'.tr(),
-                                  active: !noFloor,
-                                ),
-                              ],
-                            ),
                             const SizedBox(height: 18),
                             FloorDropdown(
                               initialPlaceId: _selectedFloor?.id?.toString(),
@@ -276,7 +251,7 @@ class _CheckoutBarState extends State<CheckoutBar>
                                 width: double.infinity,
                                 child: CustomButton(
                                   color: accent,
-                                  text: 'checkout_proceed'.tr(),
+                                  text: 'order_success'.tr(),
                                   textStyle: AppTextStyle.getBoldStyle(
                                     fontSize: AppFontSize.size_16,
                                     color: Colors.white,
@@ -379,62 +354,6 @@ class _ExpandHandle extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-    );
-  }
-}
-
-class _StepIndicator extends StatelessWidget {
-  const _StepIndicator({
-    required this.index,
-    required this.label,
-    required this.active,
-  });
-
-  final int index;
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = AppColors.orange;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: active
-                ? LinearGradient(
-                    colors: [accent, accent.withValues(alpha: 0.7)],
-                  )
-                : null,
-            color: active ? null : Colors.white.withValues(alpha: 0.65),
-            border: Border.all(
-              color: active
-                  ? accent.withValues(alpha: 0.6)
-                  : Colors.white.withValues(alpha: 0.5),
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            '$index',
-            style: AppTextStyle.getBoldStyle(
-              fontSize: AppFontSize.size_13,
-              color: active ? Colors.white : AppColors.black23,
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: AppTextStyle.getRegularStyle(
-            fontSize: AppFontSize.size_11,
-            color: active ? AppColors.black23 : AppColors.secondPrimery,
-          ),
-        ),
-      ],
     );
   }
 }

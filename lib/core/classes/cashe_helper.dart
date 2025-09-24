@@ -30,6 +30,7 @@ class CacheHelper {
   static Future<void> setRefreshToken(String? value) =>
       box.put(refreshToken, value ?? '');
   static Future<void> setUserId(String? value) => box.put(userId, value ?? 0);
+  static Future<void> setRole(String? value) => box.put(role, value ?? '');
   static Future<void> setExpiresIn(int? value) =>
       box.put(expiresIn, value ?? 0);
 
@@ -65,6 +66,10 @@ class CacheHelper {
   static String? get userID {
     if (!box.containsKey(userId)) return null;
     return "${box.get(userId)}";
+  }
+  static String? get getRole {
+    if (!box.containsKey(role)) return null;
+    return "${box.get(role)}";
   }
 
   static bool get firstTime => box.get(isFirstTime) ?? true;

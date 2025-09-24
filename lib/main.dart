@@ -1,16 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
-import 'package:enjaz/features/officeboy/screen/office_boy_screen.dart';
 import 'package:enjaz/features/place/cubit/place_cubit.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
-import 'package:enjaz/features/auth/screen/login_screen.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
 import 'package:enjaz/features/drink/cubit/drink_cubit.dart';
 import 'package:enjaz/features/order/cubit/order_cubit.dart';
-import 'package:enjaz/features/root/screen/root_screen.dart';
 import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/root/cubit/root_cubit.dart';
-import 'package:enjaz/features/officeboy/cubit/ccubit1.dart';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
 import 'package:enjaz/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,6 +17,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/classes/keys.dart';
 import 'core/classes/notification.dart';
 import 'core/constant/app_theme/app_theme.dart';
+import 'features/auth/screen/login_screen.dart';
+import 'features/root/screen/root_screen.dart';
 
 SharedPreferences? prefs;
 
@@ -28,8 +26,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CacheHelper.init();
   await EasyLocalization.ensureInitialized();
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // await FireBaseNotification().initNotification();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FireBaseNotification().initNotification();
 
   runApp(
     EasyLocalization(
@@ -73,8 +71,7 @@ class MyApp extends StatelessWidget {
             navigatorKey: Keys.navigatorKey,
             title: 'Task App',
             theme: appThemeData[AppTheme.light],
-            // home: CacheHelper.token != null ? RootScreen() : LoginScreen(),
-            home: OfficeBoyOrdersScreen(),
+            home: CacheHelper.token != null ? RootScreen() : LoginScreen(),
           );
         },
       ),

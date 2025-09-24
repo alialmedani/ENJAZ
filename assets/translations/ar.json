@@ -222,5 +222,6 @@
     "no_drinks_attached_sub": "عند إضافة العناصر سنعرضها هنا مع ملاحظات الباريستا.",
     "signature_drink": "مشروب مميز",
     "qty_x": "الكمية ×{0}",
-    "barista_notes": "ملاحظات الباريستا"
+    "barista_notes": "ملاحظات الباريستا",
+    "order_success": "تقديم الطلب"
 }
