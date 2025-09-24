@@ -1,13 +1,12 @@
-// lib/features/staff/domain/usecases/update_order_status_usecase.dart
-import 'package:enjaz/core/constant/enum/enum.dart';
 import 'package:enjaz/core/params/base_params.dart';
 import 'package:enjaz/core/results/result.dart';
 import 'package:enjaz/core/usecase/usecase.dart';
 import 'package:enjaz/features/officeboy/data/model/status_order_model.dart';
 import 'package:enjaz/features/officeboy/data/repo/office_boy_repo.dart';
- class UpdateOrderStatusParams extends BaseParams {
-    String orderId;
-    final int status;
+
+class UpdateOrderStatusParams extends BaseParams {
+  String orderId;
+  final int status;
 
   UpdateOrderStatusParams({required this.orderId, required this.status});
 
@@ -16,6 +15,7 @@ import 'package:enjaz/features/officeboy/data/repo/office_boy_repo.dart';
     "status": status.toInt(), // enum → int
   };
 }
+
 class UpdateOrderStatusUsecase
     extends UseCase<SatusOrderModel, UpdateOrderStatusParams> {
   final OfficeBoyRepository repository;

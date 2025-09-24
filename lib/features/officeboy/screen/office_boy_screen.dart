@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
 import 'package:enjaz/features/officeboy/data/usecase/get_order_usecase.dart';
 import 'package:enjaz/features/officeboy/data/usecase/status_order_usecase.dart';
+import 'package:enjaz/features/officeboy/screen/pffice_boy_order_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -478,177 +479,112 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int? status = order.status;
-
     final String? customerName = order.customerUser?.name;
     final String? floorName = order.floorName;
     final String? officeName = order.officeName;
-    final String? createdAt = order.creationTime;
-
-    final List<OrderItems> items = order.orderItems ?? const [];
 
     return _PressableScale(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppFontSize.size_14),
-          border: Border.all(color: AppColors.greyE5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => OfficeBoyOrderDetailsScreen(order: order),
             ),
-          ],
-        ),
-        padding: const EdgeInsets.all(AppPaddingSize.padding_14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: _StatusPill(status: status ?? -1),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFFFFF), Color(0xFFF9FBFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(
-                  Icons.person_outline,
-                  size: 18,
-                  color: AppColors.black,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    (customerName ?? '—'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: AppFontSize.size_15,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(
-                  Icons.apartment_outlined,
-                  size: 18,
-                  color: AppColors.black,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    [
-                      if (floorName != null) floorName,
-                      if (officeName != null) officeName,
-                    ].join(' • '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: AppFontSize.size_13,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (createdAt != null) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.schedule, size: 18, color: AppColors.grey89),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      createdAt,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.06),
+                blurRadius: 14,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            border: Border.all(color: AppColors.greyE5),
+          ),
+          padding: const EdgeInsets.all(AppPaddingSize.padding_14),
+          child: Row(
+            children: [
+              // شارة الحالة
+              StatusPill(status: status ?? -1),
+
+              const SizedBox(width: 12),
+
+              // النصوص: اسم الزبون + المكان
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Customer
+                    Text(
+                      customerName ?? '—',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: AppFontSize.size_12,
-                        color: AppColors.grey89,
+                        color: AppColors.black,
+                        fontSize: AppFontSize.size_16,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    // Floor • Office
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.apartment_outlined,
+                          size: 16,
+                          color: AppColors.grey89,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            [
+                              if (floorName != null) floorName,
+                              if (officeName != null) officeName,
+                            ].join(' • '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.grey89,
+                              fontSize: AppFontSize.size_13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // سهم للدخول للتفاصيل
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.xprimaryColor.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.chevron_right,
+                  color: AppColors.xprimaryColor,
+                ),
               ),
             ],
-            const SizedBox(height: 12),
-            _OrderItemsList(items: items),
-            const SizedBox(height: 12),
-            LayoutBuilder(
-              builder: (context, constraints) => Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  _ActionBtn(
-                    icon: Icons.check_circle_outline,
-                    label: 'Accept',
-                    color: Colors.green,
-                    onTap: (status == 1 || status == 4 || status == 5)
-                        ? null
-                        : () => _changeStatus(context, order, 1),
-                  ),
-                  _ActionBtn(
-                    icon: Icons.cancel_outlined,
-                    label: 'Cancel',
-                    color: Colors.red,
-                    onTap: (status == 4 || status == 5)
-                        ? null
-                        : () => _changeStatus(context, order, 5),
-                  ),
-                  SizedBox(
-                    width: constraints.maxWidth > 360
-                        ? constraints.maxWidth - 260
-                        : 0,
-                  ),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 220),
-                    child: TextButton.icon(
-                      onPressed: () => _showChangeStatusSheet(context, order),
-                      icon: const Icon(Icons.swap_horiz_rounded),
-                      label: const Text(
-                        'تغيير الحالة',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.xprimaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _changeStatus(
-    BuildContext context,
-    Items order,
-    int newStatus,
-  ) async {
-    final cubit = context.read<OfficeBoyCubit>();
-    cubit.updateOrderStatusParams = UpdateOrderStatusParams(
-      orderId: order.id ?? '',
-      status: newStatus,
-    );
-    await cubit.updateOrderStatusBool();
-    cubit.drinkCubit;
   }
 }
 
@@ -857,14 +793,14 @@ class _MiniChip extends StatelessWidget {
   }
 }
 
-class _StatusPill extends StatelessWidget {
+class StatusPill extends StatelessWidget {
   final int status;
-  const _StatusPill({required this.status});
+  const StatusPill({required this.status});
 
   @override
   Widget build(BuildContext context) {
     final Color c = _statusColor(status);
-    final String label = _statusLabel(status);
+    final String label = statusLabel(status);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppPaddingSize.padding_10,
@@ -909,7 +845,7 @@ class _StatusPill extends StatelessWidget {
     }
   }
 
-  static String _statusLabel(int status) {
+  static String statusLabel(int status) {
     switch (status) {
       case 0:
         return 'قيد الانتظار';
@@ -967,7 +903,7 @@ void _showChangeStatusSheet(BuildContext context, Items order) {
               children: [
                 for (final s in allowed)
                   ChoiceChip(
-                    label: Text(_StatusPill._statusLabel(s)),
+                    label: Text(StatusPill.statusLabel(s)),
                     selected: selected == s,
                     onSelected: (_) => setSt(() => selected = s),
                   ),
