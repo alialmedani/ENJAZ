@@ -19,7 +19,6 @@ import 'core/classes/keys.dart';
 import 'core/classes/notification.dart';
 import 'core/constant/app_theme/app_theme.dart';
 import 'features/auth/screen/login_screen.dart';
-import 'features/root/screen/root_screen.dart';
 
 SharedPreferences? prefs;
 

@@ -1,7 +1,8 @@
-import 'dart:ui';
+import 'package:enjaz/core/classes/cashe_helper.dart';
+import 'package:enjaz/core/utils/Navigation/navigation.dart';
+import 'package:enjaz/features/auth/screen/login_screen.dart';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
 import 'package:enjaz/features/officeboy/data/usecase/get_order_usecase.dart';
-import 'package:enjaz/features/officeboy/data/usecase/status_order_usecase.dart';
 import 'package:enjaz/features/officeboy/screen/pffice_boy_order_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,12 +35,8 @@ class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
 
   final List<_StatusTab> _tabs = const [
     _StatusTab(label: 'Pending', status: 0, icon: Icons.timer_outlined),
-    _StatusTab(
-      label: 'In-Progress',
-      status: 1,
-      icon: Icons.run_circle_outlined,
-    ),
-    _StatusTab(label: 'Completed', status: 4, icon: Icons.check_circle_outline),
+    _StatusTab(label: 'Progress', status: 1, icon: Icons.run_circle_outlined),
+    _StatusTab(label: 'Complete', status: 4, icon: Icons.check_circle_outline),
     _StatusTab(label: 'Cancelled', status: 5, icon: Icons.cancel_outlined),
   ];
 
@@ -62,7 +59,8 @@ class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
         return PaginationList<OfficeBoyModel>(
           key: PageStorageKey('officeboy-status-$status'),
           physics: const BouncingScrollPhysics(),
-          withRefresh: false,
+          withRefresh: true,
+          withPagination: true,
           onCubitCreated: (PaginationCubit cubit) {
             _tabPaginationCubits[status] = cubit;
             officeBoyCubit.drinkCubit = cubit;
@@ -124,57 +122,292 @@ class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.xbackgroundColor3,
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 160,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            flexibleSpace: FlexibleSpaceBar(
+              background: _ModernHeader(),
+              titlePadding: EdgeInsets.zero,
+            ),
+          ),
 
-      body: Stack(
-        children: [
-          const _FancyBackdrop(),
-          Column(
-            children: [
-              SafeArea(
-                child: Text(
-                  'Office Boy Orders',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.orange.withValues(alpha: 0.78),
-                    fontSize: AppFontSize.size_18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              _AnimatedTabs(controller: _tabController, tabs: _tabs),
-              const SizedBox(height: 8),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  physics: const BouncingScrollPhysics(),
-                  children: _tabs
-                      .map(
-                        (t) => _buildStatusTab(
-                          status: t.status,
-                          emptyTitle: 'لا توجد طلبات لهذه الحالة',
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-            ],
+          // Tab Bar Section
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _SafeTabBarDelegate(
+              controller: _tabController,
+              tabs: _tabs,
+            ),
+          ),
+
+          // Content
+          SliverFillRemaining(
+            child: TabBarView(
+              controller: _tabController,
+              physics: const BouncingScrollPhysics(),
+              children: _tabs
+                  .map(
+                    (t) => _buildStatusTab(
+                      status: t.status,
+                      emptyTitle: 'No orders for this status',
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.xprimaryColor,
-        onPressed: () {
-          final currentStatus = _tabs[_tabController.index].status;
-          final cubit = _tabPaginationCubits[currentStatus];
-          cubit; // تُركت لميكانيزمك الخاص
-        },
-        label: const Text(
-          'تحديث هذه الحالة',
-          style: TextStyle(color: AppColors.white),
+    );
+  }
+}
+
+// ================== Modern Beautiful Components ==================
+
+class _SafeTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabController controller;
+  final List<_StatusTab> tabs;
+
+  _SafeTabBarDelegate({required this.controller, required this.tabs});
+
+  static const double _verticalPadding = 8.0;
+  static const double _horizontalPadding = 12.0;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox.expand(
+      child: Container(
+        color: const Color(0xFFF8FAFC),
+        padding: const EdgeInsets.symmetric(vertical: _verticalPadding),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+          child: _ModernTabBar(controller: controller, tabs: tabs),
         ),
-        icon: const Icon(Icons.refresh, color: AppColors.white),
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => kTextTabBarHeight + (_verticalPadding * 2);
+
+  @override
+  double get minExtent => maxExtent;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return false;
+  }
+}
+
+class _ModernHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF6366F1),
+            const Color(0xFF8B5CF6),
+            AppColors.xprimaryColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -30,
+            right: -30,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -20,
+            left: -20,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 20,
+            right: 20,
+            child: IconButton(
+              onPressed: () {
+                CacheHelper.box.clear();
+                Navigation.pushAndRemoveUntil(LoginScreen());
+              },
+              icon: Icon(Icons.logout, color: Colors.white, size: 30),
+            ),
+          ),
+
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // App Title
+                    const Text(
+                      'Office Boy Orders',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Subtitle
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.coffee_outlined,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            'Manage and track order requests',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModernTabBar extends StatelessWidget {
+  final TabController controller;
+  final List<_StatusTab> tabs;
+
+  const _ModernTabBar({required this.controller, required this.tabs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TabBar(
+        controller: controller,
+        isScrollable: true,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+        dividerColor: Colors.transparent,
+        tabAlignment: TabAlignment.center,
+        indicator: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.xprimaryColor,
+              AppColors.xprimaryColor.withValues(alpha: 0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.grey.shade600,
+        tabs: tabs.map((tab) => _ModernTab(tab: tab)).toList(),
+      ),
+    );
+  }
+}
+
+class _ModernTab extends StatelessWidget {
+  final _StatusTab tab;
+
+  const _ModernTab({required this.tab});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Icon with subtle animation potential
+          Icon(tab.icon, size: 16),
+          const SizedBox(height: 3),
+          // Label with better typography
+          Flexible(
+            child: Text(
+              tab.label,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -189,69 +422,6 @@ class _StatusTab {
     required this.status,
     required this.icon,
   });
-}
-
-class _AnimatedTabs extends StatelessWidget {
-  final TabController controller;
-  final List<_StatusTab> tabs;
-  const _AnimatedTabs({required this.controller, required this.tabs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppPaddingSize.padding_12,
-        AppPaddingSize.padding_12,
-        AppPaddingSize.padding_12,
-        AppPaddingSize.padding_6,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .65),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.greyE5.withValues(alpha: .8)),
-      ),
-      child: TabBar(
-        controller: controller,
-        isScrollable: true,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 14),
-        indicator: BoxDecoration(
-          color: AppColors.xprimaryColor.withValues(alpha: .12),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.xprimaryColor.withValues(alpha: .35),
-          ),
-        ),
-        indicatorSize: TabBarIndicatorSize.label,
-        labelColor: AppColors.black,
-        unselectedLabelColor: AppColors.grey89,
-        tabs: [
-          for (final t in tabs)
-            Tab(
-              height: 40,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(t.icon, size: 18),
-                      const SizedBox(width: 6),
-                      Text(
-                        t.label,
-                        overflow: TextOverflow.fade,
-                        softWrap: false,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SlidingIndicator extends StatefulWidget {
@@ -323,40 +493,6 @@ class _SlidingIndicatorState extends State<_SlidingIndicator> {
   }
 }
 
-/// خلفية زخرفية بسيطة
-class _FancyBackdrop extends StatelessWidget {
-  const _FancyBackdrop();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _BackdropPainter(),
-      child: const SizedBox.expand(),
-    );
-  }
-}
-
-class _BackdropPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final g1 = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFEAF2FF), Color(0xFFFFFFFF)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Offset.zero & size);
-    canvas.drawRect(Offset.zero & size, g1);
-
-    final circle = Paint()
-      ..color = const Color(0xFFCCE2FF).withValues(alpha: .35);
-    canvas.drawCircle(Offset(size.width * .8, 120), 90, circle);
-    canvas.drawCircle(Offset(size.width * .2, size.height * .35), 70, circle);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 /// حركة ظهور لطيفة
 class _ShowUp extends StatefulWidget {
   final Widget child;
@@ -415,54 +551,95 @@ class _FancyEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Modern Illustration Container
             Container(
-              width: 78,
-              height: 78,
+              width: 120,
+              height: 120,
               decoration: BoxDecoration(
-                color: Colors.white,
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.xprimaryColor.withValues(alpha: 0.1),
+                    AppColors.xprimaryColor.withValues(alpha: 0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: .06),
-                    blurRadius: 16,
-                    offset: const Offset(0, 10),
+                    color: AppColors.xprimaryColor.withValues(alpha: 0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.inbox_outlined,
-                size: 36,
-                color: AppColors.grey89,
+              child: Icon(
+                Icons.coffee_outlined,
+                size: 48,
+                color: AppColors.xprimaryColor.withValues(alpha: 0.7),
               ),
             ),
-            const SizedBox(height: 12),
+
+            const SizedBox(height: 24),
+
+            // Title
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.black,
-                fontSize: AppFontSize.size_16,
-                fontWeight: FontWeight.w700,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 6),
+
+            const SizedBox(height: 12),
+
+            // Subtitle
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.grey89,
-                fontSize: AppFontSize.size_13,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 16,
+                height: 1.5,
               ),
             ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onCta,
-              icon: const Icon(Icons.refresh),
-              label: Text(ctaLabel),
+
+            const SizedBox(height: 32),
+
+            // Action Button
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.xprimaryColor.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                onPressed: onCta,
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(ctaLabel),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.xprimaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -471,7 +648,6 @@ class _FancyEmptyState extends StatelessWidget {
   }
 }
 
-/// ↓↓↓ الكروت والأزرار نفس السابق (ما لمست الـ core)
 class _OrderCard extends StatelessWidget {
   final Items order;
   const _OrderCard({required this.order});
@@ -482,10 +658,12 @@ class _OrderCard extends StatelessWidget {
     final String? customerName = order.customerUser?.name;
     final String? floorName = order.floorName;
     final String? officeName = order.officeName;
+    final List<OrderItems> items = order.orderItems ?? [];
+    final int itemCount = items.length;
 
     return _PressableScale(
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -495,89 +673,125 @@ class _OrderCard extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFFFFFF), Color(0xFFF9FBFF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.06),
-                blurRadius: 14,
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
             ],
-            border: Border.all(color: AppColors.greyE5),
           ),
-          padding: const EdgeInsets.all(AppPaddingSize.padding_14),
-          child: Row(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // شارة الحالة
-              StatusPill(status: status ?? -1),
-
-              const SizedBox(width: 12),
-
-              // النصوص: اسم الزبون + المكان
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Customer
-                    Text(
-                      customerName ?? '—',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.black,
-                        fontSize: AppFontSize.size_16,
-                        fontWeight: FontWeight.w800,
+              // Header Row
+              Row(
+                children: [
+                  // Customer Avatar
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.xprimaryColor.withValues(alpha: 0.2),
+                          AppColors.xprimaryColor.withValues(alpha: 0.1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 4),
-                    // Floor • Office
-                    Row(
+                    child: Icon(
+                      Icons.person_outline,
+                      color: AppColors.xprimaryColor,
+                      size: 24,
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Customer Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.apartment_outlined,
-                          size: 16,
-                          color: AppColors.grey89,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            [
-                              if (floorName != null) floorName,
-                              if (officeName != null) officeName,
-                            ].join(' • '),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.grey89,
-                              fontSize: AppFontSize.size_13,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        Text(
+                          customerName ?? 'Unknown Customer',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.black,
                           ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                [
+                                  if (floorName != null) floorName,
+                                  if (officeName != null) officeName,
+                                ].join(' • '),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Status Badge
+                  _ModernStatusPill(status: status ?? -1),
+                ],
               ),
 
-              const SizedBox(width: 8),
+              const SizedBox(height: 16),
 
-              // سهم للدخول للتفاصيل
+              // Order Summary
               Container(
-                width: 34,
-                height: 34,
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.xprimaryColor.withOpacity(.10),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.chevron_right,
-                  color: AppColors.xprimaryColor,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.local_cafe_outlined,
+                      color: AppColors.xprimaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$itemCount item${itemCount != 1 ? 's' : ''} ordered',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.grey.shade500,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -586,6 +800,72 @@ class _OrderCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ModernStatusPill extends StatelessWidget {
+  final int status;
+
+  const _ModernStatusPill({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final statusInfo = _getStatusInfo(status);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusInfo.color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: statusInfo.color.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: statusInfo.color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            statusInfo.label,
+            style: TextStyle(
+              color: statusInfo.color,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _StatusInfo _getStatusInfo(int status) {
+    switch (status) {
+      case 0:
+        return _StatusInfo('Pending', Colors.orange);
+      case 1:
+        return _StatusInfo('In Progress', Colors.blue);
+      case 4:
+        return _StatusInfo('Completed', Colors.green);
+      case 5:
+        return _StatusInfo('Cancelled', Colors.red);
+      default:
+        return _StatusInfo('Unknown', Colors.grey);
+    }
+  }
+}
+
+class _StatusInfo {
+  final String label;
+  final Color color;
+  _StatusInfo(this.label, this.color);
 }
 
 class _PressableScale extends StatefulWidget {
@@ -615,184 +895,6 @@ class _PressableScaleState extends State<_PressableScale> {
   }
 }
 
-class _ActionBtn extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback? onTap;
-  const _ActionBtn({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final disabled = onTap == null;
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 96),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: disabled ? Colors.grey.shade200 : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: disabled
-                  ? Colors.grey.shade300
-                  : color.withValues(alpha: .5),
-            ),
-            boxShadow: disabled
-                ? null
-                : [
-                    BoxShadow(
-                      color: color.withValues(alpha: .08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: disabled ? Colors.grey : color),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: disabled ? Colors.grey : color,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OrderItemsList extends StatelessWidget {
-  final List<OrderItems> items;
-  const _OrderItemsList({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    if (items.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(AppPaddingSize.padding_12),
-        decoration: BoxDecoration(
-          color: AppColors.whiteF3,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Text(
-          'لا توجد عناصر في هذا الطلب',
-          style: TextStyle(
-            color: AppColors.black,
-            fontSize: AppFontSize.size_13,
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      children: items.map((e) {
-        final String? name = e.drink?.name;
-        final int? qty = e.quantity;
-        final int? sugar = e.sugarLevel;
-        final String? notes = e.bengaliNotes;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(AppPaddingSize.padding_12),
-          decoration: BoxDecoration(
-            color: AppColors.whiteF3,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.local_cafe, color: AppColors.black),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (name != null)
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: AppFontSize.size_14,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.black,
-                        ),
-                      ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        if (qty != null) _MiniChip(label: 'الكمية: $qty'),
-                        if (sugar != null) _MiniChip(label: 'سكر: $sugar'),
-                        if (notes != null && notes.isNotEmpty)
-                          _MiniChip(label: 'ملاحظة: $notes'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _MiniChip extends StatelessWidget {
-  final String label;
-  const _MiniChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppPaddingSize.padding_8,
-        vertical: AppPaddingSize.padding_4,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.greyE5),
-      ),
-      child: Text(
-        label,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: AppFontSize.size_12,
-          color: AppColors.black,
-        ),
-      ),
-    );
-  }
-}
-
 class StatusPill extends StatelessWidget {
   final int status;
   const StatusPill({required this.status});
@@ -802,10 +904,7 @@ class StatusPill extends StatelessWidget {
     final Color c = _statusColor(status);
     final String label = statusLabel(status);
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppPaddingSize.padding_10,
-        vertical: AppPaddingSize.padding_6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: c.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
@@ -821,7 +920,7 @@ class StatusPill extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: c,
-              fontSize: AppFontSize.size_12,
+              fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -841,97 +940,22 @@ class StatusPill extends StatelessWidget {
       case 5:
         return Colors.red;
       default:
-        return AppColors.greyA4;
+        return Colors.grey;
     }
   }
 
   static String statusLabel(int status) {
     switch (status) {
       case 0:
-        return 'قيد الانتظار';
+        return 'Pending';
       case 1:
-        return 'قيد التنفيذ';
+        return 'In Progress';
       case 4:
-        return 'مكتمل';
+        return 'Completed';
       case 5:
-        return 'ملغي';
+        return 'Cancelled';
       default:
-        return 'غير معروف';
+        return 'Unknown';
     }
   }
-}
-
-void _showChangeStatusSheet(BuildContext context, Items order) {
-  final List<int> allowed = [0, 1, 4, 5];
-  int selected = order.status ?? 0;
-
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (_) => StatefulBuilder(
-      builder: (context, setSt) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 38,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0E0E0),
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-            const Text(
-              'تغيير حالة الطلب',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppFontSize.size_16,
-                fontWeight: FontWeight.w800,
-                color: AppColors.black,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final s in allowed)
-                  ChoiceChip(
-                    label: Text(StatusPill.statusLabel(s)),
-                    selected: selected == s,
-                    onSelected: (_) => setSt(() => selected = s),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.save_outlined),
-              label: const Text('حفظ'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.xprimaryColor,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () async {
-                final cubit = context.read<OfficeBoyCubit>();
-                cubit.updateOrderStatusParams = UpdateOrderStatusParams(
-                  orderId: order.id ?? '',
-                  status: selected,
-                );
-                await cubit.updateOrderStatusBool();
-                cubit.drinkCubit;
-                if (context.mounted) Navigator.of(context).pop();
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    ),
-  );
 }
