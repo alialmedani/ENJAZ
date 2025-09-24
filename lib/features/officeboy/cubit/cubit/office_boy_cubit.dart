@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+ import 'package:bloc/bloc.dart';
 import 'package:enjaz/core/boilerplate/pagination/cubits/pagination_cubit.dart';
 import 'package:enjaz/core/results/result.dart';
 import 'package:enjaz/features/officeboy/data/model/officeboy_model.dart';
@@ -36,5 +36,5 @@ class OfficeBoyCubit extends Cubit<OfficeBoyState> {
       OfficeBoyRepository(),
     ).call(params: updateOrderStatusParams);
     return res;
-  }
+  } 
 }

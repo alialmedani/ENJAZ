@@ -1,660 +1,411 @@
-// lib/features/staff/screen/office_boy_home_root.dart
-import 'dart:ui';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:enjaz/core/boilerplate/create_model/widgets/create_model.dart';
-import 'package:enjaz/core/ui/dialogs/dialogs.dart';
-import 'package:enjaz/core/ui/widgets/custom_button.dart';
-import 'package:enjaz/core/utils/Navigation/navigation.dart';
-import 'package:enjaz/features/officeboy/screen/widget/3.dart';
+import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
+import 'package:enjaz/features/officeboy/data/usecase/get_order_usecase.dart';
+import 'package:enjaz/features/officeboy/data/usecase/status_order_usecase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:enjaz/core/constant/app_colors/app_colors.dart';
-import 'package:enjaz/core/constant/text_styles/app_text_style.dart';
-import 'package:enjaz/core/constant/text_styles/font_size.dart';
-
 import 'package:enjaz/core/boilerplate/pagination/widgets/pagination_list.dart';
-import 'package:enjaz/core/boilerplate/pagination/models/get_list_request.dart';
-import 'package:enjaz/core/results/result.dart';
+import 'package:enjaz/core/boilerplate/pagination/cubits/pagination_cubit.dart';
+import 'package:enjaz/core/constant/app_colors/app_colors.dart';
+import 'package:enjaz/core/constant/text_styles/font_size.dart';
+import 'package:enjaz/core/constant/app_padding/app_padding.dart';
 
-import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
-import 'package:enjaz/features/officeboy/screen/widget/segmented_status_tabs.dart';
 import 'package:enjaz/features/officeboy/data/model/officeboy_model.dart';
 
-// ====== البروفايل (عندك جاهز) ======
-
-class OfficeBoyHomeRoot extends StatefulWidget {
-  const OfficeBoyHomeRoot({super.key});
-  @override
-  State<OfficeBoyHomeRoot> createState() => _OfficeBoyHomeRootState();
-}
-
-class _OfficeBoyHomeRootState extends State<OfficeBoyHomeRoot> {
-  int _index = 0;
+/// شاشة طلبات Office Boy بأربعة تبويبات حسب الحالة (0 / 1 / 4 / 5)
+/// - لا تعديل على core.
+/// - لكل تبويب OfficeBoyCubit مستقل.
+/// - PaginationList كما هي، ونفرد items للعرض.
+class OfficeBoyOrdersScreen extends StatefulWidget {
+  const OfficeBoyOrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final pages = [
-      const _OrdersTabShell(), // تبويب الطلبات
-      const ProfileScreenPro(
-        // تبويب البروفايل
-        name: 'Lolo',
-        email: '09420733555@coffeeapp.local',
-        role: 'Office Boy',
-        avatarUrl: null, // أو لينك صورة
-      ),
-    ];
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6EDE7),
-      body: SafeArea(
-        child: IndexedStack(index: _index, children: pages),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        selectedItemColor: AppColors.xprimaryColor,
-        unselectedItemColor: AppColors.secondPrimery,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.coffee_outlined),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
-      ),
-      floatingActionButton: _index == 0
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton.small(
-                  heroTag: 'refresh',
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    // لو بدك ترفّرش الليست
-                    // تقدر توصل للكيوبيت اللي جوّا OrdersTabShell لو عملته GlobalKey
-                  },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.refresh, color: Colors.black87),
-                ),
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  heroTag: 'scan',
-                  onPressed: () => HapticFeedback.selectionClick(),
-                  backgroundColor: AppColors.xprimaryColor,
-                  child: const Icon(Icons.qr_code_scanner),
-                ),
-              ],
-            )
-          : null,
-    );
-  }
+  State<OfficeBoyOrdersScreen> createState() => _OfficeBoyOrdersScreenState();
 }
 
-/// =============================================
-///       تبويب الطلبات (شاشة Orders متقدمة)
-/// =============================================
-class _OrdersTabShell extends StatefulWidget {
-  const _OrdersTabShell({super.key});
-  @override
-  State<_OrdersTabShell> createState() => _OrdersTabShellState();
-}
+class _OfficeBoyOrdersScreenState extends State<OfficeBoyOrdersScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
 
-class _OrdersTabShellState extends State<_OrdersTabShell>
-    with TickerProviderStateMixin {
-  late final TabController _segCtrl;
+  /// نخزن PaginationCubit لكل حالة لتحديثها بالزر.
+  final Map<int, PaginationCubit?> _tabPaginationCubits = {
+    0: null,
+    1: null,
+    4: null,
+    5: null,
+  };
 
-  // نفس القيم لحساب الطول وتمريرها للويجت
-  late final List<OrderStatus> _orderForTabs;
-  late final bool _showAll;
-  late final bool _excludeDraft;
-
-  String _search = '';
-  String? _floorFilter;
-  String? _officeFilter;
-  OrderStatus? _selected;
+  final List<_StatusTab> _tabs = const [
+    _StatusTab(label: 'Pending', status: 0, icon: Icons.timer_outlined),
+    _StatusTab(
+      label: 'In-Progress',
+      status: 1,
+      icon: Icons.run_circle_outlined,
+    ),
+    _StatusTab(label: 'Completed', status: 4, icon: Icons.check_circle_outline),
+    _StatusTab(label: 'Cancelled', status: 5, icon: Icons.cancel_outlined),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _orderForTabs = const [
-      OrderStatus.submitted,
-      OrderStatus.inPreparation,
-      OrderStatus.canceled,
-    ];
-    _showAll = false;
-    _excludeDraft = true;
-
-    final count = requiredTabsCount(
-      showAll: _showAll,
-      excludeDraft: _excludeDraft,
-      order: _orderForTabs,
-    );
-    _segCtrl = TabController(length: count, vsync: this);
+    _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
   void dispose() {
-    _segCtrl.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        _HeaderCard(
-          title: 'Coffee Queue',
-          subtitle: DateFormat('EEE d MMM • HH:mm').format(DateTime.now()),
-        ),
-        const SizedBox(height: 8),
+  Widget _buildStatusTab({required int status, required String emptyTitle}) {
+    return BlocProvider<OfficeBoyCubit>(
+      create: (_) => OfficeBoyCubit(),
+      child: Builder(
+        builder: (context) {
+          final officeBoyCubit = context.read<OfficeBoyCubit>();
 
-        // Tabs (Ultra) — نفس القيم للضمان
-        SegmentedStatusTabsUltra(
-          controller: _segCtrl,
-          showAll: _showAll,
-          excludeDraft: _excludeDraft,
-          order: _orderForTabs,
-          onChanged: (s) => setState(() => _selected = s),
-        ),
-
-        // Filters & Search
-        _FiltersBar(onSearchChanged: (v) => setState(() => _search = v)),
-
-        // Content
-        Expanded(
-          child: _OrdersTab(
-            search: _search,
-            floorFilter: _floorFilter,
-            officeFilter: _officeFilter,
-            selectedStatus: _selected,
-            onFloorChanged: (v) => setState(() {
-              _floorFilter = v;
-              _officeFilter = null;
-            }),
-            onOfficeChanged: (v) => setState(() => _officeFilter = v),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// ------------------ HEADER ------------------
-class _HeaderCard extends StatelessWidget {
-  final String title, subtitle;
-  const _HeaderCard({required this.title, required this.subtitle});
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.xprimaryColor.withOpacity(.16),
-                      Colors.white.withOpacity(.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(color: const Color(0xFFEFE4DE)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.coffee_outlined, color: Colors.brown),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: AppTextStyle.getBoldStyle(
-                              fontSize: AppFontSize.size_18,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle,
-                            style: AppTextStyle.getRegularStyle(
-                              fontSize: AppFontSize.size_12,
-                              color: AppColors.secondPrimery,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    _Bell(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Bell extends StatefulWidget {
-  @override
-  State<_Bell> createState() => _BellState();
-}
-
-class _BellState extends State<_Bell> with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        if (!_ctrl.isAnimating) _ctrl.forward(from: 0);
-      },
-      icon: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, child) {
-          final t = _ctrl.value;
-          final double dx = t < .2
-              ? 8.0 * (t / .2)
-              : (t < .6 ? 8.0 * (1 - ((t - .2) / .4)) : 0.0);
-          return Transform.translate(offset: Offset(dx, 0), child: child);
-        },
-        child: const Icon(Icons.notifications_outlined, color: Colors.black),
-      ),
-    );
-  }
-}
-
-/// ------------------ FILTERS + SEARCH ------------------
-class _FiltersBar extends StatefulWidget {
-  final ValueChanged<String> onSearchChanged;
-  const _FiltersBar({required this.onSearchChanged});
-  @override
-  State<_FiltersBar> createState() => _FiltersBarState();
-}
-
-class _FiltersBarState extends State<_FiltersBar> {
-  final _search = TextEditingController();
-  double _elev = 0;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-      child: Row(
-        children: [
-          Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFEFE4DE)),
-                boxShadow: [
-                  if (_elev > 0)
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.06),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                ],
-              ),
-              child: FocusScope(
-                child: Focus(
-                  onFocusChange: (f) => setState(() => _elev = f ? 1 : 0),
-                  child: TextField(
-                    controller: _search,
-                    onChanged: widget.onSearchChanged,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: 'search_queue_placeholder'.tr(),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          _GlassIcon(
-            icon: Icons.tune,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('filter_all'.tr())));
+          return PaginationList<OfficeBoyModel>(
+            key: PageStorageKey('officeboy-status-$status'),
+            physics: const BouncingScrollPhysics(),
+            withRefresh: false,
+            onCubitCreated: (PaginationCubit cubit) {
+              _tabPaginationCubits[status] = cubit;
+              officeBoyCubit.drinkCubit = cubit;
             },
-          ),
-        ],
+            repositoryCallBack: (data) {
+              officeBoyCubit.getOrderOfficeBoyParams = GetOrderOfficeBoyParams(
+                request: data,
+                status: status,
+              );
+              return officeBoyCubit.fetchAllOrderServies(data);
+            },
+            listBuilder: (List<OfficeBoyModel> apiList) {
+              final List<Items> orders = <Items>[
+                for (final page in apiList)
+                  if (page.items != null) ...page.items!,
+              ];
+
+              return CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppPaddingSize.padding_16,
+                      vertical: AppPaddingSize.padding_12,
+                    ),
+                    sliver: SliverList.separated(
+                      itemCount: orders.length,
+                      itemBuilder: (_, index) =>
+                          _OrderCard(order: orders[index]),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppPaddingSize.padding_10),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: AppFontSize.size_60),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
-}
 
-class _GlassIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _GlassIcon({required this.icon, required this.onTap});
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-        child: Material(
-          color: Colors.white.withOpacity(.16),
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Icon(icon, color: Colors.black87),
+    return Scaffold(
+      backgroundColor: AppColors.xbackgroundColor3,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        title: const Text(
+          'Office Boy Orders',
+          style: TextStyle(
+            color: AppColors.black,
+            fontSize: AppFontSize.size_18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            color: AppColors.white,
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              labelColor: AppColors.xprimaryColor,
+              unselectedLabelColor: AppColors.grey89,
+              indicatorColor: AppColors.xprimaryColor,
+              indicatorWeight: 3,
+              tabs: _tabs
+                  .map((t) => Tab(icon: Icon(t.icon), text: t.label))
+                  .toList(),
             ),
           ),
         ),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        physics: const BouncingScrollPhysics(),
+        children: _tabs
+            .map(
+              (t) => _buildStatusTab(
+                status: t.status,
+                emptyTitle: 'لا توجد طلبات لهذه الحالة',
+              ),
+            )
+            .toList(),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.xprimaryColor,
+        onPressed: () {
+          final currentStatus = _tabs[_tabController.index].status;
+          final cubit = _tabPaginationCubits[currentStatus];
+
+          cubit;
+        },
+        label: const Text(
+          'تحديث هذه الحالة',
+          style: TextStyle(color: AppColors.white),
+        ),
+        icon: const Icon(Icons.refresh, color: AppColors.white),
+      ),
     );
   }
 }
 
-/// ------------------ CONTENT (Orders) ------------------
-class _OrdersTab extends StatelessWidget {
-  final String search;
-  final String? floorFilter;
-  final String? officeFilter;
-  final OrderStatus? selectedStatus;
-  final ValueChanged<String?> onFloorChanged;
-  final ValueChanged<String?> onOfficeChanged;
-
-  const _OrdersTab({
-    required this.search,
-    required this.floorFilter,
-    required this.officeFilter,
-    required this.selectedStatus,
-    required this.onFloorChanged,
-    required this.onOfficeChanged,
+class _StatusTab {
+  final String label;
+  final int status;
+  final IconData icon;
+  const _StatusTab({
+    required this.label,
+    required this.status,
+    required this.icon,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    Future<Result<List<Items>>> repo(GetListRequest req) async {
-      final c = context.read<OfficeBoyCubit>();
-      final r = await c.fetchAllOrderServies(req);
-      if (r.hasDataOnly) {
-        final flattened = <Items>[];
-        for (final m in (r.data ?? <OfficeBoyModel>[])) {
-          if (m.items != null) flattened.addAll(m.items!);
-        }
-        return Result<List<Items>>(data: flattened);
-      }
-      return Result<List<Items>>(error: r.error ?? 'Unknown error');
-    }
-
-    return PaginationList<Items>(
-      repositoryCallBack: (data) => repo(data as GetListRequest),
-      withPagination: true,
-      withRefresh: true,
-      listBuilder: (list) {
-        final base = list;
-        final floors = _distinct(base.map((e) => e.floorName));
-        final officesBase = floorFilter == null
-            ? base
-            : base.where((e) => _eq(e.floorName, floorFilter));
-        final offices = _distinct(officesBase.map((e) => e.officeName));
-
-        var filtered = base;
-        if (selectedStatus != null) {
-          filtered = filtered
-              .where((e) => OrderStatus.fromInt(e.status) == selectedStatus)
-              .toList();
-        }
-        filtered = _applyFilters(filtered, search, floorFilter, officeFilter);
-
-        return Column(
-          children: [
-            _ChipsBar(
-              floors: floors,
-              floorValue: floorFilter,
-              onFloorChanged: onFloorChanged,
-              offices: offices,
-              officeValue: officeFilter,
-              onOfficeChanged: onOfficeChanged,
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: filtered.isEmpty
-                  ? const _EmptyState()
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) =>
-                          _OrderCard(item: filtered[i], index: i),
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
-/// ------------------ ORDER CARD ------------------
+/// بطاقة عرض الطلب (Items)
 class _OrderCard extends StatelessWidget {
-  final Items item;
-  final int index;
-  const _OrderCard({required this.item, required this.index});
+  final Items order;
+  const _OrderCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
-    final status = _mapUI(item.status);
-    final drinks = (item.orderItems ?? [])
-        .map((e) => '${e.drink?.name ?? '-'} ×${e.quantity ?? 1}')
-        .join(' • ');
-    final borderColor = _statusColor(status).withOpacity(.28);
+    final String? orderId = order.id;
+    final int? status = order.status;
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 16.0, end: 0.0),
-      duration: Duration(milliseconds: 160 + index * 14),
-      curve: Curves.easeOutCubic,
-      builder: (_, dy, __) {
-        return Transform.translate(
-          offset: Offset(0, dy),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(.05),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: .6, sigmaY: .6),
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    final String? customerName = order.customerUser?.name; // مباشرة من الموديل
+    final String? floorName = order.floorName; // مباشرة من الموديل
+    final String? officeName = order.officeName; // مباشرة من الموديل
+    final String? createdAt = order.creationTime; // مباشرة من الموديل
+
+    final List<OrderItems> items = order.orderItems ?? const [];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppFontSize.size_14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppPaddingSize.padding_14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // رأس البطاقة: الحالة + المعرف
+          Row(
+            children: [
+              _StatusPill(status: status ?? -1),
+              const SizedBox(width: 8),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          Row(
+            children: [
+              if (customerName != null)
+                Flexible(
+                  child: Row(
                     children: [
-                      // top row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '#${item.id ?? '--'}',
-                              style: AppTextStyle.getBoldStyle(
-                                fontSize: AppFontSize.size_16,
-                                color: AppColors.black,
-                              ),
-                            ),
-                          ),
-                          _StatusPill(status: status),
-                        ],
+                      const Icon(
+                        Icons.person_outline,
+                        size: 16,
+                        color: AppColors.black,
                       ),
-                      const SizedBox(height: 6),
-
-                      // place
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.place_outlined,
-                            size: 16,
-                            color: Colors.orange,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              '${item.floorName ?? '-'} / ${item.officeName ?? '-'}',
-                              style: AppTextStyle.getRegularStyle(
-                                fontSize: AppFontSize.size_12,
-                                color: AppColors.secondPrimery,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (drinks.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          drinks,
-                          style: AppTextStyle.getRegularStyle(
-                            fontSize: AppFontSize.size_12,
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          customerName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: AppFontSize.size_15,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.black,
                           ),
                         ),
-                      ],
-
-                      if ((item.orderItems ?? []).any(
-                        (e) => (e.notes ?? '').trim().isNotEmpty,
-                      )) ...[
-                        const SizedBox(height: 6),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.sticky_note_2_outlined,
-                              size: 16,
-                              color: Colors.orange,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                (item.orderItems ?? [])
-                                    .map((e) => (e.notes ?? '').trim())
-                                    .where((t) => t.isNotEmpty)
-                                    .join('\n'),
-                                style: AppTextStyle.getRegularStyle(
-                                  fontSize: AppFontSize.size_12,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          _GhostBtn(
-                            icon: Icons.description_outlined,
-                            label: 'btn_details'.tr(),
-                            onTap: () => _openDetails(context, item),
-                          ),
-                          const Spacer(),
-                          _GhostBtn(
-                            icon: Icons.swap_horiz_rounded,
-                            label: 'Change status',
-                            onTap: () => _showStatusSheet(context, item),
-                          ),
-                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
+              if (customerName != null &&
+                  (floorName != null || officeName != null))
+                const SizedBox(width: 10),
+              if (floorName != null || officeName != null)
+                Flexible(
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.apartment_outlined,
+                        size: 16,
+                        color: AppColors.black,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          // مباشرة من الموديل بدون fallbacks
+                          [floorName, officeName].join(' • '),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: AppFontSize.size_13,
+                            color: AppColors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-        );
-      },
+
+          // وقت الإنشاء
+          if (createdAt != null) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time,
+                  size: 16,
+                  color: AppColors.grey89,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  createdAt,
+                  style: const TextStyle(
+                    fontSize: AppFontSize.size_12,
+                    color: AppColors.grey89,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 12),
+          _OrderItemsList(items: items),
+
+          const SizedBox(height: 10),
+          // أزرار Accept/Cancel + (اختياري) تغيير الحالة
+          Row(
+            children: [
+              _ActionBtn(
+                icon: Icons.check_circle_outline,
+                label: 'Accept',
+                color: Colors.green,
+                onTap: (status == 1 || status == 4 || status == 5)
+                    ? null
+                    : () => _changeStatus(context, order, 1),
+              ),
+              const SizedBox(width: 8),
+              _ActionBtn(
+                icon: Icons.cancel_outlined,
+                label: 'Cancel',
+                color: Colors.red,
+                onTap: (status == 4 || status == 5)
+                    ? null
+                    : () => _changeStatus(context, order, 5),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () => _showChangeStatusSheet(context, order),
+                icon: const Icon(Icons.swap_horiz_rounded),
+                label: const Text('تغيير الحالة'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.xprimaryColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  void _openDetails(BuildContext context, Items item) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => _OrderDetails(item: item)));
+  /// استدعاء تحديث الحالة عبر Cubit
+  Future<void> _changeStatus(
+    BuildContext context,
+    Items order,
+    int newStatus,
+  ) async {
+    final cubit = context.read<OfficeBoyCubit>();
+
+    cubit.updateOrderStatusParams = UpdateOrderStatusParams(
+      orderId: order.id ?? '',
+      status: newStatus,
+    );
+
+    await cubit.updateOrderStatusBool();
+
+    // حسب طلبك: ما في refresh هنا؛ اترك الاسترجاع لميكانيزمك الخاص أو لفاب
+    cubit.drinkCubit;
   }
 }
 
-class _GhostBtn extends StatelessWidget {
+class _ActionBtn extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
-  const _GhostBtn({
+  final Color color;
+  final VoidCallback? onTap;
+  const _ActionBtn({
     required this.icon,
     required this.label,
+    required this.color,
     required this.onTap,
   });
+
   @override
   Widget build(BuildContext context) {
+    final disabled = onTap == null;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: disabled ? Colors.grey.shade200 : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEFE4DE)),
+          border: Border.all(
+            color: disabled ? Colors.grey.shade300 : color.withOpacity(.5),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: AppColors.xprimaryColor),
-            const SizedBox(width: 8),
+            Icon(icon, size: 18, color: disabled ? Colors.grey : color),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: AppColors.xprimaryColor,
+                color: disabled ? Colors.grey : color,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -665,523 +416,260 @@ class _GhostBtn extends StatelessWidget {
   }
 }
 
-/// ------------------ STATUS SHEET ------------------
-void _showStatusSheet(
-  BuildContext context,
-  Items item, {
-  OrderStatus? initial,
-}) {
-  final statuses = OrderStatus.values;
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-    ),
-    builder: (_) {
-      var selected = initial ?? OrderStatus.submitted;
-      return StatefulBuilder(
-        builder: (context, setSt) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE0E0E0),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                Text(
-                  'Change order status',
-                  style: AppTextStyle.getBoldStyle(
-                    fontSize: AppFontSize.size_16,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final s in statuses)
-                      ChoiceChip(
-                        label: Text(_keyLabel(s).tr()),
-                        selected: selected == s,
-                        onSelected: (_) => setSt(() => selected = s),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                CreateModel(
-                  useCaseCallBack: (data) {
-                    context
-                            .read<OfficeBoyCubit>()
-                            .updateOrderStatusParams
-                            .orderId =
-                        item.id ?? '';
-                    context
-                        .read<OfficeBoyCubit>()
-                        .updateOrderStatusParams
-                        .status = selected
-                        .toInt();
-                    return context
-                        .read<OfficeBoyCubit>()
-                        .updateOrderStatusBool();
-                  },
-                  withValidation: false,
-                  onSuccess: (model) {
-                    Dialogs.showSnackBar(message: "Status updated");
-                    Navigation.pop();
-                  },
-                  child: CustomButton(text: "Save"),
-                ),
-                const SizedBox(height: 6),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+class _OrderItemsList extends StatelessWidget {
+  final List<OrderItems> items;
+  const _OrderItemsList({required this.items});
 
-String _keyLabel(OrderStatus s) {
-  switch (s) {
-    case OrderStatus.draft:
-      return 'status_draft';
-    case OrderStatus.submitted:
-      return 'status_submitted';
-    case OrderStatus.inPreparation:
-      return 'status_in_preparation';
-    case OrderStatus.ready:
-      return 'status_ready';
-    case OrderStatus.delivered:
-      return 'status_delivered';
-    case OrderStatus.canceled:
-      return 'status_canceled';
-  }
-}
-
-/// ------------------ DETAILS ------------------
-class _OrderDetails extends StatelessWidget {
-  final Items item;
-  const _OrderDetails({required this.item});
   @override
   Widget build(BuildContext context) {
-    final createdAt = item.creationTime ?? '-';
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6EDE7),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.xprimaryColor,
-        title: Text('order_id'.tr(namedArgs: {'id': item.id ?? '--'})),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _Section(
-            title: 'section_order_info'.tr(),
-            child: Column(
-              children: [
-                _KV(
-                  'info_status'.tr(),
-                  _keyLabel(OrderStatus.fromInt(item.status)!).tr(),
-                ),
-                _KV(
-                  'info_customer'.tr(),
-                  item.customerUser?.name ?? item.customerUser?.userName ?? '-',
-                ),
-                _KV(
-                  'floor_office'.tr(),
-                  '${item.floorName ?? '-'} / ${item.officeName ?? '-'}',
-                ),
-                _KV('info_created_at'.tr(), createdAt),
-              ],
-            ),
+    if (items.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(AppPaddingSize.padding_12),
+        decoration: BoxDecoration(
+          color: AppColors.whiteF3,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Text(
+          'لا توجد عناصر في هذا الطلب',
+          style: TextStyle(
+            color: AppColors.black,
+            fontSize: AppFontSize.size_13,
           ),
-          const SizedBox(height: 12),
-          _Section(
-            title: 'section_items'.tr(),
-            child: Column(
-              children: (item.orderItems ?? []).map((oi) {
-                final d = oi.drink;
-                final n = d?.name ?? d?.nameAr ?? d?.nameBe ?? '-';
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFEFE4DE)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+        ),
+      );
+    }
+
+    return Column(
+      children: items.map((e) {
+        // مباشرة من الموديل بدون fallbacks
+        final String? name = e.drink?.name;
+        final int? qty = e.quantity;
+        final int? sugar = e.sugarLevel;
+        final String? notes = e.notes;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(AppPaddingSize.padding_12),
+          decoration: BoxDecoration(
+            color: AppColors.whiteF3,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.local_cafe, color: AppColors.black),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (name != null)
                       Text(
-                        '$n ×${oi.quantity ?? 1}',
-                        style: AppTextStyle.getBoldStyle(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
                           fontSize: AppFontSize.size_14,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.black,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          if (oi.sugarLevel != null)
-                            _Chip(
-                              text: '${'info_sugar'.tr()}: ${oi.sugarLevel}',
-                            ),
-                          if ((oi.notes ?? '').isNotEmpty)
-                            _Chip(text: oi.notes!),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (qty != null) _MiniChip(label: 'الكمية: $qty'),
+                        if (sugar != null) _MiniChip(label: 'سكر: $sugar'),
+                        if (notes != null && notes.isNotEmpty)
+                          _MiniChip(label: 'ملاحظة: $notes'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }).toList(),
     );
   }
 }
 
-class _Section extends StatelessWidget {
-  final String title;
-  final Widget child;
-  const _Section({required this.title, required this.child});
+class _MiniChip extends StatelessWidget {
+  final String label;
+  const _MiniChip({required this.label});
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.04),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppPaddingSize.padding_8,
+        vertical: AppPaddingSize.padding_4,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTextStyle.getBoldStyle(
-              fontSize: AppFontSize.size_14,
-              color: AppColors.black,
-            ),
-          ),
-          const SizedBox(height: 10),
-          child,
-        ],
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.greyE5),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: AppFontSize.size_12,
+          color: AppColors.black,
+        ),
       ),
     );
-  }
-}
-
-class _KV extends StatelessWidget {
-  final String k, v;
-  const _KV(this.k, this.v);
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEFE4DE)),
-      ),
-      child: Row(
-        children: [
-          Text(
-            k,
-            style: AppTextStyle.getRegularStyle(
-              fontSize: AppFontSize.size_12,
-              color: AppColors.secondPrimery,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            v,
-            style: AppTextStyle.getBoldStyle(
-              fontSize: AppFontSize.size_12,
-              color: AppColors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String text;
-  const _Chip({required this.text});
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.xprimaryColor.withOpacity(.10),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.xprimaryColor.withOpacity(.25)),
-      ),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
-    );
-  }
-}
-
-/// ------------------ STATUS UI HELPERS ------------------
-enum _UIStatus { draft, submitted, inPreparation, ready, delivered, canceled }
-
-_UIStatus _mapUI(int? s) {
-  switch (s) {
-    case 0:
-      return _UIStatus.draft;
-    case 1:
-      return _UIStatus.submitted;
-    case 2:
-      return _UIStatus.inPreparation;
-    case 3:
-      return _UIStatus.ready;
-    case 4:
-      return _UIStatus.delivered;
-    case 5:
-      return _UIStatus.canceled;
-    default:
-      return _UIStatus.draft;
-  }
-}
-
-Color _statusColor(_UIStatus s) {
-  switch (s) {
-    case _UIStatus.draft:
-      return AppColors.secondPrimery;
-    case _UIStatus.submitted:
-      return AppColors.lightOrange;
-    case _UIStatus.inPreparation:
-      return AppColors.xprimaryColor;
-    case _UIStatus.ready:
-      return AppColors.green32;
-    case _UIStatus.delivered:
-      return AppColors.secondPrimery;
-    case _UIStatus.canceled:
-      return Colors.red;
   }
 }
 
 class _StatusPill extends StatelessWidget {
-  final _UIStatus status;
+  final int status;
   const _StatusPill({required this.status});
+
   @override
   Widget build(BuildContext context) {
-    final fg = _statusColor(status);
+    final Color c = _statusColor(status);
+    final String label = _statusLabel(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppPaddingSize.padding_10,
+        vertical: AppPaddingSize.padding_6,
+      ),
       decoration: BoxDecoration(
-        color: fg.withOpacity(.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        _statusText(status),
-        style: AppTextStyle.getBoldStyle(
-          fontSize: AppFontSize.size_12,
-          color: fg,
-        ),
-      ),
-    );
-  }
-}
-
-String _statusText(_UIStatus s) {
-  switch (s) {
-    case _UIStatus.draft:
-      return 'status_draft'.tr();
-    case _UIStatus.submitted:
-      return 'status_submitted'.tr();
-    case _UIStatus.inPreparation:
-      return 'status_in_preparation'.tr();
-    case _UIStatus.ready:
-      return 'status_ready'.tr();
-    case _UIStatus.delivered:
-      return 'status_delivered'.tr();
-    case _UIStatus.canceled:
-      return 'status_canceled'.tr();
-  }
-}
-
-/// ------------------ FILTER HELPERS ------------------
-List<Items> _applyFilters(
-  List<Items> src,
-  String search,
-  String? floor,
-  String? office,
-) {
-  var out = src;
-  if (search.trim().isNotEmpty) {
-    final q = search.toLowerCase().trim();
-    out = out.where((e) {
-      bool contains(String? s) => (s ?? '').toLowerCase().contains(q);
-      final inId = contains(e.id);
-      final inOffice = contains(e.officeName);
-      final inFloor = contains(e.floorName);
-      final inDrink = (e.orderItems ?? []).any(
-        (it) => contains(it.drink?.name),
-      );
-      return inId || inOffice || inFloor || inDrink;
-    }).toList();
-  }
-  if (floor != null) out = out.where((e) => _eq(e.floorName, floor)).toList();
-  if (office != null)
-    out = out.where((e) => _eq(e.officeName, office)).toList();
-  return out;
-}
-
-bool _eq(String? a, String? b) =>
-    (a ?? '').trim().toLowerCase() == (b ?? '').trim().toLowerCase();
-
-List<String> _distinct(Iterable<String?> it) {
-  final s = <String>{}, out = <String>[];
-  for (final v in it) {
-    if (v == null) continue;
-    final key = v.trim().toLowerCase();
-    if (key.isEmpty || s.contains(key)) continue;
-    s.add(key);
-    out.add(v);
-  }
-  return out;
-}
-
-// === CHIPS BAR ===
-class _ChipsBar extends StatelessWidget {
-  final List<String> floors;
-  final String? floorValue;
-  final ValueChanged<String?> onFloorChanged;
-  final List<String> offices;
-  final String? officeValue;
-  final ValueChanged<String?> onOfficeChanged;
-  const _ChipsBar({
-    required this.floors,
-    required this.floorValue,
-    required this.onFloorChanged,
-    required this.offices,
-    required this.officeValue,
-    required this.onOfficeChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _DropChip<String>(
-            label: 'filter_floor'.tr(),
-            values: floors,
-            value: floorValue,
-            onChanged: onFloorChanged,
-          ),
-          const SizedBox(width: 8),
-          _DropChip<String>(
-            label: 'filter_office'.tr(),
-            values: offices,
-            value: officeValue,
-            onChanged: onOfficeChanged,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DropChip<T> extends StatelessWidget {
-  final String label;
-  final List<T> values;
-  final T? value;
-  final ValueChanged<T?> onChanged;
-  const _DropChip({
-    required this.label,
-    required this.values,
-    required this.value,
-    required this.onChanged,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFEFE4DE)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.03),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+        border: Border.all(color: c.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, size: 8, color: c),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: c,
+              fontSize: AppFontSize.size_12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T?>(
-          isDense: true,
-          value: value,
-          hint: Text(label),
-          onChanged: onChanged,
-          items: <DropdownMenuItem<T?>>[
-            DropdownMenuItem<T?>(value: null, child: Text('filter_all'.tr())),
-            ...values.map(
-              (e) => DropdownMenuItem<T?>(value: e as T?, child: Text('$e')),
-            ),
-          ],
-        ),
-      ),
     );
+  }
+
+  static Color _statusColor(int status) {
+    switch (status) {
+      case 0:
+        return Colors.orange; // Pending
+      case 1:
+        return Colors.blue; // In-Progress
+      case 4:
+        return Colors.green; // Completed
+      case 5:
+        return Colors.red; // Cancelled
+      default:
+        return AppColors.greyA4;
+    }
+  }
+
+  static String _statusLabel(int status) {
+    switch (status) {
+      case 0:
+        return 'قيد الانتظار';
+      case 1:
+        return 'قيد التنفيذ';
+      case 4:
+        return 'مكتمل';
+      case 5:
+        return 'ملغي';
+      default:
+        return 'غير معروف';
+    }
   }
 }
 
-// === EMPTY STATE ===
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.inbox_outlined,
-              size: 38,
-              color: Color(0xFFBDBDBD),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'empty_queue'.tr(),
-              style: AppTextStyle.getRegularStyle(
-                fontSize: AppFontSize.size_14,
-                color: AppColors.secondPrimery,
+/// BottomSheet لتغيير الحالة (اختياري)
+void _showChangeStatusSheet(BuildContext context, Items order) {
+  final List<int> allowed = [0, 1, 4, 5];
+  int selected = order.status ?? 0;
+
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (_) {
+      return StatefulBuilder(
+        builder: (context, setSt) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 38,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(999),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const Text(
+                'تغيير حالة الطلب',
+                style: TextStyle(
+                  fontSize: AppFontSize.size_16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final s in allowed)
+                    ChoiceChip(
+                      label: Text(_StatusPill._statusLabel(s)),
+                      selected: selected == s,
+                      onSelected: (_) => setSt(() => selected = s),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.save_outlined),
+                label: const Text('حفظ'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.xprimaryColor,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  final cubit = context.read<OfficeBoyCubit>();
+                  cubit.updateOrderStatusParams = UpdateOrderStatusParams(
+                    orderId: order.id ?? '',
+                    status: selected,
+                  );
+                  await cubit.updateOrderStatusBool();
+                  // حسب طلبك: ما في refresh هنا
+                  cubit.drinkCubit;
+                  if (context.mounted) Navigator.of(context).pop();
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
 }

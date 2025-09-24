@@ -53,7 +53,7 @@ class Items {
     id = json['id'];
     customerUserId = json['customerUserId'];
     customerUser = json['customerUser'] != null
-        ? new CustomerUser.fromJson(json['customerUser'])
+        ? CustomerUser.fromJson(json['customerUser'])
         : null;
     floorId = json['floorId'];
     officeId = json['officeId'];
@@ -62,7 +62,7 @@ class Items {
     if (json['orderItems'] != null) {
       orderItems = <OrderItems>[];
       json['orderItems'].forEach((v) {
-        orderItems!.add(new OrderItems.fromJson(v));
+        orderItems!.add(OrderItems.fromJson(v));
       });
     }
     status = json['status'];

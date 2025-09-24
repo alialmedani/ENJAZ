@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
+import 'package:enjaz/features/officeboy/screen/office_boy_screen.dart';
 import 'package:enjaz/features/place/cubit/place_cubit.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
 import 'package:enjaz/features/auth/screen/login_screen.dart';
@@ -11,7 +12,6 @@ import 'package:enjaz/features/profile/cubit/profile_cubit.dart';
 import 'package:enjaz/features/root/cubit/root_cubit.dart';
 import 'package:enjaz/features/officeboy/cubit/ccubit1.dart';
 import 'package:enjaz/features/officeboy/cubit/cubit/office_boy_cubit.dart';
-import 'package:enjaz/features/officeboy/screen/office_boy_screen.dart';
 import 'package:enjaz/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +28,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CacheHelper.init();
   await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await FireBaseNotification().initNotification();
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // await FireBaseNotification().initNotification();
 
   runApp(
     EasyLocalization(
@@ -73,8 +73,8 @@ class MyApp extends StatelessWidget {
             navigatorKey: Keys.navigatorKey,
             title: 'Task App',
             theme: appThemeData[AppTheme.light],
-            // home: CacheHelper.token != null ? OfficeBoyHomeScreen() : LoginScreen(),
-            home: OfficeBoyHomeRoot(),
+            // home: CacheHelper.token != null ? RootScreen() : LoginScreen(),
+            home: OfficeBoyOrdersScreen(),
           );
         },
       ),
