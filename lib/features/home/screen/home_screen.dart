@@ -27,8 +27,7 @@ class CoffeeAppHomeScreen extends StatefulWidget {
 class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
   late final PageController _promoController;
   late final List<List<Color>> _categoryGradients;
-  late final List<_PromoCardData> _promoCards;
-
+ 
   double _promoPage = 0;
   int selectedIndex = 0;
 
@@ -61,24 +60,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
       [AppColors.lightXPrimary, AppColors.xprimaryColor],
     ];
 
-    _promoCards = [
-      _PromoCardData(
-        titleKey: 'coffee_signature_title',
-        subtitleKey: 'coffee_default_tagline',
-        gradient: [AppColors.xprimaryColor, AppColors.lightXOrange],
-        asset: 'assets/images/banner.png',
-      ),
-      _PromoCardData(
-        titleKey: 'cart_intro',
-        subtitleKey: 'empty_cart_subtitle',
-        gradient: [AppColors.xpurpleColor, AppColors.lightXPrimary],
-      ),
-      _PromoCardData(
-        titleKey: 'meta_brew',
-        subtitleKey: 'meta_brew_value',
-        gradient: [AppColors.lightOrange, AppColors.xprimaryColor],
-      ),
-    ];
+ 
   }
 
   @override
@@ -175,9 +157,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: AppFontSize.size_18)),
-              SliverToBoxAdapter(child: _buildPromoCarousel()),
-              SliverToBoxAdapter(child: SizedBox(height: AppFontSize.size_25)),
+                SliverToBoxAdapter(child: SizedBox(height: AppFontSize.size_25)),
               SliverToBoxAdapter(child: _buildCategorySelection(categories)),
               SliverToBoxAdapter(child: SizedBox(height: AppFontSize.size_25)),
               SliverPadding(
@@ -275,13 +255,13 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: AppFontSize.size_20),
-                    Text(
-                      'home_location_label'.tr(),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.75),
-                        fontSize: AppFontSize.size_14,
-                      ),
-                    ),
+                    // Text(
+                    //   'home_location_label'.tr(),
+                    //   style: TextStyle(
+                    //     color: Colors.white.withValues(alpha: 0.75),
+                    //     fontSize: AppFontSize.size_14,
+                    //   ),
+                    // ),
                     SizedBox(height: AppFontSize.size_6),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
@@ -298,17 +278,17 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
                       ),
                     ),
                     SizedBox(height: AppFontSize.size_6),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      child: Text(
-                        'home_location_value'.tr(),
-                        key: ValueKey<int>(selectedIndex),
-                        style: const TextStyle(
-                          color: AppColors.whiteF1,
-                          fontSize: AppFontSize.size_15,
-                        ),
-                      ),
-                    ),
+                    // AnimatedSwitcher(
+                    //   duration: const Duration(milliseconds: 400),
+                    //   child: Text(
+                    //     'home_location_value'.tr(),
+                    //     key: ValueKey<int>(selectedIndex),
+                    //     style: const TextStyle(
+                    //       color: AppColors.whiteF1,
+                    //       fontSize: AppFontSize.size_15,
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(height: AppFontSize.size_25),
                     _buildSearchBar(context, palette),
                     const Spacer(),
@@ -433,58 +413,7 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
     );
   }
 
-  Widget _buildPromoCarousel() {
-    return SizedBox(
-      height: AppFontSize.size_250,
-      child: Column(
-        children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _promoController,
-              physics: const BouncingScrollPhysics(),
-              itemCount: _promoCards.length,
-              itemBuilder: (context, index) {
-                final data = _promoCards[index];
-                final progress = (_promoPage - index).abs().clamp(0.0, 1.0);
-                final double scale = lerpDouble(0.88, 1.0, 1 - progress)!;
-                final double translateY = lerpDouble(20, 0, 1 - progress)!;
-
-                return Transform.translate(
-                  offset: Offset(0, translateY),
-                  child: Transform.scale(
-                    scale: scale,
-                    child: _PromoCard(data: data, isActive: progress < 0.3),
-                  ),
-                );
-              },
-            ),
-          ),
-          SizedBox(height: AppFontSize.size_14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(_promoCards.length, (index) {
-              final progress = (_promoPage - index).abs().clamp(0.0, 1.0);
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(
-                  horizontal: AppPaddingSize.padding_4,
-                ),
-                width: lerpDouble(8, 22, 1 - progress)!,
-                height: AppFontSize.size_8,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppFontSize.size_12),
-                  color: _promoCards[index].gradient.first.withValues(
-                    alpha: lerpDouble(0.3, 0.9, 1 - progress)!,
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
+  
   Widget _buildCategorySelection(List<String> categories) {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -576,156 +505,8 @@ class _CoffeeAppHomeScreenState extends State<CoffeeAppHomeScreen> {
   }
 }
 
-class _PromoCard extends StatelessWidget {
-  final _PromoCardData data;
-  final bool isActive;
-
-  const _PromoCard({required this.data, required this.isActive});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutCubic,
-      margin: const EdgeInsets.symmetric(horizontal: AppPaddingSize.padding_8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: data.gradient.length > 1
-              ? data.gradient
-              : [data.gradient.first, data.gradient.first],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-        ),
-        borderRadius: BorderRadius.circular(AppFontSize.size_24),
-        boxShadow: [
-          BoxShadow(
-            color: data.gradient.first.withValues(alpha: isActive ? 0.3 : 0.12),
-            blurRadius: isActive ? 25 : 12,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          if (data.asset != null)
-            Positioned(
-              right: -AppFontSize.size_10,
-              bottom: -AppFontSize.size_10,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
-                opacity: isActive ? 1 : 0.65,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppFontSize.size_24),
-                  child: Image.asset(
-                    data.asset!,
-                    width: AppFontSize.size_160,
-                    height: AppFontSize.size_160,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(AppPaddingSize.padding_20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppPaddingSize.padding_12,
-                    vertical: AppPaddingSize.padding_6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(AppFontSize.size_20),
-                  ),
-                  child: Text(
-                    'signature_drink'.tr(),
-                    style: const TextStyle(
-                      color: AppColors.white,
-                      fontSize: AppFontSize.size_12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                SizedBox(height: AppFontSize.size_16),
-                Text(
-                  data.titleKey.tr(),
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: AppFontSize.size_20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: AppFontSize.size_8),
-                Expanded(
-                  child: Text(
-                    data.subtitleKey.tr(),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.88),
-                      fontSize: AppFontSize.size_14,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-                SizedBox(height: AppFontSize.size_12),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOut,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(
-                      alpha: isActive ? 0.22 : 0.15,
-                    ),
-                    borderRadius: BorderRadius.circular(AppFontSize.size_16),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppPaddingSize.padding_14,
-                    vertical: AppPaddingSize.padding_10,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.trending_up,
-                        color: AppColors.white,
-                        size: AppFontSize.size_16,
-                      ),
-                      SizedBox(width: AppFontSize.size_8),
-                      Text(
-                        'more'.tr(),
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: AppFontSize.size_14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PromoCardData {
-  final String titleKey;
-  final String subtitleKey;
-  final List<Color> gradient;
-  final String? asset;
-
-  const _PromoCardData({
-    required this.titleKey,
-    required this.subtitleKey,
-    required this.gradient,
-    this.asset,
-  });
-}
-
+ 
+ 
 class _DrinkCard extends StatefulWidget {
   final DrinkModel drink;
   final int index;
