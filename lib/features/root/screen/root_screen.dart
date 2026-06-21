@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:enjaz/features/home/screen/home_screen.dart';
+import 'package:enjaz/features/floorplan/screen/floor_plan_entry_screen.dart';
 import 'package:enjaz/features/profile/screen/profile_screen.dart';
 import '../cubit/root_cubit.dart';
 
@@ -22,8 +23,8 @@ class RootScreen extends StatelessWidget {
             children: const [
               CoffeeAppHomeScreen(), // 0
               CartScreen(), // 1
-              ProfileScreen(), // 2
-              // 3
+              FloorPlanEntryScreen(), // 2
+              ProfileScreen(), // 3
             ],
           ),
           bottomNavigationBar: SafeArea(
@@ -33,6 +34,7 @@ class RootScreen extends StatelessWidget {
               items: const [
                 _BarItem(icon: Icons.home_filled, label: 'Home'),
                 _BarItem(icon: Icons.local_offer, label: 'Orders'),
+                _BarItem(icon: Icons.map_outlined, label: 'Floor Map'),
                 _BarItem(icon: Icons.person_2, label: 'Profile'),
               ],
               barColor: AppColors.xprimaryColor, // بنفسجيك
@@ -127,7 +129,9 @@ class _AnimatedNotchedNavBar extends StatefulWidget {
     this.barColor = const Color(0xFF2A0C24),
     this.accentColor = const Color(0xFFD95B2B),
     this.curveDepth = 86.0,
-  }) : barHeight = 72.0 : fabSize = 56.0 : cornerRadius = 24.0;
+  }) : barHeight = 72.0,
+       fabSize = 56.0,
+       cornerRadius = 24.0;
 
   @override
   State<_AnimatedNotchedNavBar> createState() => _AnimatedNotchedNavBarState();
