@@ -161,13 +161,8 @@ class _ProfileGlassSurface extends StatelessWidget {
   const _ProfileGlassSurface({
     required this.borderRadius,
     required this.child,
-    this.padding,
     this.margin,
-    this.blurSigma = 18,
-    this.backgroundOpacity = 0.94,
-    this.borderOpacity = 0.6,
-    this.shadows,
-  });
+  }) : padding = null : blurSigma = 18 : backgroundOpacity = 0.94 : borderOpacity = 0.6 : shadows = null;
 
   final BorderRadius borderRadius;
   final Widget child;

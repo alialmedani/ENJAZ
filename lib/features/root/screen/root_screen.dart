@@ -126,12 +126,8 @@ class _AnimatedNotchedNavBar extends StatefulWidget {
     required this.onTap,
     this.barColor = const Color(0xFF2A0C24),
     this.accentColor = const Color(0xFFD95B2B),
-    this.barHeight = 72.0,
-    this.fabSize = 56.0,
-    this.cornerRadius = 24.0,
-    this.curveDepth = 86.0, // عدّلها للي بدك ياه
-    super.key,
-  });
+    this.curveDepth = 86.0,
+  }) : barHeight = 72.0 : fabSize = 56.0 : cornerRadius = 24.0;
 
   @override
   State<_AnimatedNotchedNavBar> createState() => _AnimatedNotchedNavBarState();
