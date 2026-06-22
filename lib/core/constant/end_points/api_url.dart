@@ -1,5 +1,9 @@
 
-const baseUrl = 'https://task.jasim-erp.com/';
+// Local backend over the PC's LAN IP (physical Android device on the same Wi-Fi).
+// The backend must listen on 0.0.0.0:44314 and Windows Firewall must allow it.
+// Switch back to the deployed server by swapping which line is active.
+const baseUrl = 'https://10.200.0.207:44314/';
+// const baseUrl = 'https://task.jasim-erp.com/';
 
 
 const getlistdrink = '${baseUrl}api/app/drink'; // GET

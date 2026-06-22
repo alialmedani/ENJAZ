@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:enjaz/core/constant/end_points/api_url.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -13,7 +14,24 @@ class ApiProvider {
     baseUrl: baseUrl,
     connectTimeout: const Duration(seconds: 10),
   );
-  static final Dio dio = Dio(options);
+  static final Dio dio = _createDio();
+
+  static Dio _createDio() {
+    final client = Dio(options);
+    // In debug, accept the backend's self-signed dev certificate. The local
+    // HTTPS cert is issued for "localhost", so connecting over the LAN IP would
+    // otherwise fail the hostname/trust check.
+    if (kDebugMode) {
+      client.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final httpClient = HttpClient();
+          httpClient.badCertificateCallback = (cert, host, port) => true;
+          return httpClient;
+        },
+      );
+    }
+    return client;
+  }
 
   static Future<Either<String, T>> sendObjectRequest<T>({
     required HttpMethod method,
