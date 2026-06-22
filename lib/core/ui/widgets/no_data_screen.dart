@@ -12,21 +12,26 @@ class NoDataScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding:  EdgeInsets.only(top: 70.h),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(noDataImage,
-            width: width??300.w,height:height??230.h ,
-            ),
-            SizedBox(height: 30.h ),
-            Text("no data",
-                style: AppTextStyle.getRegularStyle(
-                    color:AppColors.grey9A, fontSize: AppFontSize.size_16)),
-          ],
+    // Scrollable so the empty-state never overflows when placed in a short
+    // container (e.g. inside a dropdown / small list cell).
+    return SingleChildScrollView(
+      child: Padding(
+        padding:  EdgeInsets.only(top: 70.h),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(noDataImage,
+              width: width??300.w,height:height??230.h ,
+              ),
+              SizedBox(height: 30.h ),
+              Text("no data",
+                  style: AppTextStyle.getRegularStyle(
+                      color:AppColors.grey9A, fontSize: AppFontSize.size_16)),
+            ],
+          ),
         ),
       ),
     );

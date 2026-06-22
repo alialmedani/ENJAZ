@@ -45,6 +45,10 @@ class _PlaceDropdownState extends State<PlaceDropdown> {
     return SizedBox(
       height: 56,
       child: PaginationList(
+        // A dropdown is far too short for the full-screen empty-state widget;
+        // render an (empty) dropdown instead of NoDataScreen when there are none.
+        withEmptyWidget: false,
+        withRefresh: false,
         repositoryCallBack: (data) {
           return context.read<PlaceCubit>().fetchPLaceServies(data);
         },
