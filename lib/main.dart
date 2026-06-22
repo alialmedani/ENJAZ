@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:enjaz/core/classes/cashe_helper.dart';
-import 'package:enjaz/core/ui/screens/splash_screen.dart';
 import 'package:enjaz/features/place/cubit/place_cubit.dart';
 import 'package:enjaz/features/auth/cubit/auth_cubit.dart';
 import 'package:enjaz/features/cart/cubit/cart_cubit.dart';
@@ -18,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/classes/keys.dart';
 import 'core/classes/notification.dart';
 import 'core/constant/app_theme/app_theme.dart';
-import 'features/auth/screen/login_screen.dart';
+import 'features/floorplan/screen/floor_plan_entry_screen.dart';
 
 SharedPreferences? prefs;
 
@@ -71,7 +70,7 @@ class MyApp extends StatelessWidget {
             navigatorKey: Keys.navigatorKey,
             title: 'Task App',
             theme: appThemeData[AppTheme.light],
-            home: CacheHelper.token != null ? SplashSscreen1() : LoginScreen(),
+            home: FloorPlanEntryScreen(),
           );
         },
       ),

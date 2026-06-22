@@ -31,10 +31,10 @@ const String moveDeskUrl = '${baseUrl}api/app/desk/move'; // POST
 const String assignUserToDeskUrl = '${baseUrl}api/app/desk/assign-user'; // POST
 const String deskUrl = '${baseUrl}api/app/desk'; // GET list / POST / DELETE
 // Document (floor-plan image) raw file bytes by Document id.
-// Use the Document download route (lookup by document id) — NOT the DMS
-// file-get route, which looks up by owning-entity id + entityType.
+// FileController exposes this (DocumentAppService is RemoteService(false)); it
+// reads the same GeneralContainer that uploads write to.
 const String documentDownloadUrl =
-    '${baseUrl}api/app/document/download'; // GET /{documentId}
+    '${baseUrl}api/app/file/download'; // GET /{documentId}
 
 //presence urls (Slice 2)//
 const String presenceCheckInUrl =
